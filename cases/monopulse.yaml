@@ -1,0 +1,70 @@
+slug: monopulse
+name: Monopulse
+legal_form:
+  value: null           # entity form not established from public sources
+country:
+  value: null           # SOURCES CONFLICT. See notes. Deliberately left unknown.
+sites:
+  value: []
+  source: "No German Betriebsstätte identified in public sources"
+  as_of: 2026-09-10
+founded:
+  value: null
+headcount:
+  value: null           # small; EUR 1.12m round implies micro or small enterprise
+turnover_eur:
+  value: null
+balance_sheet_eur:
+  value: null
+ownership_status:
+  value: null
+listed:
+  value: false
+  source: "Privately held; EUR 1.12m financing from ILTE, November 2025"
+  as_of: 2026-09-10
+application_domain:
+  value: military
+  source: "NATO-grade defence UAV production"
+  as_of: 2026-09-10
+activity:
+  value: "Modular defence UAVs, NATO-grade; expanding production capacity"
+  source: "EU-Startups, ArcticStartup, Vestbee, November 2025"
+  as_of: 2026-09-10
+de_minimis_used_eur:
+  value: null           # EUR 1.12m from a state development finance institution — check the aid basis
+turnover_in_field_eur:
+  value: null
+references:
+  value: null
+
+project:
+  name:
+    value: "UAV production capacity expansion"
+  domains:
+    value: [uav, defence, manufacturing]
+  started:
+    value: true
+    source: "Financing raised specifically to expand production, November 2025"
+    as_of: 2026-09-10
+
+notes:
+  - >
+    COUNTRY OF ESTABLISHMENT IS CONTESTED IN PUBLIC SOURCES and it is the field that
+    decides almost everything else. ArcticStartup describes a "Danish UAV maker"; Vestbee
+    describes a "Danish firm"; TechFundingNews describes it as Lithuania-based. The
+    investor, ILTE, is the Lithuanian state development finance institution, which points
+    to Lithuania — but pointing is not knowing. Both candidates are EU Member States, so
+    EU-level eligibility is unaffected either way; German Land programmes and any German
+    procurement with a local-presence requirement are not. Left as unknown on purpose:
+    this is exactly the case where a guess would look like an answer.
+  - >
+    NO GERMAN PRESENCE FOUND. Without a German Betriebsstätte, the German funding half of
+    the radar is structurally unavailable — Bund programmes generally require it and every
+    Land programme certainly does. What remains is EU-level instruments and German
+    procurement open to EU bidders.
+  - >
+    THE SMALLEST OF THE FOUR CASES, and the one where Eignungskriterien will bind hardest.
+    A EUR 1.12m raise implies a company that will fail Mindestumsatz and reference
+    requirements on most substantial tenders. That makes the reversible kills — Bieter-
+    gemeinschaft, Eignungsleihe, subcontracting to a prime — the main product for this
+    client rather than a footnote.

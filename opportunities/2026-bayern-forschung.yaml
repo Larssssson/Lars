@@ -1,0 +1,20 @@
+slug: bayern-forschung
+title: "Bayerische Forschungsförderung — Verbundprojekt (illustrative)"
+kind: funding
+issuer: "Freistaat Bayern"
+source_url: "https://www.foerderdatenbank.de/"
+retrieved: 2026-09-10
+verified: false
+deadline: 2026-09-25
+deadline_kind: skizze
+deadline_source: "ILLUSTRATIVE DATE — not a real Stichtag."
+prep_days: 40
+requires_land: [BY]
+requires_country: [DE]
+civil_use_only: true
+no_vorhabenbeginn: true
+domains: [photonics, lasers, materials, energy, ai]
+notes: >
+  UNVERIFIED FIXTURE representing a Land-level programme with a Betriebsstätte
+  requirement. Included to exercise the establishment_land rule and the
+  deadline_unreachable rule — 15 days of runway against 40 days of preparation.

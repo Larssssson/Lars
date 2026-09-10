@@ -1,0 +1,87 @@
+slug: tytan-technologies
+name: TYTAN Technologies GmbH
+legal_form:
+  value: GmbH
+  source: "Company name; Munich-registered startup"
+  as_of: 2026-09-10
+  assumed: true
+country:
+  value: DE
+  source: "Munich-based; tytan-technologies.com"
+  as_of: 2026-09-10
+sites:
+  value:
+    - {land: BY, kreis: "München, Landeshauptstadt"}
+  source: "Munich HQ; production facility under construction in western Munich"
+  as_of: 2026-09-10
+founded:
+  value: 2023
+  source: "Founded 2023 by Balazs Nagy and Batuhan Yumurtacı, TU München alumni"
+  as_of: 2026-09-10
+headcount:
+  value: null           # not published. Ramping toward 3,000 drones/month by end-2026
+turnover_eur:
+  value: null           # Bundeswehr development contract in the low double-digit millions
+balance_sheet_eur:
+  value: null
+ownership_status:
+  value: null           # NATO Innovation Fund + Armira. See notes.
+listed:
+  value: false
+  source: "Privately held; EUR 100m valuation at Series A"
+  as_of: 2026-09-10
+application_domain:
+  value: military
+  source: "Counter-UAS interceptors for European air defence; Bundeswehr customer"
+  as_of: 2026-09-10
+activity:
+  value: "AI-guided interceptor drones that detect and destroy hostile UAVs; counter-UAS for military sites"
+  source: "tytan-technologies.com; hartpunkt reporting"
+  as_of: 2026-09-10
+de_minimis_used_eur:
+  value: null
+turnover_in_field_eur:
+  value: null
+references:
+  value:
+    - name: "Bundeswehr — AI-based drone defence for Bundeswehr Liegenschaften"
+      value_eur: null
+      year: 2025
+      note: "Development contract, total volume reported as low double-digit millions"
+  source: "hartpunkt, autumn 2025"
+  as_of: 2026-09-10
+
+project:
+  name:
+    value: "Serial production scale-up, western Munich"
+  domains:
+    value: [counter_uas, defence, autonomy, ai, manufacturing]
+  started:
+    value: true
+    source: "Production facility under construction; ~3,000 drones/month targeted by end-2026"
+    as_of: 2026-09-10
+  location_land:
+    value: BY
+
+notes:
+  - >
+    THE MOST IMPORTANT FACT ABOUT THIS CASE IS A NEGATIVE ONE. Application domain is
+    military, which excludes TYTAN from a large share of German civil research funding —
+    BMFTR and BMWK programmes routinely carry a Zivilklausel, and a university Verbund
+    partner will usually have one of its own even where the programme does not. The
+    civil-funding half of the radar is close to empty for this client, and saying so
+    early is more useful than a shortlist of things they cannot have.
+  - >
+    OWNERSHIP AGAIN DECIDES KMU STATUS. Series A of EUR 30m led by the NATO Innovation
+    Fund with Armira; approximately EUR 46m raised in total. NIF plausibly falls within
+    the institutional-investor exception in Art. 3(2)(a); Armira's stake and character
+    decide whether a partner or linked enterprise arises. Unresolved until someone reads
+    the cap table.
+  - >
+    EU DEFENCE FUNDING IS THE LIVE ROUTE. EDIP's first calls were published on the EU
+    Funding & Tenders Portal on 2026-03-31 under a EUR 1.5bn work programme adopted
+    2026-03-30, with over EUR 700m for production increases explicitly including
+    counter-drone systems, EUR 240m for joint procurement of counter-drone and air
+    defence, and EUR 100m of equity support for defence start-ups and SMEs through FAST.
+    Eligibility runs to EU Member States, Norway and Ukraine — TYTAN qualifies on
+    establishment.

@@ -1,0 +1,99 @@
+slug: droneshield
+name: DroneShield Limited
+legal_form:
+  value: "Limited (ASX-listed public company)"
+  source: "ASX:DRO / OTC:DRSHF"
+  as_of: 2026-09-10
+country:
+  value: AU
+  source: "Headquartered in Sydney, Australia; ASX-listed"
+  as_of: 2026-09-10
+sites:
+  value: []
+  source: >
+    No German Betriebsstätte identified. A first manufacturing and in-house assembly
+    facility outside Australia was announced for Europe in 2026; location not confirmed
+    in the sources reviewed.
+  as_of: 2026-09-10
+founded:
+  value: null
+headcount:
+  value: null
+turnover_eur:
+  value: 150000000
+  source: >
+    FY2026 revenue guidance AUD 250-270m (H1 2026 AUD 125.8m, +74% year on year).
+    Converted at an approximate rate — the figure is far enough above the KMU ceiling
+    that exchange-rate precision does not change the test.
+  as_of: 2026-09-10
+balance_sheet_eur:
+  value: null
+ownership_status:
+  value: autonomous
+  source: "Publicly listed with dispersed shareholding"
+  as_of: 2026-09-10
+  assumed: true
+listed:
+  value: true
+  source: "ASX:DRO"
+  as_of: 2026-09-10
+application_domain:
+  value: military
+  source: "Counter-drone detection and mitigation for military and government customers"
+  as_of: 2026-09-10
+activity:
+  value: "Counter-UAS: RF detection, vehicle-mounted and dismounted C-UAS systems, software subscriptions"
+  source: "Company announcements; European Security & Defence; Defence Connect"
+  as_of: 2026-09-10
+de_minimis_used_eur:
+  value: null
+turnover_in_field_eur:
+  value: 150000000
+  source: "Counter-UAS is the company's entire business"
+  as_of: 2026-09-10
+  assumed: true
+references:
+  value:
+    - name: "European military customer via COBBS BELUX BV (Benelux reseller)"
+      value_eur: null
+      year: 2026
+      note: "AUD 23.2m in vehicle-mounted C-UAS, deliveries progressive through 2026"
+    - name: "Western military contracts"
+      value_eur: null
+      year: 2026
+      note: "USD 21.7m reported February 2026"
+    - name: "European defence deal"
+      value_eur: null
+      year: 2026
+      note: "USD 49.6m reported 2026"
+  source: "Company announcements via channellife, euro-sd, proactiveinvestors"
+  as_of: 2026-09-10
+
+project:
+  name:
+    value: "European market expansion"
+  domains:
+    value: [counter_uas, defence, rf_sensing]
+  started:
+    value: true
+
+notes:
+  - >
+    THIS CASE EXISTS TO BE KILLED, AND THAT IS ITS VALUE. Australian establishment and
+    roughly EUR 150m of revenue put DroneShield outside EU funding entirely and outside
+    KMU-gated instruments twice over. EDIP eligibility runs to EU Member States, Norway
+    and Ukraine. The BwPBBG, in force since 2026-02-14, lets contracting authorities
+    restrict participation to EU-resident applicants and bidders. A radar that surfaces
+    German and EU funding calls for this client is producing pure noise.
+  - >
+    WHAT IS ACTUALLY USEFUL HERE IS THE INVERSE OF THE PRODUCT. For DroneShield the
+    scannable value is: procurement notices that do NOT invoke the third-country
+    restriction; award notices naming EU primes worth approaching as a route to market
+    — the existing Benelux reseller relationship is precisely this pattern; and tracking
+    whether the announced European facility creates an EU establishment that changes the
+    eligibility picture. That is monitoring plus positioning advice, not a funding radar.
+  - >
+    STRONGEST EIGNUNG OF THE FOUR CASES BY A DISTANCE. Where DroneShield can bid, it
+    clears Mindestumsatz and reference requirements that would kill the other three.
+    Eligibility and capacity run in opposite directions across this case set, which is
+    worth remembering before generalising from any one client.

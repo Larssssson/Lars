@@ -1,0 +1,19 @@
+slug: bmftr-fusion-explorativ
+title: "Bekanntmachung: Explorative Forschungsansätze in der Fusion"
+kind: funding
+issuer: "BMFTR"
+source_url: "https://www.bmftr.bund.de/SharedDocs/Bekanntmachungen/DE/2025/11/2025-11-10-bekanntmachung-fusion.html"
+retrieved: 2026-09-10
+verified: true
+deadline: null
+deadline_kind: skizze
+deadline_source: "Stichtag not extracted from the Bekanntmachung — must be read before this record is usable"
+prep_days: 45
+requires_country: [DE]
+civil_use_only: true
+no_vorhabenbeginn: true
+domains: [fusion, energy, photonics, lasers, materials]
+notes: >
+  Deliberately left with a null deadline. The deadline rules cannot fire, so this record
+  reaches the shortlist with its date unresolved rather than being quietly dropped or
+  quietly passed. Deadlines are quoted, never computed — and never invented.

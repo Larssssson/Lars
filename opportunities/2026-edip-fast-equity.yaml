@@ -1,0 +1,17 @@
+slug: edip-fast-equity
+title: "EDIP — FAST (Fund Accelerating Defence Supply Chains Transformation), equity support"
+kind: funding
+issuer: "European Commission (DG DEFIS)"
+source_url: "https://defence-industry-space.ec.europa.eu/edip-commission-adopts-eu15-billion-work-programme-boost-european-and-ukrainian-defence-industry-2026-03-30_en"
+retrieved: 2026-09-10
+verified: true
+deadline: null
+prep_days: 45
+requires_sme: true
+requires_country: [AT, BE, BG, HR, CY, CZ, DK, EE, FI, FR, DE, GR, HU, IE, IT, LV, LT, LU, MT, NL, PL, PT, RO, SK, SI, ES, SE, "NO", UA]
+domains: [counter_uas, defence, uav, autonomy, ai, manufacturing]
+volume_eur: 100000000
+notes: >
+  EUR 100m of equity support for defence start-ups, SMEs and small mid-caps. Included in
+  the fixture set to exercise the KMU rule: it is exactly the instrument where an
+  unresolved cap table stops the system from answering.

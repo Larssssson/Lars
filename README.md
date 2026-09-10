@@ -94,9 +94,49 @@ lets you catch the engine being wrong.
 5. [**Cadence**](docs/04-cadence.md) — the weekly digest, state, re-surfacing, and why an empty week must announce itself
 6. [**Build plan**](docs/05-build-plan.md) — four weeks, one person, Claude Code
 7. [**Risks**](docs/06-risks.md) — false negatives, eligibility hallucination, deadline liability, and the RDG boundary
+8. [**What the real cases changed**](docs/07-case-findings.md) — the engine run against Marvel Fusion, TYTAN, Monopulse and DroneShield, and the six design changes that came out of it
 
 The earlier nine-tool concept is in [`docs/archive/`](docs/archive/), with
 a note on what carried forward and what was wrong.
+
+---
+
+## It runs
+
+The knockout engine is built and tested against four real cases.
+
+```
+python3 -m radar.run                       # every case, every opportunity
+python3 -m radar.run --case marvel-fusion  # one case
+python3 -m pytest tests/ -q                # 26 tests
+```
+
+```
+cases/           Marvel Fusion · TYTAN Technologies · Monopulse · DroneShield
+opportunities/   opportunity records, each flagged verified: true | false
+radar/rules.py   the knockout rules — deterministic, no model judgement
+radar/model.py   Sourced fields; a bare scalar is an assumption and renders as one
+tests/           the rules decide what a client is told. They get tests.
+```
+
+Current run, 28 case × opportunity pairs: **1 shortlisted · 6 undecidable ·
+21 killed.** The reasons are in
+[docs/07-case-findings.md](docs/07-case-findings.md) — including why the
+three defence cases turned out to need a different product from the funding
+case, and a real bug the DroneShield profile caught.
+
+### Three outcomes, not two
+
+Building against real profiles with real gaps forced a third verdict:
+
+| | |
+|---|---|
+| **Killed** | A rule fired. Logged with the rule, the client value, the requirement, the source, and whether it is reversible |
+| **Undecidable** | The rule's input is unknown. Never a silent kill (invisible false negative) and never a silent pass (false confidence) — it becomes an intake question instead |
+| **Shortlisted** | Survived everything, goes to assessment and a brief |
+
+The undecidable set is one of the more useful outputs: it is the intake
+question list, ordered by what it blocks.
 
 ---
 

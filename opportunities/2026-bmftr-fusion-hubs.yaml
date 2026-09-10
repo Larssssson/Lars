@@ -1,0 +1,23 @@
+slug: bmftr-fusion-hubs
+title: "Richtlinie zur Förderung von „Hubs für die Fusion“"
+kind: funding
+issuer: "BMFTR (Bundesministerium für Forschung, Technologie und Raumfahrt)"
+source_url: "https://www.bmftr.bund.de/SharedDocs/Bekanntmachungen/DE/2026/04/2026-04-17-bekanntmachung-fusion.html"
+retrieved: 2026-09-10
+verified: true
+deadline: 2026-07-29
+deadline_kind: skizze
+deadline_source: "Hubs announced 2026-07-29 — submission window closed before that date; exact Stichtag not extracted"
+prep_days: 60
+requires_country: [DE]
+civil_use_only: true
+no_vorhabenbeginn: true
+domains: [fusion, energy, photonics, lasers, materials]
+volume_eur: 125000000
+notes: >
+  Part of the Fusion 2040 programme. Three thematic hubs — laser fusion, magnetic
+  fusion (stellarator), fuel cycle and materials. BMFTR providing EUR 125m initially.
+  The laser fusion hub, VEGA, is coordinated by Marvel Fusion with Focused Energy.
+  Included in the fixture set precisely because it is already decided: a radar that
+  surfaces this to Marvel Fusion in September 2026 as an opportunity is wrong, and the
+  deadline rule is what stops it.

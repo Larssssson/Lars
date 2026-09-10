@@ -1,0 +1,85 @@
+slug: marvel-fusion
+name: Marvel Fusion GmbH
+legal_form:
+  value: GmbH
+  source: "HRB 249969, Amtsgericht München"
+  as_of: 2026-09-10
+country:
+  value: DE
+  source: "Sitz München — marvelfusion.com"
+  as_of: 2026-09-10
+sites:
+  value:
+    - {land: BY, kreis: "München, Landeshauptstadt"}
+  source: "Company website; Bayern Innovativ company profile"
+  as_of: 2026-09-10
+founded:
+  value: 2019
+  source: "Startbase / Tracxn company profile"
+  as_of: 2026-09-10
+headcount:
+  value: 121
+  source: "Tracxn company profile, employee count as of 2026-06-30"
+  as_of: 2026-06-30
+turnover_eur:
+  value: 0
+  source: null          # pre-revenue is an inference from stage, not a filed figure
+  assumed: true
+balance_sheet_eur:
+  value: null           # not extracted from Bundesanzeiger — would settle the KMU test
+ownership_status:
+  value: null           # THE load-bearing unknown. See notes.
+listed:
+  value: false
+  source: "No listing; privately held, USD 160m raised across 4 rounds"
+  as_of: 2026-09-10
+application_domain:
+  value: civil
+  source: "Laser inertial fusion energy for power generation"
+  as_of: 2026-09-10
+activity:
+  value: "Laser-driven inertial confinement fusion; nanostructured targets; photonics, optics, target fabrication"
+  source: "marvelfusion.com; BMFTR VEGA hub announcement"
+  as_of: 2026-09-10
+de_minimis_used_eur:
+  value: null           # not tracked. Likely irrelevant at this scale — but "likely" is not "known"
+turnover_in_field_eur:
+  value: null
+references:
+  value: null
+
+project:
+  name:
+    value: "Next-phase laser and target development beyond the VEGA hub scope"
+  domains:
+    value: [fusion, photonics, lasers, energy, materials]
+  started:
+    value: null         # cannot be answered generically for a company doing continuous R&D
+  location_land:
+    value: BY
+
+notes:
+  - >
+    OWNERSHIP IS THE BINDING UNKNOWN. USD 160m raised over four rounds, latest a
+    Series B on 2025-03-27 with five investors. Under Empfehlung 2003/361/EG Art. 3(2)(a)
+    certain investors — venture capital companies, institutional investors, universities —
+    may hold up to 50% without creating a partner enterprise. A strategic corporate
+    investor at 25% or more does create one, and pro-rata consolidation with a large
+    company would very likely break KMU status. Headcount 121 is comfortably inside the
+    ceiling; the cap table decides everything else. This is one question to a CFO and it
+    changes which half of the German funding landscape is available.
+  - >
+    ALREADY FEDERALLY FUNDED. Marvel Fusion coordinates the VEGA laser-fusion hub together
+    with Focused Energy under the BMFTR "Hubs für die Fusion" Bekanntmachung of 2026-04-17,
+    part of the Fusion 2040 programme; BMFTR is providing EUR 125m across three hubs,
+    announced 2026-07-29. This matters twice over: Kumulierungsverbot on any overlapping
+    costs, and the fact that the obvious opportunity is already won, so the real question
+    is what comes next.
+  - >
+    NOTE THE MINISTRY RENAME: BMBF is now BMFTR (Bundesministerium für Forschung,
+    Technologie und Raumfahrt). Any source list or programme catalogue written before 2025
+    has the wrong name and quite possibly the wrong URLs.
+  - >
+    MUNICH IS NOT A GRW-FÖRDERGEBIET. Regional investment aid under the GRW is not
+    available at this location. Assumption — confirm against the current Fördergebietskarte
+    before relying on it.

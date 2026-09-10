@@ -1,0 +1,23 @@
+slug: bw-c-uas-liegenschaften
+title: "Bundeswehr — Drohnenabwehr für Liegenschaften, Folgebeschaffung (illustrative)"
+kind: procurement
+issuer: "BAAINBw"
+source_url: "https://www.gesetze-im-internet.de/bwbbg_2026/BwBBG.pdf"
+retrieved: 2026-09-10
+verified: false
+deadline: 2026-11-14
+deadline_kind: angebot
+deadline_source: "ILLUSTRATIVE DATE — not a real notice. Do not act on it."
+prep_days: 30
+excludes_third_country: true
+min_turnover_eur: 5000000
+min_references: 2
+domains: [counter_uas, defence]
+notes: >
+  UNVERIFIED FIXTURE, and deliberately so. It represents the shape of a German defence
+  procurement under the BwPBBG regime in force since 2026-02-14: participation may be
+  restricted to EU-resident applicants and bidders, and Losaufteilung is dispensed with.
+  The point of including it is to exercise the third-country rule — and to make visible
+  that a scanner cannot reliably find the real version of this notice, because raised
+  value limits for Direktaufträge and the Art. 346 TFEU / §107 Abs. 2 GWB exemptions keep
+  much of this flow unpublished. See docs/07-case-findings.md.

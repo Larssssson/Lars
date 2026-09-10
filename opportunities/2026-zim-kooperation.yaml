@@ -1,0 +1,22 @@
+slug: zim-kooperation
+title: "ZIM — Zentrales Innovationsprogramm Mittelstand, Kooperationsprojekt"
+kind: funding
+issuer: "BMWK / AiF Projekt GmbH"
+source_url: "https://www.foerderdatenbank.de/"
+retrieved: 2026-09-10
+verified: false
+deadline: null
+deadline_kind: laufend
+deadline_source: "Laufendes Verfahren — no Stichtag. Programme parameters NOT verified against the current Richtlinie."
+prep_days: 45
+requires_sme: true
+requires_country: [DE]
+civil_use_only: true
+no_vorhabenbeginn: true
+domains: [manufacturing, ai, autonomy, energy, materials, photonics, lasers]
+notes: >
+  UNVERIFIED FIXTURE. Represents the shape of a mainstream German SME innovation
+  programme — KMU-gated, German establishment, no Vorhabenbeginn, civil application. The
+  specific parameters have not been checked against the current Richtlinie and must be
+  before this record is used for anything real. Present in the fixture set to exercise
+  the Zivilklausel rule against the three defence cases.
