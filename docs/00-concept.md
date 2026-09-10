@@ -1,146 +1,127 @@
-# The thesis
+# Concept
 
-## What the job actually is
+## What the work actually is
 
-Strip the glamour off public affairs and the work is four verbs, repeated
-across every client and every file:
+A consultant asked to find funding or contracts for a client does five
+things, and only one of them is worth a consultant's hourly rate.
 
-**Know** what is happening (monitoring, intelligence, stakeholder mapping)
-**Judge** what it means for this client (impact assessment, risk, options)
-**Say** something about it (papers, amendments, briefings, talking points)
-**Show** that you did it (reports, readouts, registers, invoices)
+1. **Find** what is out there — mechanical, high-volume, tedious
+2. **Filter** to what plausibly relates — mechanical, judgement-light
+3. **Qualify** whether the client can actually win it — rule-heavy, checkable, and the place errors are expensive
+4. **Decide** whether it is worth pursuing — genuine judgement
+5. **Prepare** the application or the bid — craft, and out of scope here
 
-A consultant's billable hour is spent almost entirely in *Judge*. That is
-the part clients cannot do themselves and the reason the retainer exists.
+Steps 1 and 2 are sold as a product by half a dozen German vendors. Step 4
+is the consultant's job and should stay there. Step 5 is where the fee is,
+and it is deliberately out of scope.
 
-Almost every consultant's actual day is spent in *Know*, *Say* and *Show*.
-Reading agendas. Reformatting a paper into a one-pager. Writing the
-readout. Filling in timesheets. Assembling the quarterly report. Rebuilding
-the same budget model in a fresh spreadsheet because last quarter's is
-buried in a subfolder.
-
-**The suite's entire purpose is to give hours back to *Judge*.** Any tool
-that automates judgement is building the wrong thing — it produces
-confident, unaccountable advice, which is the one product a public affairs
-firm cannot sell. Any tool that automates *Know*, *Say* and *Show* is
-printing money.
+**Step 3 is the gap.** It is too fiddly to do well by hand across dozens of
+opportunities a week, too rule-bound to be interesting, and too consequential
+to skip. It is the entire target of this system.
 
 ---
 
-## Why the context layer is the product
+## Why qualification is hard enough to be worth automating
 
-Consider a real, small task: a client asks what a Council general approach
-means for them. To answer it you need:
+A single German funding opportunity turns on all of the following before it
+is worth ten minutes of a consultant's attention:
 
-- the Council text, and the Commission proposal it modifies
-- the diff between them, at article level
-- the client's product portfolio and which articles bite on it
-- what we told this client three weeks ago (so we don't contradict it)
-- what the client has said publicly (so we don't contradict *them*)
-- who moved the text in Council and whether it holds in trilogue
+- **Rechtsform** — some programmes exclude Einzelunternehmen, some require gemeinnützig, some require a Betriebsstätte and not merely a Sitz
+- **KMU-Status** under the EU definition — and the Partnerunternehmen and verbundene Unternehmen rules that quietly disqualify a Mittelständler owned by a group
+- **Standort** — Land-level programmes require presence in that Land; GRW rates depend on the Fördergebiet the district sits in
+- **Vorhabenbeginn** — if the project has already started without a vorzeitiger Maßnahmenbeginn, most Zuschüsse are simply gone. A single date kills the opportunity outright and it is the most common avoidable loss
+- **De-minimis headroom** — a running total over three fiscal years, per entity, that clients almost never track and consultants have to reconstruct
+- **Kumulierungsverbot** — what other funding is already committed to the same costs
+- **AGVO-Artikel** — which state-aid article the programme runs under determines the Förderquote, and the rate differs by enterprise size and by whether the work is industrielle Forschung or experimentelle Entwicklung
+- **Unternehmen in Schwierigkeiten** — an AGVO exclusion that is checkable and routinely missed
+- **The real deadline** — a Förderrichtlinie may run for three years while the Skizzen-Stichtag is in eleven days
 
-Six context objects. A generic chat tool has none of them, so you paste,
-and paste, and the answer is only as good as what you remembered to paste.
-A tool suite that has all six *standing* answers the question in one
-sentence of prompting — and answers the next forty questions too.
+And a procurement opportunity turns on a different set: CPV fit,
+Eignungskriterien (Mindestumsatz, comparable references, personnel
+qualifications), Präqualifikation, whether a Bietergemeinschaft or
+Eignungsleihe is permitted, the Zuschlagskriterien weighting, whether it is
+a Rahmenvereinbarung and how many Lose, and the Bewerbungsfrist as distinct
+from the Angebotsfrist.
 
-So the architecture is inverted from how software like this usually gets
-built. Not: nine apps that each hold their own data. Instead:
-
-```
-                    ┌──────────────────────────────┐
-                    │      THE ACCOUNT GRAPH        │
-                    │  clients · dossiers · files   │
-                    │  stakeholders · positions     │
-                    │  interactions · deliverables  │
-                    └──────────────┬───────────────┘
-                                   │
-   ┌────────┬────────┬────────┬────┴───┬────────┬────────┬────────┐
- Ledger   Pitch   Redline   Table   Signal  Dossier   Whip   Readout
-   └────────┴────────┴────────┴────────┴────────┴────────┴────────┘
-                                   │
-                          Bridge (the dashboard)
-```
-
-Each tool is a few hundred lines of prompt, format knowledge and
-validation. The graph is the asset. Rip out any tool and the firm loses a
-convenience; rip out the graph and it loses its memory.
-
-The strategic consequence: **the suite gets better the longer the firm uses
-it**, because the graph accumulates. That is a moat a competitor cannot
-buy, and it is the argument for building rather than licensing.
+None of that is intellectually difficult. All of it is checkable against a
+public document. It is precisely the shape of work that is miserable for a
+human at volume and reliable for a system with the rules written down.
 
 ---
 
-## The three rules
+## The design consequence: two engines, not one model
 
-### 1. No source, no sentence
+The qualification stage is split, and the split is load-bearing.
 
-Every factual assertion in a generated deliverable carries a pointer: an
-article reference, a document ID, a URL, a dated meeting note. Unsourced
-claims are not smoothed into fluent prose — they render as an explicit gap:
+### Deterministic knockouts
 
-> The rapporteur has signalled openness to a transition period.
-> `[UNSOURCED — verify before sending]`
+Eligibility questions with binary answers run as **code, not model
+judgement**: date comparisons, headcount thresholds, Land matching,
+de-minimis arithmetic, deadline arithmetic.
 
-This is not a nicety. A hallucinated article number in a client note is a
-lost account, and worse, a client who acts on it. Fluency is the enemy
-here: the failure mode of language models in this profession is being
-*persuasively* wrong about a recital that does not exist. The design
-answer is to make unsourced statements visibly ugly.
+A model asked "is this company a KMU?" will sometimes say yes because the
+company feels like a KMU. Code given a headcount, a turnover, a balance
+sheet total and an ownership structure gives the same answer every time and
+can be pointed at the rule it applied.
 
-Corollary: **retrieval over recall.** The suite never answers from the
-model's memory of EU law. It answers from a document it just read, and
-tells you which one.
+Every knockout writes a line: the rule, the input value, the threshold, and
+the source. That line is what makes the rejection log auditable.
 
-### 2. Draft to the last mile, never to the client
+### Sourced assessment
 
-Nothing the suite produces is addressed to a client. Every output is
-addressed to a consultant, in draft, with its own uncertainty marked.
-Nothing auto-sends. Nothing auto-files to a register. Nothing auto-posts.
+What survives goes to a model for the questions that genuinely need
+reading: does this project actually serve the programme's Förderzweck; how
+does the Leistungsbeschreibung map to what the client does; how
+oversubscribed does this call look; what would preparation actually cost.
 
-This is partly liability and partly craft: the value a consultant adds is
-in the last 20% of a document, and a tool that pretends to deliver 100%
-takes away the 80% *and* the incentive to check. A tool that honestly
-delivers a good third draft with the weak spots flagged is used forever.
-
-### 3. Capture is a by-product
-
-The graph is only valuable if it is populated, and every firm that has
-bought a CRM knows what happens when populating it is a task: it does not
-get populated.
-
-So no tool in this suite asks anyone to maintain a database. Instead:
-
-- File a meeting readout (which you want, because it writes your follow-ups) → the stakeholder card updates itself
-- Draft a paper (which you were doing anyway) → the position library learns what we now say
-- Do a week of work → the timesheet arrives pre-drafted for approval
-- Log a Commission meeting in the readout → the Transparency Register return builds itself
-
-Every capture mechanism is bolted onto something the consultant already
-had selfish reason to do. Where that isn't possible, the data doesn't get
-captured, and the suite is designed to work without it.
+Every claim here quotes the Bekanntmachung. **No source, no sentence** —
+an assertion the system cannot point at renders as a visible gap, not as
+fluent prose. A client acts on "you are eligible for this", and being
+persuasively wrong about it is the failure mode that ends the engagement.
 
 ---
 
-## What this is *not*
+## What it deliberately does not do
 
-**Not a monitoring subscription.** Politico, Agence Europe, Contexte,
-MLex, Dods already do feeds well, and better than you will. Agora consumes
-them; it does not compete with them. The value added is the step nobody
-sells: turning a feed into *this client's* two-paragraph note.
+**It does not write the application.** Not the Projektskizze, not the
+Vorhabenbeschreibung, not the tender response. The scoping decision is
+deliberate: a fabricated eligibility claim inside a submitted document is a
+different order of problem from one in an internal shortlist, and the line
+is easier to hold if it is never crossed. Preparation is where the fee is,
+and it should stay human.
 
-**Not a CRM.** Salesforce with a lobbying skin has been tried repeatedly
-and dies of data-entry starvation. The graph is populated by rule 3 or not
-at all.
+**It does not decide.** Go / no-go / watch is a recommendation with a
+stated reason. The consultant decides, and the reason is there so they can
+disagree with it specifically.
 
-**Not a replacement for the consultant's network.** The suite makes a
-consultant's relationships more legible and more transferable within the
-firm. It does not create them, and a tool that pretends it can will be
-resented by exactly the senior people whose buy-in decides whether it is
-adopted.
+**It does not give legal advice.** Stating that a programme's text requires
+X and that the client's profile records Y is a factual comparison. Stating
+that the client "is entitled to" funding under AGVO is an opinion on the
+application of law, which in Germany runs into the Rechtsdienstleistungs­
+gesetz. The output is phrased as the former throughout — see
+[risks](06-risks.md).
 
-**Not, initially, a client-facing product.** Build it as an internal tool
-where mistakes are cheap and the feedback loop is a colleague down the
-corridor. There is a client portal in this eventually — see the roadmap —
-but selling before the graph is dense is selling an empty database.
+**It does not silently filter.** Anything discarded is discarded visibly,
+with a reason. This is the single most important behavioural commitment in
+the system.
+
+---
+
+## What carried over from the first design
+
+Three principles survived the pivot intact and are worth restating, because
+they now do more work than they did before:
+
+**No source, no sentence.** Now enforced at the point where it matters
+most: eligibility claims.
+
+**Draft to the last mile, never to the client.** The digest is addressed to
+a consultant. Nothing goes to a client without someone reading it, and
+nothing is ever submitted anywhere by the system.
+
+**The structured context is the asset, the tools are thin.** In the first
+design that meant an account graph. Here it means the **eligibility
+profile** — and it compounds in the same way. A client profiled once is
+profiled for every programme, every tender, and every year. Fifty profiled
+clients is an asset a competitor cannot assemble quickly, because most of
+it comes from conversations rather than from public records.

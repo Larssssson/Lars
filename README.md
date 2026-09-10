@@ -1,74 +1,124 @@
-# Agora — a tool suite for public affairs consultants
+# Agora — Förder- und Vergabe-Radar
 
-> Working concept. Nothing here is built yet; this repository is the design.
+> Working design. Nothing is built yet; this repository is the specification.
 
-Public affairs consultants do not have a software problem. They have a
-**context re-entry problem**.
+Enter a case — a client, a project, a prospect, or four scribbled lines
+from a phone call — and the system scans German and EU public funding
+programmes and public procurement notices, kills everything the client
+cannot actually win, and returns a short list of qualified opportunities
+with a go/no-go recommendation on each.
 
-Every task — a budget, a proposal, an amendment, a briefing, a monitoring
-note — requires the same twenty facts: who the client is, what they sell,
-where they operate, what file we are on, what we have already said in
-public, who the rapporteur is, what she said in committee last March, what
-we promised in the last steering meeting. A consultant re-assembles those
-twenty facts from memory, from Outlook, from a shared drive, and from a
-colleague who is on holiday — several times a day, for every client.
-
-Generic AI tools do not fix this. They move the re-assembly into a chat
-window: you paste the same background in for the fifteenth time, get a
-fluent draft with a half-invented article number in it, and spend forty
-minutes checking it. The tool was faster than writing. The task was not.
-
-**Agora is built the other way round.** One shared context layer per
-client account; every tool reads from it and writes back to it. Tools are
-thin. The context is the product.
+Weekly, per client, standing.
 
 ---
 
-## The nine tools
+## The one idea
 
-| Tool | What it does | Replaces |
+**Matching is a commodity. Qualification is the product.**
+
+Keyword and CPV matching is already sold by Vergabe24, subreport, the
+Deutsches Ausschreibungsblatt and every Fördermitteldatenbank on the
+market. A system that outputs "47 hits" has rebuilt something a client can
+buy for a few hundred euros a year.
+
+The consultancy value sits one step later, and it is the step nobody sells:
+
+> Is this client genuinely antragsberechtigt? What is the Förderquote once
+> AGVO Art. 25 and their KMU status are applied? Is there de-minimis
+> headroom left this year? Has Vorhabenbeginn already killed it? Is the
+> real deadline the Vollantrag date or the Skizze-Stichtag six weeks
+> earlier? For a tender: do they clear the Eignungskriterien, and who won
+> the last three comparable Vergaben?
+
+That is a hundred fiddly, checkable rules sitting on public documents. It
+is exactly the work a well-built system carries and a human should not be
+doing at 22:00.
+
+---
+
+## The governing asymmetry
+
+The two error types are not symmetrical, and the whole design follows from
+this:
+
+| | Cost | Visibility |
 |---|---|---|
-| **Ledger** | Budgets, retainer scoping, fee models, burn tracking | The partner's private Excel |
-| **Pitch** | Proposals, RFP/tender responses, compliance matrices | Copy-paste from the last proposal |
-| **Redline** | Legislative text review, version diffs, impact assessment | Three PDFs side by side on one screen |
-| **Table** | Amendment drafting in institutional format, survival tracking | Word, and hope |
-| **Signal** | Monitoring, filtered per client, into a client-ready brief | 400 unread Politico alerts |
-| **Dossier** | Stakeholder cards, relationship graph, meeting history | A colleague's memory |
-| **Whip** | Coalition and vote mapping, path-to-majority | A whiteboard photo in WhatsApp |
-| **Readout** | Meeting packs before, structured readouts after | Notes that die in a notebook |
-| **Bridge** | The dashboard: accounts, deadlines, burn, risk, time, compliance | Nothing. This is the gap. |
+| **False positive** — surfaced something ineligible | Ten minutes of reading | Immediate, self-correcting |
+| **False negative** — missed something they could have won | Potentially millions, and the account | **Never discovered** |
 
-Full specifications: [`docs/01-tool-catalogue.md`](docs/01-tool-catalogue.md)
+So: **cast wide, kill late, log every kill.**
+
+Nothing is filtered silently at ingestion. The net is deliberately
+over-inclusive; the elimination happens at the qualification stage, where
+every rejection is recorded with the rule that fired and the line of the
+Bekanntmachung that triggered it.
+
+**The rejection log is a feature, not debug output.** A scanner you cannot
+audit is a scanner you cannot stake a client relationship on. "37 killed,
+here is why each" is the output that earns trust — and the only one that
+lets you catch the engine being wrong.
+
+---
+
+## The pipeline
+
+```
+   CASE INTAKE          four input shapes, one eligibility profile
+        │               interrogates for what's missing, highest-information question first
+        ▼
+   SCAN                 TED · Datenservice Öffentlicher Einkauf · service.bund.de
+        │               Förderdatenbank · Förderportal · Projektträger · 16 Länder-Förderbanken
+        │               EU Funding & Tenders Portal · KfW · BAFA — all open data
+        ▼
+   MATCH                deliberately loose. CPV sets, Förderzweck, sector, region, volume
+        │
+        ▼
+   QUALIFY              ① deterministic knockouts, each logged
+        │               ② model assessment of fit, money, competition, effort — every claim sourced
+        ▼
+   BRIEF                one page per survivor: what, when really, how much,
+        │               why it fits, what could still disqualify, go / no-go / watch
+        ▼
+   DIGEST               weekly, per client: act now · new · changed · coverage note
+                        state carried week to week, so "new" means new
+```
 
 ---
 
 ## Read in this order
 
-1. [**The thesis**](docs/00-concept.md) — why the context layer is the product, and the three rules the suite is built on
-2. [**Tool catalogue**](docs/01-tool-catalogue.md) — all nine tools, specified: inputs, outputs, the hard parts
-3. [**Architecture**](docs/02-architecture.md) — the account graph, sources, how to actually build it
-4. [**Roadmap**](docs/03-roadmap.md) — what to build first and why, scored
-5. [**A day with it**](docs/04-day-in-the-life.md) — Tuesday, 08:10 to 18:30
-6. [**Risks and guardrails**](docs/05-risks-and-guardrails.md) — the ways this goes wrong, and the design answers
+1. [**Concept**](docs/00-concept.md) — why qualification is the product, and what the system deliberately refuses to do
+2. [**The case**](docs/01-the-case.md) — four input shapes, one profile; the eligibility spine; the intake interrogation
+3. [**Sources**](docs/02-sources.md) — the German and EU open-data map, honestly graded, including where coverage is genuinely incomplete
+4. [**Qualification**](docs/03-qualification.md) — the knockout rules, the fit assessment, the brief format
+5. [**Cadence**](docs/04-cadence.md) — the weekly digest, state, re-surfacing, and why an empty week must announce itself
+6. [**Build plan**](docs/05-build-plan.md) — four weeks, one person, Claude Code
+7. [**Risks**](docs/06-risks.md) — false negatives, eligibility hallucination, deadline liability, and the RDG boundary
+
+The earlier nine-tool concept is in [`docs/archive/`](docs/archive/), with
+a note on what carried forward and what was wrong.
 
 ---
 
-## The three rules
+## Scope decisions already made
 
-**1. No source, no sentence.** Every factual claim in a generated
-deliverable carries a citation to a document, an article, a URL, a dated
-meeting note. A claim without a source is rendered as a visible gap for a
-human to fill, never as fluent prose. In this trade a wrong article number
-in a client note is not a bug, it is a lost account.
+**Both funding and procurement**, one system, one case object — though the
+qualification logic barely overlaps and is built as two rule sets.
 
-**2. Draft to the last mile, never to the client.** Every output is a
-draft addressed to a consultant, not a deliverable addressed to a client.
-Nothing sends itself. The suite's job is to move work from a blank page to
-a good third draft, which is where the consultant's judgement starts
-paying.
+**Stops at the qualified shortlist.** It does not draft the Projektskizze,
+the Vorhabenbeschreibung or the tender response. That was a deliberate
+scoping decision: a hallucinated eligibility claim inside a submitted
+application costs a client real money, and the line is easier to hold if
+it is never crossed.
 
-**3. Capture is a by-product.** No tool asks the consultant to maintain a
-database. The stakeholder card updates because a readout was filed. The
-timesheet drafts itself because documents were written and meetings
-happened. If capture requires discipline, it will not happen — every firm
-that has bought a CRM knows this.
+**Open sources only.** No paid database subscriptions, so no licence
+constraints on storage or reuse — which also means the system can be
+demonstrated to anyone without a procurement conversation first.
+
+**Public data first.** An eligibility profile — Rechtsform, KMU status,
+Betriebsstätte, de-minimis headroom — is not confidential material. Version
+one works without a single client document, so it does not wait on a data
+policy.
+
+**One person, four weeks, one real client.** Not a rollout. The design
+generalises later; it is built now to be useful to exactly one consultant.
