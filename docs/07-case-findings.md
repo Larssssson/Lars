@@ -199,3 +199,41 @@ true|false` — the BMFTR fusion Bekanntmachungen and the EDIP work programme
 are real and sourced; the ZIM, Bavarian and Bundeswehr records are marked
 unverified fixtures that exercise specific rules, and their dates are
 explicitly labelled as illustrative so nobody acts on them.
+
+---
+
+## Second pass — three facts from the client
+
+Supplied after the first run: Marvel Fusion's ownership still unknown, TYTAN
+at roughly 200 staff, Armira's stake unknown, and Monopulse established in
+**both** Denmark and Lithuania.
+
+Two of the three changed the engine's answers.
+
+**TYTAN at 200 staff produced the system's first piece of real advice.** It
+still qualifies as a KMU — that is the point. At 80% of the ceiling and
+scaling toward serial production, its KMU-gated eligibility is a wasting
+asset. Art. 4(2) of the Annex to Empfehlung 2003/361/EG gives a two-period
+buffer before the status is actually lost, so the window is open but closing,
+and anything KMU-gated should be applied for now. This is the first output in
+the project that a consultant could not have produced faster by hand, and it
+came out of one number mentioned in passing.
+
+**Monopulse was not a source conflict.** The company is established in Denmark
+and Lithuania both; the reporting that looked contradictory was each outlet
+seeing one half. The profile had recorded the field as unknown rather than
+resolving to Lithuania — the better-supported reading, since ILTE is the
+Lithuanian state development finance institution. Guessing would have produced
+a confident half-truth. The engine now treats establishment as a list, and
+Monopulse consequently clears EDIP on establishment and escapes the BwPBBG
+third-country restriction on either leg. Its scan went from zero shortlisted
+to one.
+
+**Marvel Fusion's ownership is still the binding unknown**, and the client
+does not have it either. That is itself informative: it is a question for the
+company's CFO or its cap table, not for the consultant, and it is now the
+first thing to ask in the next conversation. Until it is answered, every
+KMU-gated German programme stays undecidable for them.
+
+Scan after the second pass: **2 shortlisted · 5 undecidable · 21 killed**,
+across 28 pairs, with one client-level advisory.

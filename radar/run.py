@@ -11,7 +11,7 @@ from __future__ import annotations
 import argparse
 from datetime import date
 
-from .model import KILL, UNRESOLVED, Result, load_cases, load_opportunities
+from .model import ADVISORY, KILL, UNRESOLVED, Result, load_cases, load_opportunities
 from .rules import qualify
 
 BAR = "=" * 78
@@ -51,6 +51,24 @@ def report(results: list[Result], today: date) -> None:
             else:
                 print(f"      deadline: {r.opportunity.deadline} ({r.opportunity.deadline_kind})")
                 print(f"      source:   {r.opportunity.deadline_source}")
+
+        # Advisories are facts about the client, not about one opportunity. Collapse
+        # them, and list what each one bears on — repeating the same warning under every
+        # matching call is the noise that gets a digest filtered into a folder.
+        advisories: dict[tuple[str, str], tuple[object, list[str]]] = {}
+        for r in rows:
+            for f in r.advisories:
+                key = (f.rule, f.client)
+                advisories.setdefault(key, (f, []))[1].append(r.opportunity.title)
+        if advisories:
+            print(f"\n  ADVISORY — does not block, but say it to the client\n{DASH}")
+            for f, bears_on in advisories.values():
+                print(f"  ! {f.client}")
+                print(f"      basis:  {f.source}")
+                print(f"      do:     {f.reversible}")
+                print(f"      bears on {len(bears_on)} opportunit{'y' if len(bears_on) == 1 else 'ies'} in this scan:")
+                for title in bears_on:
+                    print(f"        - {title}")
 
         print(f"\n  CANNOT DECIDE — these are the intake questions\n{DASH}")
         if not unresolved:

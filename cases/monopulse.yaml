@@ -2,8 +2,10 @@ slug: monopulse
 name: Monopulse
 legal_form:
   value: null           # entity form not established from public sources
-country:
-  value: null           # SOURCES CONFLICT. See notes. Deliberately left unknown.
+countries:
+  value: [DK, LT]
+  source: "Client-supplied: established in both Denmark and Lithuania"
+  as_of: 2026-09-10
 sites:
   value: []
   source: "No German Betriebsstätte identified in public sources"
@@ -49,14 +51,21 @@ project:
 
 notes:
   - >
-    COUNTRY OF ESTABLISHMENT IS CONTESTED IN PUBLIC SOURCES and it is the field that
-    decides almost everything else. ArcticStartup describes a "Danish UAV maker"; Vestbee
-    describes a "Danish firm"; TechFundingNews describes it as Lithuania-based. The
-    investor, ILTE, is the Lithuanian state development finance institution, which points
-    to Lithuania — but pointing is not knowing. Both candidates are EU Member States, so
-    EU-level eligibility is unaffected either way; German Land programmes and any German
-    procurement with a local-presence requirement are not. Left as unknown on purpose:
-    this is exactly the case where a guess would look like an answer.
+    THE SOURCES WERE NOT IN CONFLICT — BOTH WERE RIGHT. ArcticStartup and Vestbee describe
+    a Danish firm; TechFundingNews describes it as Lithuania-based; the investor ILTE is
+    the Lithuanian state development finance institution. The company is established in
+    both. Worth recording as a methodological point: the profile had this field as
+    unknown rather than picking the likelier reading, and the resolution was a structure
+    neither source described. A system that had guessed "Lithuania" would have been
+    half right and fully confident.
+  - >
+    DUAL ESTABLISHMENT IS AN ASSET AND A COMPLICATION. Asset: access to both Danish and
+    Lithuanian national programmes, and useful flexibility on EDIP consortium composition,
+    where multi-Member-State participation is generally what the instruments are designed
+    to reward. Complication: two entities probably means a group, and a group means the
+    KMU test runs on consolidated figures. Which entity holds the contracts, the staff and
+    the IP is now the question that decides eligibility — and it is the same question the
+    other three cases raise in a different costume.
   - >
     NO GERMAN PRESENCE FOUND. Without a German Betriebsstätte, the German funding half of
     the radar is structurally unavailable — Bund programmes generally require it and every

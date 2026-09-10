@@ -20,6 +20,7 @@ import yaml
 
 KILL = "kill"
 UNRESOLVED = "unresolved"
+ADVISORY = "advisory"   # does not change the verdict; belongs in the brief anyway
 
 REPO = Path(__file__).resolve().parent.parent
 
@@ -80,10 +81,11 @@ class Case:
     slug: str
     name: str
     legal_form: Sourced
-    country: Sourced                 # ISO-2, where the entity is established
+    countries: Sourced               # ISO-2 list — a group may be established in several
     sites: Sourced                   # list of {land, kreis} for German presence
     founded: Sourced
     headcount: Sourced
+    headcount_trajectory: Sourced
     turnover_eur: Sourced
     balance_sheet_eur: Sourced
     ownership_status: Sourced        # autonomous | partner_exempt | linked | None
@@ -104,10 +106,11 @@ class Case:
             slug=raw["slug"],
             name=raw["name"],
             legal_form=_sourced(raw.get("legal_form")),
-            country=_sourced(raw.get("country")),
+            countries=_sourced(raw.get("countries")),
             sites=_sourced(raw.get("sites")),
             founded=_sourced(raw.get("founded")),
             headcount=_sourced(raw.get("headcount")),
+            headcount_trajectory=_sourced(raw.get("headcount_trajectory")),
             turnover_eur=_sourced(raw.get("turnover_eur")),
             balance_sheet_eur=_sourced(raw.get("balance_sheet_eur")),
             ownership_status=_sourced(raw.get("ownership_status")),
@@ -120,6 +123,10 @@ class Case:
             project=project,
             notes=raw.get("notes") or [],
         )
+
+    @property
+    def country_list(self) -> list[str]:
+        return list(self.countries.value or []) if self.countries.known else []
 
     @property
     def laender(self) -> list[str]:
@@ -176,7 +183,7 @@ class Finding:
     needs: str | None = None   # UNRESOLVED only: the fact that would settle it
 
     def render(self) -> str:
-        head = "KILLED" if self.outcome == KILL else "UNRESOLVED"
+        head = {KILL: "KILLED", UNRESOLVED: "UNRESOLVED"}.get(self.outcome, "ADVISORY")
         lines = [
             f"{head}  rule: {self.rule}",
             f"  client:      {self.client}",
@@ -203,6 +210,10 @@ class Result:
     @property
     def unresolved(self) -> list[Finding]:
         return [f for f in self.findings if f.outcome == UNRESOLVED]
+
+    @property
+    def advisories(self) -> list[Finding]:
+        return [f for f in self.findings if f.outcome == ADVISORY]
 
     @property
     def status(self) -> str:

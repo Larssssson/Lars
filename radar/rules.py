@@ -21,7 +21,7 @@ from __future__ import annotations
 from datetime import date
 from typing import Callable
 
-from .model import KILL, UNRESOLVED, Case, Finding, Opportunity
+from .model import ADVISORY, KILL, UNRESOLVED, Case, Finding, Opportunity
 
 # EU SME definition, Empfehlung 2003/361/EG Art. 2
 SME_MAX_HEADCOUNT = 250
@@ -76,20 +76,21 @@ def deadline_unreachable(case: Case, opp: Opportunity, today: date) -> Finding |
 
 @rule
 def establishment_country(case: Case, opp: Opportunity, today: date) -> Finding | None:
+    """A group established in several countries qualifies if ANY establishment does."""
     if not opp.requires_country:
         return None
-    if not case.country.known:
+    if not case.countries.known:
         return Finding(
-            UNRESOLVED, "establishment_country", "country unknown",
+            UNRESOLVED, "establishment_country", "country of establishment unknown",
             f"establishment in {'/'.join(opp.requires_country)}",
-            opp.source_url, needs="country of establishment",
+            opp.source_url, needs="countries of establishment",
         )
-    if case.country.value in opp.requires_country:
+    if set(case.country_list) & set(opp.requires_country):
         return None
     return Finding(
         outcome=KILL,
         rule="establishment_country",
-        client=f"established in {case.country.value} ({case.country.cite()})",
+        client=f"established in {', '.join(case.country_list)} ({case.countries.cite()})",
         required=f"establishment in {'/'.join(opp.requires_country)}",
         source=opp.source_url,
         reversible="an EU subsidiary with genuine activity may qualify — verify the call's control provisions",
@@ -101,17 +102,17 @@ def third_country_exclusion(case: Case, opp: Opportunity, today: date) -> Findin
     """BwPBBG lets the contracting authority restrict participation to EU-resident bidders."""
     if not opp.excludes_third_country:
         return None
-    if not case.country.known:
+    if not case.countries.known:
         return Finding(
-            UNRESOLVED, "third_country_exclusion", "country unknown",
-            "EU-resident bidder", opp.source_url, needs="country of establishment",
+            UNRESOLVED, "third_country_exclusion", "country of establishment unknown",
+            "EU-resident bidder", opp.source_url, needs="countries of establishment",
         )
-    if case.country.value in EU_MEMBER_STATES:
+    if set(case.country_list) & EU_MEMBER_STATES:
         return None
     return Finding(
         outcome=KILL,
         rule="third_country_exclusion",
-        client=f"established in {case.country.value} (third country)",
+        client=f"established in {', '.join(case.country_list)} (all third countries)",
         required="participation restricted to EU-resident applicants or bidders",
         source=opp.source_url,
         reversible="bid as subcontractor to an EU prime, or via an EU-resident subsidiary",
@@ -214,6 +215,42 @@ def sme_required(case: Case, opp: Opportunity, today: date) -> Finding | None:
         required="KMU per Empfehlung 2003/361/EG (< 250 staff and turnover <= EUR 50m or balance sheet <= EUR 43m)",
         source=opp.source_url,
         reversible=None,
+    )
+
+
+SME_HEADCOUNT_WARN = 0.8   # flag once a client is within 20% of the ceiling
+
+
+@rule
+def kmu_status_at_risk(case: Case, opp: Opportunity, today: date) -> Finding | None:
+    """A scaling company's KMU status has an expiry date, and that is advice.
+
+    Does not change the verdict — this fires on opportunities the client currently
+    qualifies for, precisely because the point is to use them while they still can.
+    """
+    if not opp.requires_sme or not case.headcount.known:
+        return None
+    verdict, _ = sme_test(case)
+    if verdict is False:
+        return None            # already lost; nothing to warn about
+    threshold = SME_MAX_HEADCOUNT * SME_HEADCOUNT_WARN
+    if case.headcount.value < threshold:
+        return None
+    trajectory = case.headcount_trajectory
+    if not (trajectory.known and trajectory.value == "scaling_fast"):
+        return None
+    pct = round(100 * case.headcount.value / SME_MAX_HEADCOUNT)
+    return Finding(
+        outcome=ADVISORY,
+        rule="kmu_status_at_risk",
+        client=f"headcount {case.headcount.value} — {pct}% of the ceiling, and scaling",
+        required=f"KMU status requires headcount below {SME_MAX_HEADCOUNT}",
+        source="Empfehlung 2003/361/EG, Anhang Art. 4(2) — status is lost only after the "
+               "ceilings are exceeded over two consecutive accounting periods",
+        reversible=(
+            "apply while the window is open. Crossing the ceiling once does not end KMU "
+            "status; it starts a two-period clock. Plan KMU-gated applications now."
+        ),
     )
 
 

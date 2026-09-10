@@ -8,7 +8,7 @@ from datetime import date
 
 import pytest
 
-from radar.model import KILL, UNRESOLVED, Case, Opportunity, Sourced, load_cases
+from radar.model import ADVISORY, KILL, UNRESOLVED, Case, Opportunity, Sourced, load_cases
 from radar.rules import qualify, sme_test
 
 TODAY = date(2026, 9, 10)
@@ -72,13 +72,66 @@ def test_edip_country_list_excludes_australia():
     assert f and f.outcome == KILL
 
 
-def test_contested_country_is_unresolved_not_guessed():
-    """Monopulse: sources disagree between Denmark and Lithuania. Both are EU, but
-    the system must not pick one to look decisive."""
+def test_monopulse_is_established_in_two_countries_and_either_can_qualify():
+    """Public sources split between Denmark and Lithuania. Both were right — the company
+    is established in both. The profile had held this as unknown rather than picking the
+    likelier reading, and the resolution was a structure neither source described."""
+    assert set(case_by_slug("monopulse").country_list) == {"DK", "LT"}
+    # Qualifies on a call open to Lithuania even though Denmark is listed first.
+    assert find(case_by_slug("monopulse"), bare_opp(requires_country=["LT"]), "establishment_country") is None
+    # And on one open to Denmark.
+    assert find(case_by_slug("monopulse"), bare_opp(requires_country=["DK"]), "establishment_country") is None
+    # But not on a German-establishment requirement.
+    f = find(case_by_slug("monopulse"), bare_opp(requires_country=["DE"]), "establishment_country")
+    assert f and f.outcome == KILL
+
+
+def test_unknown_establishment_is_a_question_not_a_guess():
+    c = case_by_slug("monopulse")
+    c.countries = Sourced(value=None)
     opp = bare_opp(requires_country=["DE"])
-    f = find(case_by_slug("monopulse"), opp, "establishment_country")
-    assert f and f.outcome == UNRESOLVED
-    assert f.needs == "country of establishment"
+    f = next(f for f in qualify(c, opp, TODAY) if f.rule == "establishment_country")
+    assert f.outcome == UNRESOLVED and f.needs == "countries of establishment"
+
+
+def test_an_eu_establishment_survives_the_bwpbbg_third_country_restriction():
+    opp = bare_opp(kind="procurement", excludes_third_country=True)
+    assert find(case_by_slug("monopulse"), opp, "third_country_exclusion") is None
+
+
+# --------------------------------------------------- KMU status has an expiry
+
+def test_scaling_company_near_the_ceiling_gets_a_warning_not_a_kill():
+    """TYTAN at ~200 staff still qualifies as a KMU, and that is exactly why the
+    advisory fires: the window is open now and will not stay open."""
+    opp = bare_opp(requires_sme=True)
+    c = case_by_slug("tytan-technologies")
+    c.ownership_status = Sourced(value="autonomous", source="test")
+    c.turnover_eur = Sourced(value=10_000_000, source="test")
+    f = next(f for f in qualify(c, opp, TODAY) if f.rule == "kmu_status_at_risk")
+    assert f.outcome == ADVISORY
+    assert "80% of the ceiling" in f.client
+    assert "two consecutive accounting periods" in f.source
+    # and it must not affect the verdict
+    from radar.model import Result
+    assert Result(c, opp, qualify(c, opp, TODAY)).status != KILL
+
+
+def test_no_warning_for_a_company_that_is_not_scaling():
+    opp = bare_opp(requires_sme=True)
+    c = case_by_slug("tytan-technologies")
+    c.ownership_status = Sourced(value="autonomous", source="test")
+    c.turnover_eur = Sourced(value=10_000_000, source="test")
+    c.headcount_trajectory = Sourced(value=None)
+    assert find(c, opp, "kmu_status_at_risk") is None
+
+
+def test_no_warning_for_a_company_well_inside_the_ceiling():
+    opp = bare_opp(requires_sme=True)
+    c = case_by_slug("marvel-fusion")   # 121 staff
+    c.ownership_status = Sourced(value="autonomous", source="test")
+    c.headcount_trajectory = Sourced(value="scaling_fast", source="test")
+    assert find(c, opp, "kmu_status_at_risk") is None
 
 
 def test_land_requirement_kills_a_company_with_no_presence_there():

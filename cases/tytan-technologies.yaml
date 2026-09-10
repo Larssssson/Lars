@@ -5,8 +5,8 @@ legal_form:
   source: "Company name; Munich-registered startup"
   as_of: 2026-09-10
   assumed: true
-country:
-  value: DE
+countries:
+  value: [DE]
   source: "Munich-based; tytan-technologies.com"
   as_of: 2026-09-10
 sites:
@@ -19,7 +19,16 @@ founded:
   source: "Founded 2023 by Balazs Nagy and Batuhan Yumurtacı, TU München alumni"
   as_of: 2026-09-10
 headcount:
-  value: null           # not published. Ramping toward 3,000 drones/month by end-2026
+  value: 200
+  source: "Client-supplied, approximate"
+  as_of: 2026-09-10
+headcount_trajectory:
+  value: scaling_fast
+  source: >
+    Production facility under construction in western Munich targeting ~3,000 drones per
+    month by end-2026; EUR 30m Series A raised to expand manufacturing across Germany,
+    Ukraine and allied markets.
+  as_of: 2026-09-10
 turnover_eur:
   value: null           # Bundeswehr development contract in the low double-digit millions
 balance_sheet_eur:
@@ -77,6 +86,14 @@ notes:
     the institutional-investor exception in Art. 3(2)(a); Armira's stake and character
     decide whether a partner or linked enterprise arises. Unresolved until someone reads
     the cap table.
+  - >
+    KMU STATUS HAS AN EXPIRY DATE HERE, AND THAT IS ADVICE WORTH GIVING. At roughly 200
+    staff TYTAN sits at 80% of the 250 ceiling while building out serial production. The
+    KMU-gated instruments — EDIP FAST equity among them — are available for a limited
+    number of application cycles. The Annex to Empfehlung 2003/361/EG, Art. 4(2), gives a
+    buffer: ceilings must be exceeded over two consecutive accounting periods before the
+    status is lost. So crossing 250 in one year does not end it immediately, but it starts
+    the clock. Anything KMU-gated should be applied for while the window is open.
   - >
     EU DEFENCE FUNDING IS THE LIVE ROUTE. EDIP's first calls were published on the EU
     Funding & Tenders Portal on 2026-03-31 under a EUR 1.5bn work programme adopted

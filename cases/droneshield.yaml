@@ -4,8 +4,8 @@ legal_form:
   value: "Limited (ASX-listed public company)"
   source: "ASX:DRO / OTC:DRSHF"
   as_of: 2026-09-10
-country:
-  value: AU
+countries:
+  value: [AU]
   source: "Headquartered in Sydney, Australia; ASX-listed"
   as_of: 2026-09-10
 sites:
