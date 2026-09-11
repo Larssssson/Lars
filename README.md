@@ -96,6 +96,7 @@ lets you catch the engine being wrong.
 7. [**Risks**](docs/06-risks.md) — false negatives, eligibility hallucination, deadline liability, and the RDG boundary
 8. [**What the real cases changed**](docs/07-case-findings.md) — the engine run against Marvel Fusion, TYTAN, Monopulse and DroneShield, and the design changes that came out of it
 9. [**Decisions taken**](docs/08-decisions.md) — judgement calls made without the client in the room, recorded so they can be overturned deliberately
+10. [**Supply-chain positioning**](docs/09-positioning.md) — 25-Mio-Vorlagen as a leading indicator, and the two tag-collision false positives it was built to prevent
 
 The earlier nine-tool concept is in [`docs/archive/`](docs/archive/), with
 a note on what carried forward and what was wrong.
@@ -109,13 +110,17 @@ The knockout engine is built and tested against four real cases.
 ```
 python3 -m radar.run                       # every case, every opportunity
 python3 -m radar.run --case marvel-fusion  # one case
-python3 -m pytest tests/ -q                # 31 tests
+python3 -m radar.run --positioning         # supply-chain leads from 25-Mio-Vorlagen
+python3 -m pytest tests/ -q                # 41 tests
 ```
 
 ```
 cases/           Marvel Fusion · TYTAN Technologies · Monopulse · DroneShield
 opportunities/   opportunity records, each flagged verified: true | false
 radar/rules.py   the knockout rules — deterministic, no model judgement
+radar/positioning.py  supply-chain leads from Haushaltsausschuss approvals
+radar/sources/   the fetch/parse seam — fetch is unimplemented on purpose
+fixtures/        real records captured by hand; this sandbox has no egress
 radar/model.py   Sourced fields; a bare scalar is an assumption and renders as one
 tests/           the rules decide what a client is told. They get tests.
 ```

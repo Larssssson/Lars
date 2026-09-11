@@ -11,8 +11,10 @@ from __future__ import annotations
 import argparse
 from datetime import date
 
-from .model import ADVISORY, KILL, UNRESOLVED, Result, load_cases, load_opportunities
+from .model import ADVISORY, KILL, UNRESOLVED, Case, Result, load_cases, load_opportunities
+from .positioning import position, prime_index
 from .rules import qualify
+from .sources.vorlagen import load as load_vorlagen
 
 BAR = "=" * 78
 DASH = "-" * 78
@@ -91,13 +93,64 @@ def report(results: list[Result], today: date) -> None:
             print()
 
 
+def positioning_report(cases: list[Case], today: date) -> None:
+    """Vorlagen are approvals, not tenders. Nobody can bid for one — so this
+    report is kept separate from the shortlist, and worded differently."""
+    vorlagen = load_vorlagen(offline=True)
+    print(f"\n{BAR}\nSUPPLY-CHAIN POSITIONING — 25-Mio-Vorlagen\n{BAR}")
+    print(
+        f"{len(vorlagen)} Vorlagen captured. These are Haushaltsausschuss approvals, not\n"
+        f"opportunities: money is committed and the contract is not yet let. The action is\n"
+        f"to reach the prime before award, not to bid.\n"
+        f"COVERAGE: 3 of the 16 Vorlagen approved on 2026-07-08 — the ones the reviewed\n"
+        f"sources named individually. For scale: 103 Vorlagen in 2025."
+    )
+
+    for case in cases:
+        matches, excluded = position(case, vorlagen, today)
+        broad = [e for e in excluded if "broad tag" in e.reason]
+        gated = [e for e in excluded if e not in broad]
+        print(f"\n  {case.name}\n{DASH}")
+
+        if not matches:
+            print("  No leads.")
+        for m in matches:
+            print(f"  → {m.vorlage.title}")
+            print(f"      overlap:  {', '.join(m.overlap)}")
+            print(f"      argument: {m.argument}")
+            if m.vorlage.value_note:
+                print(f"      value:    {m.vorlage.value_note}")
+            for b in m.blockers:
+                print(f"      BLOCKER:  {b}")
+            print(f"      source:   {m.vorlage.source_url}")
+
+        idx = prime_index(matches)
+        if idx:
+            print("\n      PRIMES TO APPROACH")
+            for name, titles in idx:
+                print(f"        {name} — {len(titles)} programme(s): {'; '.join(t[:44] for t in titles)}")
+
+        for e in gated:
+            print(f"\n      NOT A LEAD: {e.vorlage.title[:54]}")
+            print(f"        {e.reason}")
+        if broad:
+            print(f"\n      {len(broad)} further Vorlage(n) rejected on sector tag alone "
+                  f"(no shared capability).")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--case")
-    ap.add_argument("--today", default="2026-09-10")
+    ap.add_argument("--today", default="2026-09-11")
+    ap.add_argument("--positioning", action="store_true",
+                    help="supply-chain positioning from 25-Mio-Vorlagen instead of the shortlist")
     args = ap.parse_args()
     today = date.fromisoformat(args.today)
-    report(run(args.case, today), today)
+    cases = [c for c in load_cases() if args.case in (None, c.slug)]
+    if args.positioning:
+        positioning_report(cases, today)
+    else:
+        report(run(args.case, today), today)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,41 @@
+[
+  {
+    "session_date": "2026-07-08",
+    "title": "Hochenergielaser-Waffensystem zur Nächstbereichsverteidigung der Marine",
+    "domains": ["counter_uas", "lasers", "defence", "naval", "directed_energy"],
+    "value_eur": null,
+    "value_note": "Individual value not reported in the sources reviewed; part of a session totalling approx. EUR 9.5bn across 16 Vorlagen",
+    "primes": ["Rheinmetall", "MBDA Deutschland"],
+    "in_service_from": 2029,
+    "verified": true,
+    "retrieved": "2026-09-11",
+    "source_url": "https://esut.de/2026/07/meldungen/72652/haushaltsausschuss95-milliarden-euro-fuer-sechzehn-vorhaben-gebilligt/",
+    "notes": "Improves capability against agile, low-signature small targets such as drones. Demonstrator developed by Rheinmetall and MBDA Deutschland, first fired against drones from the frigate Sachsen in August 2022; operational system for the Navy expected from 2029."
+  },
+  {
+    "session_date": "2026-07-08",
+    "title": "MEKO A-200 DEU — Fregatten zur U-Boot-Jagd",
+    "domains": ["naval", "defence", "shipbuilding"],
+    "value_eur": 6300000000,
+    "value_note": "Framework agreement: four frigates fixed at approx. EUR 6.3bn, plus four options at approx. EUR 5.3bn",
+    "primes": ["TKMS"],
+    "in_service_from": null,
+    "verified": true,
+    "retrieved": "2026-09-11",
+    "source_url": "https://esut.de/2026/07/meldungen/72652/haushaltsausschuss95-milliarden-euro-fuer-sechzehn-vorhaben-gebilligt/",
+    "notes": "The largest item in the 8 July 2026 session."
+  },
+  {
+    "session_date": "2026-07-08",
+    "title": "Combat Fighter System of Systems Nucleus (CFSN)",
+    "domains": ["air_combat", "uav", "autonomy", "defence"],
+    "value_eur": null,
+    "value_note": "Individual value not reported in the sources reviewed",
+    "primes": [],
+    "in_service_from": null,
+    "verified": true,
+    "retrieved": "2026-09-11",
+    "source_url": "https://esut.de/2026/07/meldungen/72652/haushaltsausschuss95-milliarden-euro-fuer-sechzehn-vorhaben-gebilligt/",
+    "notes": "National research and development initiative including the development and procurement of unmanned combat air vehicles (UCAV). No prime named in the sources reviewed — an open question worth answering, since an unnamed prime on an R&D nucleus is where a small supplier has the best chance of getting in early."
+  }
+]
