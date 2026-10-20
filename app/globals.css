@@ -78,3 +78,72 @@
     @apply outline-2 outline-offset-2 outline-ring;
   }
 }
+
+/* Editor (BRIEFING 7.3): Bausteine, Änderungsverfolgung, Kommentaranker */
+.document-editor {
+  @apply flex min-h-[28rem] flex-col gap-3 px-4 py-4 outline-none sm:px-6;
+}
+.template-block {
+  @apply rounded-md border border-dashed border-transparent px-2 py-1;
+}
+.document-editor:focus-within .template-block:focus-within,
+.template-block:hover {
+  @apply border-border;
+}
+.template-block-label {
+  @apply mb-0.5 flex items-center gap-2 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase select-none;
+}
+.template-block-required {
+  @apply rounded bg-muted px-1 text-[10px] font-normal tracking-normal normal-case;
+}
+.template-block[data-block="headline"] .template-block-content p,
+.template-block[data-block="titel"] .template-block-content p,
+.template-block[data-block="betreff"] .template-block-content p {
+  @apply text-2xl leading-tight font-bold;
+}
+.template-block[data-block="lead"] .template-block-content p {
+  @apply font-semibold;
+}
+.template-block-content p {
+  @apply min-h-6 leading-relaxed;
+}
+.template-block-content h3 {
+  @apply mt-2 text-base font-semibold;
+}
+.template-block-content ul {
+  @apply list-disc pl-6;
+}
+.template-block-content ol {
+  @apply list-decimal pl-6;
+}
+.template-block-content a {
+  @apply text-primary underline;
+}
+.template-block-content table {
+  @apply my-2 w-full border-collapse text-sm;
+}
+.template-block-content th,
+.template-block-content td {
+  @apply border border-border px-2 py-1 align-top;
+}
+.template-block-content th {
+  @apply bg-muted font-semibold;
+}
+.change-insertion {
+  @apply rounded-sm bg-emerald-100 text-emerald-900 no-underline dark:bg-emerald-950 dark:text-emerald-200;
+  text-decoration: underline;
+  text-decoration-color: rgb(16 185 129);
+}
+.change-deletion {
+  @apply rounded-sm bg-red-100 text-red-900 dark:bg-red-950 dark:text-red-200;
+  text-decoration: line-through;
+}
+.comment-anchor {
+  @apply rounded-sm bg-amber-100 dark:bg-amber-900/50;
+}
+.comment-anchor.comment-active {
+  @apply bg-amber-300 dark:bg-amber-700;
+}
+.ProseMirror-selectednode {
+  @apply outline-2 outline-ring;
+}

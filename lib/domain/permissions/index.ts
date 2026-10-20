@@ -1,4 +1,4 @@
-import type { MemberKind, Permission, Role } from "@/lib/generated/prisma/enums";
+import type { MemberKind, Permission, Role, TaskStatus } from "@/lib/generated/prisma/enums";
 import { ForbiddenError } from "./errors";
 
 export { ForbiddenError };
@@ -12,6 +12,9 @@ export { ForbiddenError };
  * Die Funktionen sind rein; den Kontext lädt loadPermissionContext (context.ts).
  */
 export type Actor = { id: string; role: Role; isAdmin: boolean; active: boolean };
+
+/** Handelnder Nutzer mit Namen (für Benachrichtigungen und Änderungsmarkierungen). */
+export type NamedActor = Actor & { name: string };
 
 export type Membership = { clientId: string; kind: MemberKind; canApprove: boolean };
 
@@ -195,4 +198,35 @@ export function canSeeTeamView(actor: Actor): boolean {
 /** Warnungen auf dem Dashboard: CVDs für alle Kunden, Kunden-Leads für ihre Kunden (BRIEFING 7.1). */
 export function canSeeClientWarnings(actor: Actor, ctx: PermissionContext, clientId: string): boolean {
   return isCvd(actor) || (actor.active && isLeadOf(ctx, clientId));
+}
+
+// ------------------------------------------------------------- Dokumente (BRIEFING 6.3, 6.4)
+
+/** Status, in denen der Owner (und wer die Aufgabe bearbeiten darf) schreiben kann. */
+export const WRITABLE_STATUSES: TaskStatus[] = ["OFFEN", "IN_BEARBEITUNG", "AENDERUNGEN_ANGEFORDERT"];
+
+/**
+ * Wer darf im Text schreiben? In Bearbeitung: wer die Aufgabe bearbeiten darf (D-044).
+ * Freigabe angefragt: nur der Freigeber, der die Prüfung übernommen hat (D-018).
+ * Freigegeben, beim Kunden, erledigt: niemand; ändern heißt erst zurücksetzen (BRIEFING 6.3).
+ */
+export function canEditDocument(
+  actor: Actor,
+  ctx: PermissionContext,
+  doc: { clientId: string; ownerId: string; status: TaskStatus; claimedBy: string | null },
+): boolean {
+  if (!actor.active) return false;
+  if (WRITABLE_STATUSES.includes(doc.status)) return canEditTask(actor, ctx, doc);
+  if (doc.status === "FREIGABE_ANGEFRAGT") return doc.claimedBy === actor.id && hasApprovalRight(actor, ctx, doc.clientId);
+  return false;
+}
+
+/** Änderungsverfolgung ist an, wenn eingeschaltet oder jemand anderes als der Owner schreibt (BRIEFING 7.3). */
+export function mustTrackChanges(actor: Actor, doc: { ownerId: string; trackChangesOn: boolean }): boolean {
+  return doc.trackChangesOn || actor.id !== doc.ownerId;
+}
+
+/** Freigabe anfragen und zurückziehen: der Owner (BRIEFING 6.4). */
+export function canRequestApproval(actor: Actor, task: { ownerId: string }): boolean {
+  return actor.active && actor.id === task.ownerId;
 }

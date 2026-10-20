@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 const tabs = [
   { href: "/verwaltung/nutzer", label: t.admin.tabs.users },
   { href: "/verwaltung/diensttypen", label: t.admin.tabs.shiftTypes },
+  { href: "/verwaltung/darstellungsformen", label: t.admin.tabs.formats },
   { href: "/verwaltung/protokoll", label: t.admin.tabs.audit },
 ];
 

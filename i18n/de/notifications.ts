@@ -9,4 +9,9 @@ export const notifications = {
   pushBody: (client: string, task: string, due: string) => `${client} · ${task} · Frist ${due}`,
   taskAssigned: (title: string) => `Dir wurde eine Aufgabe zugewiesen: ${title}`,
   taskUrgent: (title: string) => `Deine Aufgabe ist dringend: ${title}`,
+  approvalRequested: (name: string, title: string) => `${name} bittet um Freigabe: ${title}`,
+  approved: (name: string, title: string) => `${name} hat freigegeben: ${title}`,
+  changesRequested: (name: string, title: string) => `${name} fordert Änderungen an: ${title}`,
+  comment: (name: string, title: string) => `${name} hat kommentiert: ${title}`,
+  lockRequested: (name: string, title: string) => `${name} möchte bearbeiten: ${title}`,
 } as const;

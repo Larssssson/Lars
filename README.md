@@ -2,7 +2,7 @@
 
 Interne Presse- und Content-Plattform von Rud Pedersen Berlin. Die verbindliche Bauanleitung steht in [BRIEFING.md](BRIEFING.md), Entscheidungen zu offenen Punkten in [DECISIONS.md](DECISIONS.md), Änderungen je Phase in [CHANGELOG.md](CHANGELOG.md).
 
-**Stand:** Phase 1 (Aufgaben, Dashboard, Rechte, Dienstplan). Pressespiegel und Journo Hub sind noch Platzhalter; Dokumente zeigen bis Phase 2 nur ihre Vorlage.
+**Stand:** Phase 2 (Redaktion, Freigabe, Versand). Pressespiegel und Journo Hub sind noch Platzhalter; Prüfung, Kundenwissen und Journalisten im Editor folgen in Phase 3 und 4.
 
 ## Start in drei Befehlen
 
@@ -39,9 +39,9 @@ Führt nacheinander aus:
 
 | Befehl | Art | Inhalt |
 |---|---|---|
-| `npm run test:unit` | Vitest, Einheit | Rechtematrix (jede Zeile), Priorität, Werktage und Feiertage, Statusregeln, Adapter |
-| `npm run test:integration` | Vitest, Integration | Seed, Aufgaben, Priorität-Job, Archivierung, Redaktion-Filter, Dashboard, Warnungen, Nutzer- und Kundenverwaltung, Protokoll, Dienstplan, Leistung bei 500 Aufgaben |
-| `npm run test:e2e` | Playwright, Ende zu Ende | Login, Kundenauswahl, Aufgabe anlegen und erledigen, Zuweisung in der Glocke, Hochstufen, Redaktion Liste und Tafel, Dashboard und Team-Ansicht, Dienstplan, Verwaltung, Kunden, Suche |
+| `npm run test:unit` | Vitest, Einheit | Rechtematrix (jede Zeile), Priorität, Werktage und Feiertage, Statusregeln, Adapter, Änderungsverfolgung, Word-Export und -Import, Dateinamen und Ordner, Versionsvergleich |
+| `npm run test:integration` | Vitest, Integration | Seed, Aufgaben, Priorität-Job, Archivierung, Redaktion-Filter, Dashboard, Warnungen, Nutzer- und Kundenverwaltung, Protokoll, Dienstplan, Leistung bei 500 Aufgaben, Sperre, Freigabe, Selbstfreigabe, Versand, Rückläufer, PDF, SharePoint-Ablage, Kommentare, Versionen, Projekte |
+| `npm run test:e2e` | Playwright, Ende zu Ende | Login, Kundenauswahl, Aufgaben, Glocke, Hochstufen, Redaktion, Dashboard, Dienstplan, Verwaltung, Kunden, Suche; der ganze Redaktionsablauf aus Phase 2 (PM schreiben, Freigabe mit Änderungsverfolgung, Kunde, Rückläufer, zweite Freigabe, Medien, Datei im SharePoint-Ordner); Sperre, Mitlesen, Kommentare, Versionsvergleich; Projekte |
 
 Integrationstests laufen mit fester Uhr (Dienstag, 20.10.2026, 10:00 Uhr), damit jede Priorität aus 13.5 vorkommt.
 
@@ -97,6 +97,14 @@ Die echten Adapter prüfen bereits ihre Zugangsdaten; ihre Umsetzung folgt in Ph
 - **Als Lukas oder Lars (CVD):** „Wartet auf meine Freigabe“ mit der PM Standortentscheidung, Warnungen (Covenant im Rückstand, Ground A Compliance, Rafael Profil), Team-Ansicht, Aufgaben für andere anlegen, auf Dringend hochstufen, Dienstplan pflegen und kopieren, Verwaltung mit Nutzern, Zusatzrechten und Protokoll.
 - **Als Valentin Abel (Kunden-Lead SAFENET):** Aufgaben für andere nur bei SAFENET.
 - Wer eine Aufgabe zugewiesen bekommt, sieht sie in der Glocke; dringende Zuweisungen erscheinen zusätzlich als Push (lokal in der Konsole).
+
+## Was man in Phase 2 ausprobieren kann
+
+- **Als Laura:** „Neue Aufgabe“ → Dokument, Pressemitteilung → der Editor öffnet sich mit den Bausteinen. Schreiben, nach 5 Sekunden ist gespeichert. Links „Freigabe anfragen“.
+- **Als Lukas (in einem zweiten Browser):** auf dem Dashboard „Wartet auf meine Freigabe“ öffnen. Lukas übernimmt die Prüfung, seine Änderungen erscheinen grün bzw. durchgestrichen mit Namen. „Freigeben“ oder „Änderungen anfordern“.
+- **Wieder als Laura:** „Versenden“, Word oder PDF herunterladen (RP- oder Kundenvorlage), Empfänger und Kanal eintragen. Beim Kunden kann sie einen Rückläufer hochladen. Nach dem Versand an Medien liegt die Word-Datei unter `storage/sharepoint-mock/impress/Kunden/<Kunde>/…`.
+- Öffnen zwei Personen denselben Text, sieht die zweite „… bearbeitet gerade“ und kann die Bearbeitung anfordern.
+- Redaktion → „Projekte“ (mit gewähltem Kunden), Verwaltung → „Darstellungsformen“.
 
 ## Hintergrundjobs
 

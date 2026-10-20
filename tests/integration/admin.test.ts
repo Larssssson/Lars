@@ -93,11 +93,12 @@ describe("Kunden anlegen und archivieren (BRIEFING 6.8, 7.10)", () => {
     expect(await db.auditLog.count({ where: { action: "CLIENT_STATUS_CHANGED", entityId: rafael.id } })).toBe(2);
   });
 
-  it("Logo nur als Bild", async () => {
+  it("Logo nur als PNG oder JPEG", async () => {
     const lars = await userByKey(db, "lars");
     const covenant = await clientByName(db, "Covenant");
     await expect(setClientLogo(deps, lars, covenant.id, { name: "x.pdf", mimeType: "application/pdf", data: new Uint8Array(4) })).rejects.toThrow(DomainError);
-    await setClientLogo(deps, lars, covenant.id, { name: "logo.svg", mimeType: "image/svg+xml", data: new TextEncoder().encode("<svg/>") });
+    await expect(setClientLogo(deps, lars, covenant.id, { name: "logo.svg", mimeType: "image/svg+xml", data: new TextEncoder().encode("<svg/>") })).rejects.toThrow(DomainError);
+    await setClientLogo(deps, lars, covenant.id, { name: "logo.png", mimeType: "image/png", data: new Uint8Array(8) });
     expect((await clientByName(db, "Covenant")).logoFileId).not.toBeNull();
   });
 });

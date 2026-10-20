@@ -66,14 +66,21 @@ export function getTask(db: PrismaClient, id: string) {
   });
 }
 
-/** Suche über Aufgaben und Kunden (DECISIONS D-022); Dokumente und Kontakte folgen. */
+/** Suche über Aufgaben, Dokumente (Titel und Text) und Kunden (DECISIONS D-022); Kontakte folgen in Phase 4. */
 export async function search(db: PrismaClient, query: string) {
   const q = query.trim();
   if (q.length < 2) return { tasks: [], clients: [] };
+  const pattern = `%${q.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
+  const inDocuments = await db.$queryRaw<{ taskId: string }[]>`
+    SELECT "taskId" FROM "Document" WHERE "title" ILIKE ${pattern} OR "content"::text ILIKE ${pattern} LIMIT 100`;
   const [tasks, clients] = await Promise.all([
     db.task.findMany({
       where: {
-        OR: [{ title: { contains: q, mode: "insensitive" } }, { description: { contains: q, mode: "insensitive" } }],
+        OR: [
+          { title: { contains: q, mode: "insensitive" } },
+          { description: { contains: q, mode: "insensitive" } },
+          { id: { in: inDocuments.map((d) => d.taskId) } },
+        ],
       },
       include: taskInclude,
       orderBy: { dueAt: "desc" },

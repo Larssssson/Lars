@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ProjectForm, ProjectList } from "@/components/tasks/projects";
 import { TaskBoard } from "@/components/tasks/task-board";
 import { TaskTable } from "@/components/tasks/task-table";
 import { Button } from "@/components/ui/button";
@@ -7,10 +8,11 @@ import { t } from "@/i18n";
 import { prisma } from "@/lib/db";
 import { selectedClientName } from "@/lib/domain/clients/current";
 import { listTasks, type StatusFilter } from "@/lib/domain/tasks/queries";
-import { OPEN_STATUSES } from "@/lib/domain/tasks/rules";
+import { listProjects } from "@/lib/domain/tasks/projects";
+import { dueOptions, OPEN_STATUSES } from "@/lib/domain/tasks/rules";
 import type { Priority, TaskStatus } from "@/lib/generated/prisma/enums";
 import { requireUser } from "@/lib/session";
-import { atTime } from "@/lib/time";
+import { atTime, toLocalInput } from "@/lib/time";
 import { cn } from "@/lib/utils";
 
 type Params = {
@@ -29,7 +31,7 @@ const DATE = /^\d{4}-\d{2}-\d{2}$/;
 export default async function RedaktionPage({ searchParams }: { searchParams: Promise<Params> }) {
   const user = await requireUser();
   const p = await searchParams;
-  const view = p.ansicht === "tafel" ? "tafel" : "liste";
+  const view = p.ansicht === "tafel" ? "tafel" : p.ansicht === "projekte" ? "projekte" : "liste";
   const clientId = user.selectedClientId;
   const now = new Date();
   const statusValues = Object.keys(t.tasks.statuses) as TaskStatus[];
@@ -76,7 +78,7 @@ export default async function RedaktionPage({ searchParams }: { searchParams: Pr
           </p>
         </div>
         <nav aria-label={r.viewLabel} className="flex gap-1 rounded-md border p-1">
-          {(["liste", "tafel"] as const).map((v) => (
+          {(["liste", "tafel", "projekte"] as const).map((v) => (
             <Link
               key={v}
               href={query({ ansicht: v })}
@@ -90,6 +92,10 @@ export default async function RedaktionPage({ searchParams }: { searchParams: Pr
       </div>
 
       {/* key: nach Filtern oder Zurücksetzen zeigen die Felder die Werte aus der Adresse */}
+      {view === "projekte" ? (
+        <ProjectsView clientId={clientId} />
+      ) : (
+      <>
       <form key={JSON.stringify(p)} method="get" className="grid gap-3 rounded-lg border p-4 sm:grid-cols-2 lg:grid-cols-4" aria-label={r.filters.legend}>
         <input type="hidden" name="ansicht" value={view} />
         <Field label={r.filters.project} htmlFor="f-projekt">
@@ -140,6 +146,39 @@ export default async function RedaktionPage({ searchParams }: { searchParams: Pr
       </form>
 
       {view === "liste" ? <TaskTable tasks={tasks} now={now} /> : <TaskBoard tasks={tasks} statuses={boardStatuses} now={now} />}
+      </>
+      )}
+    </div>
+  );
+}
+
+/** Dritte Ansicht: Projekte des gewählten Kunden (BRIEFING 7.2). */
+async function ProjectsView({ clientId }: { clientId: string | null }) {
+  if (!clientId) return <p className="text-sm text-muted-foreground">{t.projects.chooseClient}</p>;
+  const [projects, services] = await Promise.all([
+    listProjects({ db: prisma }, clientId),
+    prisma.agreedService.findMany({ where: { clientId }, orderBy: { title: "asc" } }),
+  ]);
+  const fmt = new Intl.DateTimeFormat("de-DE", { timeZone: "Europe/Berlin", dateStyle: "medium" });
+  return (
+    <div className="flex flex-col gap-5">
+      <ProjectList
+        projects={projects.map((pr) => ({
+          id: pr.id,
+          title: pr.title,
+          kind: pr.kind,
+          status: pr.status,
+          period: [pr.startDate, pr.endDate].filter((d): d is Date => !!d).map((d) => fmt.format(d)).join(" bis "),
+          service: pr.agreedService?.title ?? null,
+          tasks: pr.tasks.map((task) => ({ id: task.id, title: task.title, status: task.status })),
+        }))}
+      />
+      <details className="rounded-lg border bg-card p-4">
+        <summary className="cursor-pointer font-medium">{t.projects.newProject}</summary>
+        <div className="mt-4">
+          <ProjectForm clientId={clientId} services={services.map((s) => ({ id: s.id, name: s.title }))} defaultDue={toLocalInput(dueOptions(new Date()).IN_3_WERKTAGEN)} />
+        </div>
+      </details>
     </div>
   );
 }

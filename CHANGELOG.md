@@ -1,5 +1,22 @@
 # CHANGELOG
 
+## Phase 2: Redaktion, Freigabe, Versand · 2026-10-20
+
+- Editor auf TipTap/ProseMirror (nur Open Source) mit allen 13 Darstellungsformen: Bausteine aus der Vorlage mit Beschriftung und Pflichtangabe, Fett, Kursiv, Listen, Links, Zwischenüberschriften, einfache Tabellen, Zeichen- und Normzeilenzähler, automatische Speicherung 5 Sekunden nach der letzten Eingabe. Die Bausteine lassen sich nicht löschen oder verschieben.
+- Arbeitsplatz in drei Spalten: Aufgabeninfos, Freigabe und Versand, Versionen, Verlauf; Editor; Seitenleiste mit Kommentaren und Änderungen (Prüfung, Journalisten, Kundenwissen folgen in Phase 3 und 4).
+- Bearbeitungssperre: wer schreibt, sperrt; andere lesen mit (alle 5 Sekunden), fordern die Bearbeitung an, der Sperrinhaber gibt ab; Ablauf nach 10 Minuten ohne Eingabe; beim Schließen sichern und freigeben.
+- Eigene Änderungsverfolgung als ProseMirror-Plugin: Einfügungen und Löschungen mit Name und Zeit, einzeln oder alle annehmen und ablehnen, automatisch an, wenn jemand anderes als der Owner schreibt.
+- Kommentare an markierten Stellen oder zum ganzen Text, mit Antworten, Erwähnungen und erledigt.
+- Versionen bei jedem Statuswechsel und manuell, Vergleich zweier Versionen nebeneinander mit markierten Unterschieden.
+- Vollständiges Statusmodell für Dokumente, Sperre nach Freigabe, Zurücksetzen bei Änderung.
+- Freigabe: anfragen mit vorbelegten Freigebern und Rückfrage ohne Prüfung, gesperrt bei offenen KI-Bausteinen, Übernahme „prüft gerade“, Pflichtkommentar bei Änderungswunsch, kein Freigeben eigener Texte, Selbstfreigabe nur mit Zusatzrecht und markiert; Freigaben im Protokoll.
+- Versand und Kundenabstimmung: Word, PDF, Text kopieren, Mail-Entwurf, Empfänger und Kanal, Beim Kunden, Kunde einverstanden, Word-Rückläufer mit neuer Version und neuer Freigabe.
+- Word-Import (mammoth) und Export als Word (docx) und PDF (Chromium) mit RP- oder Kundenvorlage, immer saubere Fassung.
+- Ablage finaler Texte im SharePoint-Ersatz mit Ordnerstruktur und Dateinamen nach Abschnitt 9; Kundenordner beim Anlegen eines Kunden.
+- Projekte als dritte Ansicht der Redaktion: anlegen mit Aufgabenvorschlägen für Roundtable und Presse-Event, Status, Zählung der vereinbarten Leistung.
+- Verwaltung der Darstellungsformen; Suche auch im Text der Dokumente; Glocke mit Freigabe angefragt, Entscheidung, Kommentar und Bearbeitungsanfrage.
+- Platzhalterlogos (13.7), Seed legt Kundenordner und Logos an.
+
 ## Phase 1: Aufgaben, Dashboard, Rechte, Dienstplan · 2026-10-20
 
 - Rechteprüfung für die ganze Matrix aus BRIEFING 3.3 in `/lib/domain/permissions`, mit Zusatzrechten (Freigaberecht pro Kunde, Aufgaben für andere, Selbstfreigabe) und je einem Test pro Zeile und Spalte.

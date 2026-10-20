@@ -414,7 +414,11 @@ model Document {
   title            String
   content          Json
   lockedBy         String?        @db.Uuid
+  /// letzte Eingabe des Sperrinhabers; die Sperre fällt 10 Minuten danach (BRIEFING 7.3)
   lockedAt         DateTime?
+  /// wer die Bearbeitung angefordert hat (DECISIONS D-053)
+  lockRequestedBy  String?        @db.Uuid
+  lockRequestedAt  DateTime?
   trackChangesOn   Boolean        @default(false)
   templateChoice   TemplateChoice @default(RP)
   currentVersionId String?        @unique @db.Uuid
@@ -449,6 +453,8 @@ model DocumentVersion {
   number       Int
   content      Json
   reason       VersionReason
+  /// Status nach dem Wechsel, der die Version ausgelöst hat (Verlauf, DECISIONS D-053)
+  status       TaskStatus?
   isSampleData Boolean       @default(false)
   createdAt    DateTime      @default(now())
   createdBy    String?       @db.Uuid

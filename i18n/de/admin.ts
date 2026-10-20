@@ -1,6 +1,6 @@
 export const admin = {
   title: "Verwaltung",
-  tabs: { users: "Nutzer", shiftTypes: "Diensttypen", audit: "Protokoll" },
+  tabs: { users: "Nutzer", shiftTypes: "Diensttypen", formats: "Darstellungsformen", audit: "Protokoll" },
   users: {
     title: "Nutzer",
     newUser: "Nutzer anlegen",
@@ -42,7 +42,7 @@ export const admin = {
   },
   audit: {
     title: "Protokoll",
-    intro: "Rechteänderungen und Kundenstatus. Einträge können nicht bearbeitet werden.",
+    intro: "Rechteänderungen, Kundenstatus, Freigaben und Selbstfreigaben. Einträge können nicht bearbeitet werden.",
     at: "Zeitpunkt",
     actor: "Wer",
     action: "Aktion",
@@ -62,6 +62,9 @@ export const admin = {
       CLIENT_CREATED: "Kunde angelegt",
       CLIENT_UPDATED: "Stammdaten geändert",
       CLIENT_STATUS_CHANGED: "Kundenstatus geändert",
+      APPROVAL_GRANTED: "Freigabe",
+      SELF_APPROVAL: "Selbstfreigabe",
+      CHANGES_REQUESTED: "Änderungen angefordert",
     } as Record<string, string>,
   },
   errors: {

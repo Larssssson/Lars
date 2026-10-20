@@ -18,6 +18,7 @@ export async function runAction(fn: () => Promise<string | void>): Promise<Actio
   } catch (error) {
     unstable_rethrow(error);
     if (error instanceof ZodError) return { error: error.issues[0]?.message ?? t.errors.invalidInput };
+    if (error instanceof DomainError && error.name === "CheckConfirmationRequired") throw error;
     if (error instanceof DomainError || error instanceof ForbiddenError) return { error: error.message };
     console.error("[action] unerwarteter Fehler:", error instanceof Error ? error.name : "unbekannt");
     return { error: t.errors.unexpected };

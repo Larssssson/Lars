@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { t } from "@/i18n";
 import { createUser, grantPermission, revokePermission, setUserActive, setUserRole } from "@/lib/domain/permissions/admin";
+import { createFormat, updateFormat } from "@/lib/domain/documents/formats";
 import { createShiftType, updateShiftType } from "@/lib/domain/shifts";
 import type { Permission } from "@/lib/generated/prisma/enums";
 import { bool, runAction, str, type ActionState } from "@/lib/server/action";
@@ -82,6 +83,33 @@ export async function createShiftTypeAction(_state: ActionState, form: FormData)
 export async function updateShiftTypeAction(id: string, _state: ActionState, form: FormData): Promise<ActionState> {
   const result = await runAction(async () => {
     await updateShiftType(serverDeps(), await requireUser(), id, shiftTypeInput(form));
+    return t.common.saved;
+  });
+  revalidatePath("/", "layout");
+  return result;
+}
+
+function formatInput(form: FormData) {
+  return {
+    name: str(form, "name") ?? "",
+    blocks: str(form, "blocks") ?? "",
+    rulesText: str(form, "rulesText"),
+    sharePointFolder: str(form, "sharePointFolder") ?? "",
+  };
+}
+
+export async function createFormatAction(_state: ActionState, form: FormData): Promise<ActionState> {
+  const result = await runAction(async () => {
+    await createFormat(serverDeps(), await requireUser(), formatInput(form));
+    return t.common.saved;
+  });
+  revalidatePath("/", "layout");
+  return result;
+}
+
+export async function updateFormatAction(id: string, _state: ActionState, form: FormData): Promise<ActionState> {
+  const result = await runAction(async () => {
+    await updateFormat(serverDeps(), await requireUser(), id, formatInput(form));
     return t.common.saved;
   });
   revalidatePath("/", "layout");

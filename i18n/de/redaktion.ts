@@ -1,6 +1,6 @@
 export const redaktion = {
   title: "Redaktion",
-  views: { liste: "Liste", tafel: "Tafel" },
+  views: { liste: "Liste", tafel: "Tafel", projekte: "Projekte" },
   viewLabel: "Ansicht",
   filters: {
     legend: "Filter",

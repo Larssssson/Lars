@@ -42,7 +42,7 @@ export const clients = {
     shortNameInvalid: "Der Kurzname darf nur Buchstaben, Ziffern, Leerzeichen, Bindestrich und Unterstrich enthalten.",
     shortNameTaken: "Dieser Kurzname ist schon vergeben.",
     statusInvalid: "Dieser Statuswechsel ist nicht möglich.",
-    logoType: "Das Logo muss PNG, JPEG oder SVG sein.",
+    logoType: "Das Logo muss PNG oder JPEG sein.",
     logoSize: "Das Logo darf höchstens 2 MB groß sein.",
   },
 } as const;

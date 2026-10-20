@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { DocumentTaskPage } from "@/components/editor/document-task-page";
 import { PriorityBadge, StatusBadge } from "@/components/tasks/badges";
 import { StatusButtons, UrgentToggle } from "@/components/tasks/task-actions";
 import { TaskEditForm } from "@/components/tasks/task-edit-form";
@@ -20,6 +21,8 @@ export default async function TaskPage({ params }: { params: Promise<{ id: strin
   const user = await requireUser();
   const task = await getTask(prisma, id).catch(() => null);
   if (!task) notFound();
+  // Dokumente öffnen den Arbeitsplatz mit Editor (BRIEFING 7.2)
+  if (task.type === "DOKUMENT" && task.document) return <DocumentTaskPage taskId={task.id} user={user} />;
 
   const now = new Date();
   const ctx = await loadPermissionContext(prisma, user.id);

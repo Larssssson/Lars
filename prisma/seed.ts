@@ -1,3 +1,6 @@
+import { readFile } from "node:fs/promises";
+import type { DocumentStore, FileStorage } from "../lib/adapters";
+import { ensureClientFolders } from "../lib/domain/documents/filing";
 import { buildFilledContent, buildTemplateContent, parseBlocks } from "../lib/domain/documents/template";
 import { computePriority } from "../lib/domain/tasks/rules";
 import type { PrismaClient, TaskStatus } from "../lib/generated/prisma/client";
@@ -39,7 +42,17 @@ function dateColumn(key: string): Date {
  * Nutzer und Konfiguration sind keine Beispieldaten, alles andere trägt isSampleData = true.
  * Jede Phase ergänzt hier die Daten, die sie nutzt (DECISIONS D-031).
  */
-export async function seed(db: PrismaClient, now: Date = new Date()): Promise<void> {
+/** Optional: Ablage für Kundenordner und Logos; ohne Adapter bleiben Dateien weg (Integrationstests). */
+export type SeedStores = { files?: FileStorage; documents?: DocumentStore };
+
+/** Platzhalterlogos (BRIEFING 13.7); SAFENET bleibt ohne Logo. */
+const SEED_LOGOS: Record<string, string> = {
+  Covenant: "fixtures/clients/covenant/logo_placeholder.png",
+  "Ground A": "fixtures/clients/ground-a/logo_placeholder.png",
+  Rafael: "fixtures/clients/rafael/logo_placeholder.png",
+};
+
+export async function seed(db: PrismaClient, now: Date = new Date(), stores: SeedStores = {}): Promise<void> {
   const userIds = {} as Record<SeedUserKey, string>;
   for (const u of seedUsers) {
     const user = await db.user.upsert({
@@ -89,6 +102,28 @@ export async function seed(db: PrismaClient, now: Date = new Date()): Promise<vo
   }
 
   await seedPhase1(db, now, userIds);
+  await seedPhase2(db, userIds, stores);
+}
+
+/** Phase 2: Kundenordner im SharePoint (BRIEFING 9) und Platzhalterlogos (13.7). */
+async function seedPhase2(db: PrismaClient, userIds: Record<SeedUserKey, string>, stores: SeedStores): Promise<void> {
+  for (const client of await db.client.findMany()) {
+    if (stores.documents) {
+      const folder = await ensureClientFolders(stores.documents, client.shortName);
+      if (!client.sharePointFolderPath) await db.client.update({ where: { id: client.id }, data: { sharePointFolderPath: folder } });
+    }
+    const logoPath = SEED_LOGOS[client.name];
+    if (!stores.files || !logoPath || client.logoFileId) continue;
+    const data = new Uint8Array(await readFile(logoPath));
+    const storageKey = `clients/${client.id}/logo-seed`;
+    await stores.files.put(storageKey, data, "image/png");
+    const file = await db.file.upsert({
+      where: { storageKey },
+      update: {},
+      create: { storageKey, name: "logo_placeholder.png", mimeType: "image/png", size: data.byteLength, clientId: client.id, uploadedBy: userIds.lars, isSampleData: true },
+    });
+    await db.client.update({ where: { id: client.id }, data: { logoFileId: file.id } });
+  }
 }
 
 /** Phase 1: Leistungen, Profil-Bestätigungsdaten, Aufgaben (13.5) und Dienstplan (13.6). */
@@ -196,7 +231,7 @@ async function seedPhase1(db: PrismaClient, now: Date, userIds: Record<SeedUserK
 
     // Dokumente jenseits der Bearbeitung haben eine Version und eine Freigabeanfrage (BRIEFING 6.4)
     const version = await db.documentVersion.create({
-      data: { documentId: document.id, number: 1, content, reason: "STATUSWECHSEL", createdBy: ownerId, ...sample },
+      data: { documentId: document.id, number: 1, content, reason: "STATUSWECHSEL", status, createdBy: ownerId, ...sample },
     });
     await db.document.update({ where: { id: document.id }, data: { currentVersionId: version.id } });
     const approvers = [userIds.lars, userIds.lukas];
@@ -267,9 +302,10 @@ async function seedPhase1(db: PrismaClient, now: Date, userIds: Record<SeedUserK
 
 async function main() {
   const { createPrismaClient } = await import("../lib/db");
+  const { adapters } = await import("../lib/adapters");
   const db = createPrismaClient();
   try {
-    await seed(db);
+    await seed(db, new Date(), { files: adapters.fileStorage(), documents: adapters.documentStore() });
     console.info("Seed abgeschlossen.");
   } finally {
     await db.$disconnect();

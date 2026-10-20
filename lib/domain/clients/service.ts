@@ -6,6 +6,7 @@ import { DomainError, NotFoundError } from "@/lib/domain/errors";
 import { notify } from "@/lib/domain/notifications";
 import { assert, canManageClients, canManageUsers, type Actor } from "@/lib/domain/permissions";
 import type { Client, ClientStatus, MemberKind } from "@/lib/generated/prisma/client";
+import { ensureClientFolders } from "@/lib/domain/documents/filing";
 import { warningsForClient } from "./warnings";
 
 export const clientSchema = z.object({
@@ -42,8 +43,10 @@ export async function createClient(deps: Deps, actor: Actor, raw: ClientInput, l
   assert(canManageClients(actor));
   const input = clientSchema.parse(raw);
   await ensureUniqueShortName(deps, input.shortName);
+  // Ordnerstruktur im SharePoint beim Anlegen (BRIEFING 9)
+  const folder = await ensureClientFolders(deps.documents, input.shortName);
   const client = await deps.db.client.create({
-    data: { ...input, status: "ONBOARDING", createdBy: actor.id, updatedBy: actor.id },
+    data: { ...input, status: "ONBOARDING", sharePointFolderPath: folder, createdBy: actor.id, updatedBy: actor.id },
   });
   await writeAudit(deps.db, { actorId: actor.id, action: AuditAction.CLIENT_CREATED, entity: "Client", entityId: client.id, after: { name: client.name } });
   if (leadUserId) await setMembership(deps, actor, { clientId: client.id, userId: leadUserId, kind: "LEAD", canApprove: false });
@@ -107,7 +110,8 @@ export async function setClientLogo(
 ): Promise<void> {
   assert(canManageClients(actor));
   await requireClient(deps, clientId);
-  if (!["image/png", "image/jpeg", "image/svg+xml"].includes(file.mimeType)) throw new DomainError(t.clients.errors.logoType);
+  // PNG oder JPEG, weil Word kein SVG zuverlässig einbettet (DECISIONS D-056)
+  if (!["image/png", "image/jpeg"].includes(file.mimeType)) throw new DomainError(t.clients.errors.logoType);
   if (file.data.byteLength > 2 * 1024 * 1024) throw new DomainError(t.clients.errors.logoSize);
   const storageKey = `clients/${clientId}/logo-${crypto.randomUUID()}`;
   await deps.files.put(storageKey, file.data, file.mimeType);

@@ -1,6 +1,7 @@
 import { mkdtemp } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { MockDocumentStore } from "@/lib/adapters/document-store/mock";
 import { LocalFileStorage } from "@/lib/adapters/file-storage/local";
 import { MockPushSender } from "@/lib/adapters/push/mock";
 import type { Deps } from "@/lib/domain/deps";
@@ -19,12 +20,20 @@ export async function resetAndSeed(db: PrismaClient, now: Date = FIXED_NOW): Pro
   await seed(db, now);
 }
 
-export type TestDeps = Deps & { push: MockPushSender; clock: { now: Date } };
+export type TestDeps = Deps & { push: MockPushSender; clock: { now: Date }; storageDir: string };
 
 export async function testDeps(db: PrismaClient, now: Date = FIXED_NOW): Promise<TestDeps> {
   const clock = { now };
   const dir = await mkdtemp(path.join(os.tmpdir(), "impress-files-"));
-  return { db, push: new MockPushSender(), files: new LocalFileStorage(dir), now: () => clock.now, clock };
+  return {
+    db,
+    push: new MockPushSender(),
+    files: new LocalFileStorage(path.join(dir, "files")),
+    documents: new MockDocumentStore(path.join(dir, "sharepoint-mock"), "impress/Kunden"),
+    now: () => clock.now,
+    clock,
+    storageDir: dir,
+  };
 }
 
 export async function userByKey(db: PrismaClient, key: string) {

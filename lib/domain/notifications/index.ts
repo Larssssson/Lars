@@ -13,6 +13,10 @@ export const NotificationKind = {
   TASK_URGENT: "TASK_URGENT",
   PROFILE_WARNING: "PROFILE_WARNING",
   SERVICE_BACKLOG: "SERVICE_BACKLOG",
+  APPROVAL_REQUESTED: "APPROVAL_REQUESTED",
+  APPROVAL_DECIDED: "APPROVAL_DECIDED",
+  COMMENT: "COMMENT",
+  LOCK_REQUESTED: "LOCK_REQUESTED",
 } as const;
 
 export type NotificationKindKey = keyof typeof NotificationKind;

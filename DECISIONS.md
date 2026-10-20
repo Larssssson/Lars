@@ -275,3 +275,75 @@ Begründung: Jede Phase zeigt ehrlich, was es schon gibt, ohne Funktionen vorzut
 Frage: Was darf ein Admin ohne CVD-Rolle in der Verwaltung?
 Entscheidung: Er sieht Nutzer, Diensttypen und Protokoll, ändert aber nichts davon; seine eigenen technischen Einstellungen (Integrationen, KI, Kennzahlen) kommen in Phase 6.
 Begründung: „Nur CVDs vergeben Rechte“ (BRIEFING 3) gilt auch für Admins.
+
+## Nachträge Phase 2
+
+**D-053** · 2026-10-20
+Frage: Wo stehen Übernahme-Anfragen und der Status, der eine Version ausgelöst hat?
+Entscheidung: `Document.lockRequestedBy/lockRequestedAt` für die Anfrage an den Sperrinhaber, `DocumentVersion.status` für den Status nach dem Wechsel (Grundlage des Verlaufs).
+Begründung: Kleinste Ergänzung, die Anfrage und Verlauf ohne neue Tabelle abbildet.
+
+**D-054** · 2026-10-20
+Frage: Was zählt der Zeilenzähler (7.3)?
+Entscheidung: Normzeilen à 60 Anschläge der sauberen Fassung, neben der Zeichenzahl.
+Begründung: Übliche Redaktionseinheit; Absatzzahlen wären bei Pressetexten nicht aussagekräftig.
+
+**D-055** · 2026-10-20
+Frage: Wie sehen Bausteine im Export aus?
+Entscheidung: Pressemitteilung und LinkedIn-Texte erscheinen ohne Bausteinnamen, mit typografischen Rollen (Dachzeile, Headline, Subheadline, Ortsmarke, Lead); alle anderen Formen mit dem Bausteinnamen als Zwischenzeile. Leere Bausteine fallen weg.
+Begründung: Eine PM soll versandfertig aussehen, ein Briefing oder Q&A braucht die Gliederung.
+
+**D-056** · 2026-10-20
+Frage: Welche Logoformate gehen für die Kundenvorlage?
+Entscheidung: PNG und JPEG. Die Platzhalterlogos liegen als SVG (Quelle) und PNG in `fixtures/`, `scripts/render-logos.mjs` erzeugt die PNGs.
+Begründung: Word bettet SVG nicht zuverlässig ein.
+
+**D-057** · 2026-10-20
+Frage: Wann wechselt ein Dokument von Offen bzw. Änderungen angefordert auf In Bearbeitung?
+Entscheidung: Bei der ersten gespeicherten Eingabe, nicht schon beim Öffnen.
+Begründung: Wer nur liest oder den Änderungswunsch ansieht, verändert den Status nicht.
+
+**D-058** · 2026-10-20
+Frage: Wer kommentiert eine Textstelle?
+Entscheidung: Einen Anker an einer markierten Stelle setzt, wer gerade schreibt (der Anker ist eine Markierung im Text). Alle anderen kommentieren den ganzen Text, antworten und setzen Threads auf erledigt. Owner, Thread-Beteiligte und mit @Name Erwähnte werden benachrichtigt.
+Begründung: So entsteht keine zweite Änderungsquelle neben der Bearbeitungssperre.
+
+**D-059** · 2026-10-20
+Frage: Wer legt Projekte an und wem gehören die vorgeschlagenen Aufgaben?
+Entscheidung: Alle legen Projekte an; die per Häkchen übernommenen Aufgaben gehören dem Anlegenden und lassen sich danach umverteilen. Den Projektstatus ändern Anlegender, Kunden-Lead und CVD.
+Begründung: Entspricht dem Recht „eigene Aufgaben anlegen“, ohne das Recht „für andere“ zu umgehen.
+
+**D-060** · 2026-10-20
+Frage: Wie findet ein Word-Rückläufer zurück in die Bausteine?
+Entscheidung: Der Word-Export gibt jedem Baustein einen Absatzstil `impress-<baustein>`; der Import ordnet danach zu. Listen und Tabellen gehören zum Baustein davor. Bei fremden Dateien wird die erste Überschrift die Headline, der Rest der Haupttext.
+Begründung: Absatzstile überleben die Bearbeitung beim Kunden in Word in aller Regel.
+
+**D-061** · 2026-10-20
+Frage: Kommt die Eskalation dringender Freigaben (6.4, 30 und 60 Minuten) schon in Phase 2?
+Entscheidung: Nein, sie ist Abnahmekriterium von Phase 6 und wird dort zusammen mit den einstellbaren Zeiten gebaut.
+Begründung: Strikte Reihenfolge der Bauphasen.
+
+**D-062** · 2026-10-20
+Frage: Grenzen der eigenen Änderungsverfolgung.
+Entscheidung: Verfolgt werden Einfügungen und Löschungen von Text, auch über Absätze hinweg. Strukturänderungen (Absatz teilen, Listen, Tabellen) werden ausgeführt, aber nicht markiert. Direkt anschließende Eingaben derselben Person bilden eine Änderung. Der Server prüft Schema und Bausteine, kann aber nicht nachprüfen, ob der Editor jede Änderung markiert hat.
+Begründung: Deckt den Redaktionsalltag ab; Strukturverfolgung wäre um ein Vielfaches aufwendiger.
+
+**D-063** · 2026-10-20
+Frage: Wie lesen andere mit?
+Entscheidung: Der Arbeitsplatz fragt alle 5 Sekunden Inhalt, Sperre und Status ab; beim Schließen sichert er die letzten Eingaben und löst die Sperre per `navigator.sendBeacon`.
+Begründung: Einfach und robust für eine Bearbeitungssperre; Echtzeit (Yjs) ist eine spätere Ausbaustufe (BRIEFING 14).
+
+**D-064** · 2026-10-20
+Frage: Welche Version wird exportiert, versendet und abgelegt?
+Entscheidung: Nach einer Freigabe immer genau die freigegebene Version; davor der aktuelle Stand. Die Versionsnummer im Dateinamen ist die Nummer dieser Version.
+Begründung: „Die Freigabe gilt für genau die freigegebene Version“ (BRIEFING 6.3).
+
+**D-065** · 2026-10-20
+Frage: Was läuft für den PDF-Export im Betrieb?
+Entscheidung: Das Paket `playwright` mit Chromium; `PLAYWRIGHT_CHROMIUM_PATH` kann auf einen vorinstallierten Browser zeigen. Das Betriebs-Image braucht Chromium (Phase 6, OPERATIONS.md).
+Begründung: Vorgabe aus BRIEFING 10.1.
+
+**D-066** · 2026-10-20
+Frage: Darstellungsformen in der Verwaltung ändern.
+Entscheidung: Die 13 eingebauten Formen sind fest. Eigene Formen legen CVDs an; ihre Bausteine lassen sich ändern, bis das erste Dokument sie nutzt.
+Begründung: Vorlage, Strukturprüfung und Word-Rückläufer hängen an stabilen Bausteinen.

@@ -59,7 +59,7 @@ export function LogoForm({ clientId }: { clientId: string }) {
   return (
     <ActionForm action={uploadLogoAction.bind(null, clientId)} className="flex flex-wrap items-end gap-2">
       <Field label={t.clients.uploadLogo} htmlFor="c-logo">
-        <Input id="c-logo" name="logo" type="file" accept="image/png,image/jpeg,image/svg+xml" required className="h-auto py-1.5" />
+        <Input id="c-logo" name="logo" type="file" accept="image/png,image/jpeg" required className="h-auto py-1.5" />
       </Field>
       <SubmitButton variant="outline">{t.clients.uploadLogo}</SubmitButton>
     </ActionForm>
