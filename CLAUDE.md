@@ -76,5 +76,10 @@ Konkrete Versionen und Abweichungen: siehe DECISIONS.md.
 
 ## Arbeitsumgebung
 
-- In der Cloud-Sitzung läuft kein Docker-Daemon; PostgreSQL 16 ist lokal installiert und wird für Tests direkt genutzt. Docker Compose ist für die lokale Nutzung durch das Team.
+- In der Cloud-Sitzung kann Docker keine Images bauen (kein Netz im Build); PostgreSQL 16 ist lokal installiert und wird für Tests direkt genutzt. Docker Compose ist für die lokale Nutzung durch das Team.
+- Ein SessionStart-Hook (`scripts/claude-session-start.sh`) startet in Cloud-Sitzungen PostgreSQL, installiert Pakete und spielt Migrationen und Seed ein.
+- `prisma migrate reset` ist für KI-Agenten gesperrt und wird nicht umgangen. Tests setzen nur ihre eigenen Datenbanken `impress_test` und `impress_e2e` zurück (`tests/test-db.ts`).
+- Next.js 16 weicht von älterem Wissen ab: vor Änderungen an Routing, Caching oder Konfiguration die Doku in `node_modules/next/dist/docs/` lesen (siehe AGENTS.md).
+- Prisma 7: Client wird nach `lib/generated/prisma` erzeugt, Import aus `@/lib/generated/prisma/client`, Datenbankzugang über `@/lib/db`.
+- Befehle: `npm test` (alle Tests), `npm run typecheck`, `npm run lint`, `npm run setup` (Client, Migrationen, Seed).
 - Git: Entwicklung auf dem zugewiesenen Arbeitszweig, keine Pull Requests ohne ausdrücklichen Auftrag.

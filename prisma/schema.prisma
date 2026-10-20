@@ -1,0 +1,1116 @@
+// impress – Datenmodell nach BRIEFING.md Abschnitt 5.
+// Jede Tabelle hat id (UUID), createdAt, createdBy, updatedAt, updatedBy.
+// createdBy/updatedBy sind Nutzer-IDs ohne Fremdschlüssel (null = System).
+// isSampleData kennzeichnet Beispieldaten aus Abschnitt 13 (DECISIONS D-004).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------- Nutzer, Rechte
+
+enum Role {
+  REDAKTEUR
+  CVD
+}
+
+enum Permission {
+  APPROVE
+  CREATE_TASKS_FOR_OTHERS
+  SELF_APPROVE
+}
+
+model User {
+  id               String    @id @default(uuid()) @db.Uuid
+  name             String
+  email            String    @unique
+  entraObjectId    String?   @unique
+  role             Role      @default(REDAKTEUR)
+  isAdmin          Boolean   @default(false)
+  active           Boolean   @default(true)
+  selectedClientId String?   @db.Uuid
+  deactivatedAt    DateTime?
+  createdAt        DateTime  @default(now())
+  createdBy        String?   @db.Uuid
+  updatedAt        DateTime  @updatedAt
+  updatedBy        String?   @db.Uuid
+
+  selectedClient    Client?            @relation("SelectedClient", fields: [selectedClientId], references: [id], onDelete: SetNull)
+  pushSubscriptions PushSubscription[]
+  permissionGrants  PermissionGrant[]  @relation("GrantUser")
+  grantsGiven       PermissionGrant[]  @relation("GrantGrantedBy")
+  clientMembers     ClientMember[]
+  ownedTasks        Task[]             @relation("TaskOwner")
+  preferredApprovals Task[]            @relation("TaskPreferredApprover")
+  contactOwnerships ContactOwner[]
+  notifications     Notification[]
+  shifts            Shift[]
+}
+
+/// pushSubscriptions[] aus Abschnitt 5, als eigene Tabelle (ein Eintrag pro Gerät).
+model PushSubscription {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @db.Uuid
+  endpoint     String   @unique
+  keys         Json
+  deviceLabel  String?
+  isSampleData Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  createdBy    String?  @db.Uuid
+  updatedAt    DateTime @updatedAt
+  updatedBy    String?  @db.Uuid
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PermissionGrant {
+  id           String     @id @default(uuid()) @db.Uuid
+  userId       String     @db.Uuid
+  permission   Permission
+  clientId     String?    @db.Uuid
+  grantedById  String     @db.Uuid
+  grantedAt    DateTime   @default(now())
+  revokedAt    DateTime?
+  isSampleData Boolean    @default(false)
+  createdAt    DateTime   @default(now())
+  createdBy    String?    @db.Uuid
+  updatedAt    DateTime   @updatedAt
+  updatedBy    String?    @db.Uuid
+
+  user      User    @relation("GrantUser", fields: [userId], references: [id], onDelete: Cascade)
+  grantedBy User    @relation("GrantGrantedBy", fields: [grantedById], references: [id])
+  client    Client? @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------- Kunden
+
+enum ClientStatus {
+  ONBOARDING
+  AKTIV
+  ARCHIVIERT
+}
+
+enum MemberKind {
+  LEAD
+  TEAM
+}
+
+model Client {
+  id                   String       @id @default(uuid()) @db.Uuid
+  name                 String
+  shortName            String       @unique
+  industry             String?
+  cluster              String?
+  status               ClientStatus @default(ONBOARDING)
+  aiAllowed            Boolean      @default(true)
+  logoFileId           String?      @unique @db.Uuid
+  templateSettings     Json         @default("{}")
+  sharePointFolderPath String?
+  isSampleData         Boolean      @default(false)
+  createdAt            DateTime     @default(now())
+  createdBy            String?      @db.Uuid
+  updatedAt            DateTime     @updatedAt
+  updatedBy            String?      @db.Uuid
+
+  logoFile           File?                  @relation("ClientLogo", fields: [logoFileId], references: [id], onDelete: SetNull)
+  files              File[]                 @relation("ClientFiles")
+  members            ClientMember[]
+  selectedBy         User[]                 @relation("SelectedClient")
+  permissionGrants   PermissionGrant[]
+  profileSections    ClientProfileSection[]
+  profileSuggestions ProfileSuggestion[]
+  speakers           Speaker[]
+  agreedServices     AgreedService[]
+  kpis               Kpi[]
+  projects           Project[]
+  tasks              Task[]
+  dismissalRules     DismissalRule[]
+  contactRequests    ContactRequest[]
+  contactGrants      ContactAccessGrant[]
+  articleRelevances  ArticleRelevance[]
+  articleActions     ArticleAction[]
+}
+
+model ClientMember {
+  id           String     @id @default(uuid()) @db.Uuid
+  clientId     String     @db.Uuid
+  userId       String     @db.Uuid
+  kind         MemberKind
+  /// nur bei LEAD, vom CVD gesetzt
+  canApprove   Boolean    @default(false)
+  isSampleData Boolean    @default(false)
+  createdAt    DateTime   @default(now())
+  createdBy    String?    @db.Uuid
+  updatedAt    DateTime   @updatedAt
+  updatedBy    String?    @db.Uuid
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([clientId, userId])
+}
+
+model ClientProfileSection {
+  id           String    @id @default(uuid()) @db.Uuid
+  clientId     String    @db.Uuid
+  key          String
+  content      Json      @default("{}")
+  confirmedAt  DateTime?
+  confirmedBy  String?   @db.Uuid
+  isSampleData Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  createdBy    String?   @db.Uuid
+  updatedAt    DateTime  @updatedAt
+  updatedBy    String?   @db.Uuid
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@unique([clientId, key])
+}
+
+enum SuggestionStatus {
+  OFFEN
+  ANGENOMMEN
+  ABGELEHNT
+}
+
+model ProfileSuggestion {
+  id               String           @id @default(uuid()) @db.Uuid
+  clientId         String           @db.Uuid
+  sectionKey       String
+  proposedChange   Json
+  sourceDocumentId String?          @db.Uuid
+  sourceFileId     String?          @db.Uuid
+  status           SuggestionStatus @default(OFFEN)
+  decidedBy        String?          @db.Uuid
+  decidedAt        DateTime?
+  isSampleData     Boolean          @default(false)
+  createdAt        DateTime         @default(now())
+  createdBy        String?          @db.Uuid
+  updatedAt        DateTime         @updatedAt
+  updatedBy        String?          @db.Uuid
+
+  client         Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  sourceDocument Document? @relation(fields: [sourceDocumentId], references: [id], onDelete: SetNull)
+  sourceFile     File?     @relation(fields: [sourceFileId], references: [id], onDelete: SetNull)
+}
+
+model Speaker {
+  id                       String   @id @default(uuid()) @db.Uuid
+  clientId                 String   @db.Uuid
+  name                     String
+  function                 String
+  topics                   String[]
+  quoteNeedsClientApproval Boolean  @default(false)
+  isSampleData             Boolean  @default(false)
+  createdAt                DateTime @default(now())
+  createdBy                String?  @db.Uuid
+  updatedAt                DateTime @updatedAt
+  updatedBy                String?  @db.Uuid
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+}
+
+/// Kategorien nach DECISIONS D-008.
+enum ServiceCategory {
+  PRESSEMITTEILUNG
+  MEDIEN_PITCH
+  HINTERGRUNDGESPRAECH
+  ROUNDTABLE
+  PRESSE_EVENT
+  LINKEDIN
+  SONSTIGES
+}
+
+/// doneCount wird berechnet (DECISIONS D-008), daher keine Spalte.
+model AgreedService {
+  id           String          @id @default(uuid()) @db.Uuid
+  clientId     String          @db.Uuid
+  title        String
+  category     ServiceCategory
+  targetCount  Int
+  periodStart  DateTime
+  periodEnd    DateTime
+  isSampleData Boolean         @default(false)
+  createdAt    DateTime        @default(now())
+  createdBy    String?         @db.Uuid
+  updatedAt    DateTime        @updatedAt
+  updatedBy    String?         @db.Uuid
+
+  client   Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  projects Project[]
+  tasks    Task[]
+}
+
+model Kpi {
+  id           String   @id @default(uuid()) @db.Uuid
+  clientId     String   @db.Uuid
+  title        String
+  target       String
+  period       String
+  note         String?
+  isSampleData Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  createdBy    String?  @db.Uuid
+  updatedAt    DateTime @updatedAt
+  updatedBy    String?  @db.Uuid
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+}
+
+enum ProjectKind {
+  PRESSE_EVENT
+  ROUNDTABLE
+  KAMPAGNE
+  SONSTIGES
+}
+
+/// Statuswerte nach DECISIONS D-007.
+enum ProjectStatus {
+  GEPLANT
+  LAUFEND
+  ABGESCHLOSSEN
+  ABGEBROCHEN
+}
+
+model Project {
+  id              String        @id @default(uuid()) @db.Uuid
+  clientId        String        @db.Uuid
+  title           String
+  kind            ProjectKind
+  status          ProjectStatus @default(GEPLANT)
+  startDate       DateTime?
+  endDate         DateTime?
+  agreedServiceId String?       @db.Uuid
+  isSampleData    Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  createdBy       String?       @db.Uuid
+  updatedAt       DateTime      @updatedAt
+  updatedBy       String?       @db.Uuid
+
+  client          Client               @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  agreedService   AgreedService?       @relation(fields: [agreedServiceId], references: [id], onDelete: SetNull)
+  tasks           Task[]
+  contactRequests ContactRequest[]
+  contactGrants   ContactAccessGrant[]
+}
+
+// ---------------------------------------------------------------- Aufgaben, Dokumente
+
+enum TaskType {
+  DOKUMENT
+  AUFGABE
+}
+
+enum TaskCategory {
+  MEDIENARBEIT
+  DIGITALE_KOMMUNIKATION
+  EVENT
+  INTERN
+}
+
+enum Priority {
+  DRINGEND
+  HOCH
+  NORMAL
+  NIEDRIG
+}
+
+enum ManualPriority {
+  DRINGEND
+}
+
+/// Einfache Aufgaben nutzen nur OFFEN, IN_BEARBEITUNG, ERLEDIGT, ARCHIVIERT.
+enum TaskStatus {
+  OFFEN
+  IN_BEARBEITUNG
+  FREIGABE_ANGEFRAGT
+  AENDERUNGEN_ANGEFORDERT
+  FREIGEGEBEN
+  BEIM_KUNDEN
+  ERLEDIGT
+  ARCHIVIERT
+}
+
+model Task {
+  id                  String          @id @default(uuid()) @db.Uuid
+  clientId            String          @db.Uuid
+  projectId           String?         @db.Uuid
+  agreedServiceId     String?         @db.Uuid
+  title               String
+  description         String?
+  category            TaskCategory
+  type                TaskType
+  ownerId             String          @db.Uuid
+  dueAt               DateTime
+  embargoAt           DateTime?
+  priorityManual      ManualPriority?
+  /// berechnet aus Frist und priorityManual (Abschnitt 6.2)
+  priority            Priority        @default(NORMAL)
+  status              TaskStatus      @default(OFFEN)
+  preferredApproverId String?         @db.Uuid
+  /// Zeitpunkt des Statuswechsels nach Erledigt, Grundlage der Archivierung nach 30 Tagen
+  completedAt         DateTime?
+  isSampleData        Boolean         @default(false)
+  createdAt           DateTime        @default(now())
+  createdBy           String?         @db.Uuid
+  updatedAt           DateTime        @updatedAt
+  updatedBy           String?         @db.Uuid
+
+  client            Client          @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  project           Project?        @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  agreedService     AgreedService?  @relation(fields: [agreedServiceId], references: [id], onDelete: SetNull)
+  owner             User            @relation("TaskOwner", fields: [ownerId], references: [id])
+  preferredApprover User?           @relation("TaskPreferredApprover", fields: [preferredApproverId], references: [id], onDelete: SetNull)
+  document          Document?
+  contactRequests   ContactRequest[]
+  articleActions    ArticleAction[]
+
+  @@index([ownerId, status])
+  @@index([clientId, status])
+  @@index([status, priority, dueAt])
+}
+
+/// Darstellungsformen (Abschnitt 7.3), in der Verwaltung erweiterbar (DECISIONS D-005).
+model DocumentFormat {
+  id               String     @id @default(uuid()) @db.Uuid
+  key              String     @unique
+  name             String
+  /// Bausteine: [{ key, label, required }]
+  blocks           Json
+  /// regelbasierte Strukturregeln, maschinenlesbar
+  rules            Json       @default("{}")
+  /// Strukturregeln als Text für die KI
+  rulesText        String?
+  sharePointFolder String
+  builtIn          Boolean    @default(false)
+  sortOrder        Int        @default(0)
+  isSampleData     Boolean    @default(false)
+  createdAt        DateTime   @default(now())
+  createdBy        String?    @db.Uuid
+  updatedAt        DateTime   @updatedAt
+  updatedBy        String?    @db.Uuid
+
+  documents Document[]
+}
+
+enum TemplateChoice {
+  RP
+  KUNDE
+}
+
+model Document {
+  id               String         @id @default(uuid()) @db.Uuid
+  taskId           String         @unique @db.Uuid
+  format           String
+  title            String
+  content          Json
+  lockedBy         String?        @db.Uuid
+  lockedAt         DateTime?
+  trackChangesOn   Boolean        @default(false)
+  templateChoice   TemplateChoice @default(RP)
+  currentVersionId String?        @unique @db.Uuid
+  isSampleData     Boolean        @default(false)
+  createdAt        DateTime       @default(now())
+  createdBy        String?        @db.Uuid
+  updatedAt        DateTime       @updatedAt
+  updatedBy        String?        @db.Uuid
+
+  task               Task                @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  documentFormat     DocumentFormat      @relation(fields: [format], references: [key])
+  currentVersion     DocumentVersion?    @relation("CurrentVersion", fields: [currentVersionId], references: [id], onDelete: SetNull)
+  versions           DocumentVersion[]   @relation("DocumentVersions")
+  comments           Comment[]
+  approvals          Approval[]
+  dispatches         Dispatch[]
+  checkRuns          CheckRun[]
+  aiInsertions       AiInsertion[]
+  profileSuggestions ProfileSuggestion[]
+  bookmarks          ContactBookmark[]
+}
+
+enum VersionReason {
+  STATUSWECHSEL
+  MANUELL
+  IMPORT
+}
+
+model DocumentVersion {
+  id           String        @id @default(uuid()) @db.Uuid
+  documentId   String        @db.Uuid
+  number       Int
+  content      Json
+  reason       VersionReason
+  isSampleData Boolean       @default(false)
+  createdAt    DateTime      @default(now())
+  createdBy    String?       @db.Uuid
+  updatedAt    DateTime      @updatedAt
+  updatedBy    String?       @db.Uuid
+
+  document     Document   @relation("DocumentVersions", fields: [documentId], references: [id], onDelete: Cascade)
+  currentOf    Document?  @relation("CurrentVersion")
+  approvals    Approval[]
+  dispatches   Dispatch[]
+  checkRuns    CheckRun[]
+
+  @@unique([documentId, number])
+}
+
+model Comment {
+  id           String    @id @default(uuid()) @db.Uuid
+  documentId   String    @db.Uuid
+  /// Textbereich, an dem der Kommentar hängt
+  anchor       Json?
+  body         String
+  /// ID des ersten Kommentars im Thread
+  threadId     String    @db.Uuid
+  resolvedAt   DateTime?
+  resolvedBy   String?   @db.Uuid
+  isSampleData Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  createdBy    String?   @db.Uuid
+  updatedAt    DateTime  @updatedAt
+  updatedBy    String?   @db.Uuid
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId, threadId])
+}
+
+enum ApprovalDecision {
+  FREIGEGEBEN
+  AENDERUNGEN
+  ZURUECKGEZOGEN
+}
+
+model Approval {
+  id             String            @id @default(uuid()) @db.Uuid
+  documentId     String            @db.Uuid
+  versionId      String            @db.Uuid
+  requestedBy    String            @db.Uuid
+  requestedAt    DateTime          @default(now())
+  /// angefragte Freigeber (Abschnitt 6.4, Schritt 1)
+  requestedApproverIds String[]    @db.Uuid
+  claimedBy      String?           @db.Uuid
+  claimedAt      DateTime?
+  decision       ApprovalDecision?
+  decidedBy      String?           @db.Uuid
+  decidedAt      DateTime?
+  note           String?
+  isSelfApproval Boolean           @default(false)
+  checkRunId     String?           @db.Uuid
+  isSampleData   Boolean           @default(false)
+  createdAt      DateTime          @default(now())
+  createdBy      String?           @db.Uuid
+  updatedAt      DateTime          @updatedAt
+  updatedBy      String?           @db.Uuid
+
+  document Document        @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  version  DocumentVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  checkRun CheckRun?       @relation(fields: [checkRunId], references: [id], onDelete: SetNull)
+
+  @@index([documentId])
+}
+
+/// Ziele nach DECISIONS D-006.
+enum DispatchTarget {
+  KUNDE_ABSTIMMUNG
+  KUNDE_FINAL
+  MEDIEN
+  INTERN
+}
+
+model Dispatch {
+  id                String         @id @default(uuid()) @db.Uuid
+  documentId        String         @db.Uuid
+  versionId         String         @db.Uuid
+  target            DispatchTarget
+  recipients        String
+  channel           String
+  sentAt            DateTime       @default(now())
+  sentBy            String         @db.Uuid
+  sharePointFileUrl String?
+  isSampleData      Boolean        @default(false)
+  createdAt         DateTime       @default(now())
+  createdBy         String?        @db.Uuid
+  updatedAt         DateTime       @updatedAt
+  updatedBy         String?        @db.Uuid
+
+  document Document        @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  version  DocumentVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+}
+
+// ---------------------------------------------------------------- Prüfung, KI
+
+enum CheckMode {
+  SCHNELL
+  VOLL
+}
+
+enum Strictness {
+  STRENG
+  NORMAL
+  LOCKER
+}
+
+enum Severity {
+  KRITISCH
+  WICHTIG
+  HINWEIS
+}
+
+enum Confidence {
+  HOCH
+  MITTEL
+  NIEDRIG
+}
+
+enum FindingStatus {
+  OFFEN
+  ERLEDIGT
+  VERWORFEN
+}
+
+model CheckRun {
+  id            String     @id @default(uuid()) @db.Uuid
+  documentId    String     @db.Uuid
+  versionId     String     @db.Uuid
+  mode          CheckMode
+  strictness    Strictness
+  scores        Json
+  model         String?
+  promptVersion String?
+  isSampleData  Boolean    @default(false)
+  createdAt     DateTime   @default(now())
+  createdBy     String?    @db.Uuid
+  updatedAt     DateTime   @updatedAt
+  updatedBy     String?    @db.Uuid
+
+  document  Document        @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  version   DocumentVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  findings  Finding[]
+  approvals Approval[]
+}
+
+model Finding {
+  id            String        @id @default(uuid()) @db.Uuid
+  checkRunId    String        @db.Uuid
+  category      String
+  severity      Severity
+  confidence    Confidence
+  /// Fundstelle im Text oder { wholeText: true } für "betrifft den ganzen Text"
+  anchor        Json
+  message       String
+  reason        String
+  status        FindingStatus @default(OFFEN)
+  dismissReason String?
+  isSampleData  Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+  createdBy     String?       @db.Uuid
+  updatedAt     DateTime      @updatedAt
+  updatedBy     String?       @db.Uuid
+
+  checkRun CheckRun @relation(fields: [checkRunId], references: [id], onDelete: Cascade)
+}
+
+model DismissalRule {
+  id           String   @id @default(uuid()) @db.Uuid
+  clientId     String   @db.Uuid
+  category     String
+  pattern      String
+  isSampleData Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  createdBy    String?  @db.Uuid
+  updatedAt    DateTime @updatedAt
+  updatedBy    String?  @db.Uuid
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+}
+
+enum AiInsertionKind {
+  HEADLINE
+  ZITAT
+  LEAD
+  SONSTIGES
+}
+
+enum AiInsertionStatus {
+  OFFEN
+  ANGENOMMEN
+  VERWORFEN
+}
+
+model AiInsertion {
+  id            String            @id @default(uuid()) @db.Uuid
+  documentId    String            @db.Uuid
+  kind          AiInsertionKind
+  status        AiInsertionStatus @default(OFFEN)
+  acceptedBy    String?           @db.Uuid
+  acceptedAt    DateTime?
+  model         String?
+  promptVersion String?
+  isSampleData  Boolean           @default(false)
+  createdAt     DateTime          @default(now())
+  createdBy     String?           @db.Uuid
+  updatedAt     DateTime          @updatedAt
+  updatedBy     String?           @db.Uuid
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+}
+
+// ---------------------------------------------------------------- Journo Hub
+
+enum MediaType {
+  LEITMEDIUM
+  REGIONAL
+  FACH
+  AGENTUR
+  RUNDFUNK
+  ONLINE
+}
+
+model Media {
+  id           String    @id @default(uuid()) @db.Uuid
+  name         String    @unique
+  type         MediaType
+  desks        String[]
+  isSampleData Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  createdBy    String?   @db.Uuid
+  updatedAt    DateTime  @updatedAt
+  updatedBy    String?   @db.Uuid
+
+  journalists Journalist[]
+  articles    Article[]
+}
+
+enum JournalistStatus {
+  VERIFIZIERT
+  MANUELL
+  IMPORT
+  PRESSESPIEGEL
+  KI_VORSCHLAG
+}
+
+model Journalist {
+  id             String           @id @default(uuid()) @db.Uuid
+  firstName      String
+  lastName       String
+  mediaId        String?          @db.Uuid
+  desk           String?
+  function       String?
+  topics         String[]
+  region         String?
+  notes          String?
+  status         JournalistStatus @default(MANUELL)
+  source         String?
+  verifiedBy     String?          @db.Uuid
+  verifiedAt     DateTime?
+  firstContactAt DateTime?
+  lastActivityAt DateTime         @default(now())
+  isSampleData   Boolean          @default(false)
+  createdAt      DateTime         @default(now())
+  createdBy      String?          @db.Uuid
+  updatedAt      DateTime         @updatedAt
+  updatedBy      String?          @db.Uuid
+
+  media           Media?               @relation(fields: [mediaId], references: [id], onDelete: SetNull)
+  contactDetails  ContactDetail[]
+  owners          ContactOwner[]
+  requests        ContactRequest[]
+  accessGrants    ContactAccessGrant[]
+  revealLogs      RevealLog[]
+  articles        Article[]
+  articleActions  ArticleAction[]
+  bookmarks       ContactBookmark[]
+
+  @@index([lastName, firstName])
+}
+
+enum ContactKind {
+  TELEFON
+  MAIL
+  LINKEDIN
+  X
+  SONSTIGES
+}
+
+/// Kontaktdaten getrennt gespeichert, in der Oberfläche verdeckt (Abschnitt 11).
+model ContactDetail {
+  id           String      @id @default(uuid()) @db.Uuid
+  journalistId String      @db.Uuid
+  kind         ContactKind
+  value        String
+  isPrimary    Boolean     @default(false)
+  isSampleData Boolean     @default(false)
+  createdAt    DateTime    @default(now())
+  createdBy    String?     @db.Uuid
+  updatedAt    DateTime    @updatedAt
+  updatedBy    String?     @db.Uuid
+
+  journalist Journalist @relation(fields: [journalistId], references: [id], onDelete: Cascade)
+}
+
+enum RelationQuality {
+  GUT
+  NEUTRAL
+  SCHWIERIG
+}
+
+model ContactOwner {
+  id              String           @id @default(uuid()) @db.Uuid
+  journalistId    String           @db.Uuid
+  userId          String           @db.Uuid
+  since           DateTime         @default(now())
+  relationNote    String?
+  relationQuality RelationQuality?
+  /// false nach Austritt des Nutzers
+  active          Boolean          @default(true)
+  isSampleData    Boolean          @default(false)
+  createdAt       DateTime         @default(now())
+  createdBy       String?          @db.Uuid
+  updatedAt       DateTime         @updatedAt
+  updatedBy       String?          @db.Uuid
+
+  journalist Journalist @relation(fields: [journalistId], references: [id], onDelete: Cascade)
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([journalistId, userId])
+}
+
+enum ContactRequestStatus {
+  OFFEN
+  FREIGEGEBEN
+  UEBERNOMMEN
+  ABGELEHNT
+}
+
+enum Urgency {
+  NORMAL
+  DRINGEND
+}
+
+model ContactRequest {
+  id           String               @id @default(uuid()) @db.Uuid
+  journalistId String               @db.Uuid
+  requesterId  String               @db.Uuid
+  clientId     String               @db.Uuid
+  projectId    String?              @db.Uuid
+  taskId       String?              @db.Uuid
+  reason       String
+  urgency      Urgency              @default(NORMAL)
+  status       ContactRequestStatus @default(OFFEN)
+  decidedBy    String?              @db.Uuid
+  decidedAt    DateTime?
+  decisionNote String?
+  remindedAt   DateTime?
+  isSampleData Boolean              @default(false)
+  createdAt    DateTime             @default(now())
+  createdBy    String?              @db.Uuid
+  updatedAt    DateTime             @updatedAt
+  updatedBy    String?              @db.Uuid
+
+  journalist Journalist @relation(fields: [journalistId], references: [id], onDelete: Cascade)
+  client     Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  project    Project?   @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  task       Task?      @relation(fields: [taskId], references: [id], onDelete: SetNull)
+}
+
+model ContactAccessGrant {
+  id           String    @id @default(uuid()) @db.Uuid
+  journalistId String    @db.Uuid
+  userId       String    @db.Uuid
+  clientId     String    @db.Uuid
+  projectId    String?   @db.Uuid
+  grantedBy    String    @db.Uuid
+  validUntil   DateTime?
+  isSampleData Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  createdBy    String?   @db.Uuid
+  updatedAt    DateTime  @updatedAt
+  updatedBy    String?   @db.Uuid
+
+  journalist Journalist @relation(fields: [journalistId], references: [id], onDelete: Cascade)
+  client     Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  project    Project?   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model RevealLog {
+  id           String      @id @default(uuid()) @db.Uuid
+  journalistId String      @db.Uuid
+  userId       String      @db.Uuid
+  kind         ContactKind
+  at           DateTime    @default(now())
+  isSampleData Boolean     @default(false)
+  createdAt    DateTime    @default(now())
+  createdBy    String?     @db.Uuid
+  updatedAt    DateTime    @updatedAt
+  updatedBy    String?     @db.Uuid
+
+  journalist Journalist @relation(fields: [journalistId], references: [id], onDelete: Cascade)
+}
+
+/// Kontakt für einen Text vormerken (Abschnitt 7.5, DECISIONS D-005).
+model ContactBookmark {
+  id           String   @id @default(uuid()) @db.Uuid
+  journalistId String   @db.Uuid
+  documentId   String   @db.Uuid
+  isSampleData Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  createdBy    String?  @db.Uuid
+  updatedAt    DateTime @updatedAt
+  updatedBy    String?  @db.Uuid
+
+  journalist Journalist @relation(fields: [journalistId], references: [id], onDelete: Cascade)
+  document   Document   @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([journalistId, documentId])
+}
+
+// ---------------------------------------------------------------- Pressespiegel
+
+enum MonitoringSourceType {
+  MELTWATER_CSV
+  MELTWATER_XLSX
+  MANUELL
+}
+
+enum ImportMappingKind {
+  MONITORING
+  KONTAKTE
+}
+
+/// Gespeicherte Spaltenzuordnung (DECISIONS D-005).
+model ImportMapping {
+  id           String            @id @default(uuid()) @db.Uuid
+  name         String
+  kind         ImportMappingKind
+  mapping      Json
+  isSampleData Boolean           @default(false)
+  createdAt    DateTime          @default(now())
+  createdBy    String?           @db.Uuid
+  updatedAt    DateTime          @updatedAt
+  updatedBy    String?           @db.Uuid
+
+  monitoringImports MonitoringImport[]
+}
+
+model MonitoringImport {
+  id           String               @id @default(uuid()) @db.Uuid
+  uploadedBy   String               @db.Uuid
+  fileId       String?              @db.Uuid
+  sourceType   MonitoringSourceType
+  mappingId    String?              @db.Uuid
+  articleCount Int                  @default(0)
+  isSampleData Boolean              @default(false)
+  createdAt    DateTime             @default(now())
+  createdBy    String?              @db.Uuid
+  updatedAt    DateTime             @updatedAt
+  updatedBy    String?              @db.Uuid
+
+  file     File?          @relation(fields: [fileId], references: [id], onDelete: SetNull)
+  mapping  ImportMapping? @relation(fields: [mappingId], references: [id], onDelete: SetNull)
+  articles Article[]
+}
+
+model Article {
+  id                String    @id @default(uuid()) @db.Uuid
+  importId          String?   @db.Uuid
+  publishedAt       DateTime
+  headline          String
+  teaser            String?
+  url               String?
+  mediaName         String
+  mediaId           String?   @db.Uuid
+  authorName        String?
+  journalistId      String?   @db.Uuid
+  language          String?
+  reach             Int?
+  fullTextPasted    String?
+  fullTextExpiresAt DateTime?
+  isSampleData      Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  createdBy         String?   @db.Uuid
+  updatedAt         DateTime  @updatedAt
+  updatedBy         String?   @db.Uuid
+
+  import     MonitoringImport?  @relation(fields: [importId], references: [id], onDelete: SetNull)
+  media      Media?             @relation(fields: [mediaId], references: [id], onDelete: SetNull)
+  journalist Journalist?        @relation(fields: [journalistId], references: [id], onDelete: SetNull)
+  relevances ArticleRelevance[]
+  actions    ArticleAction[]
+
+  @@index([publishedAt])
+}
+
+model ArticleRelevance {
+  id           String   @id @default(uuid()) @db.Uuid
+  articleId    String   @db.Uuid
+  clientId     String   @db.Uuid
+  score        Int
+  reason       String
+  selected     Boolean  @default(false)
+  selectedBy   String?  @db.Uuid
+  model        String?
+  promptVersion String?
+  isSampleData Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  createdBy    String?  @db.Uuid
+  updatedAt    DateTime @updatedAt
+  updatedBy    String?  @db.Uuid
+
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  client  Client  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@unique([articleId, clientId])
+}
+
+enum ArticleActionKind {
+  EINSCHAETZUNG
+  LINKEDIN_KOMMENTAR
+  NEWSHOOK_PITCH
+  KONTAKT_UEBERNEHMEN
+}
+
+model ArticleAction {
+  id                 String            @id @default(uuid()) @db.Uuid
+  articleId          String            @db.Uuid
+  clientId           String            @db.Uuid
+  kind               ArticleActionKind
+  resultTaskId       String?           @db.Uuid
+  resultJournalistId String?           @db.Uuid
+  isSampleData       Boolean           @default(false)
+  createdAt          DateTime          @default(now())
+  createdBy          String?           @db.Uuid
+  updatedAt          DateTime          @updatedAt
+  updatedBy          String?           @db.Uuid
+
+  article          Article     @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  client           Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  resultTask       Task?       @relation(fields: [resultTaskId], references: [id], onDelete: SetNull)
+  resultJournalist Journalist? @relation(fields: [resultJournalistId], references: [id], onDelete: SetNull)
+}
+
+// ---------------------------------------------------------------- Dienstplan
+
+model ShiftType {
+  id           String   @id @default(uuid()) @db.Uuid
+  key          String   @unique
+  name         String
+  /// Ortszeit Europe/Berlin, "HH:MM"
+  defaultStart String
+  defaultEnd   String
+  /// ISO-Wochentage, an denen der Dienst üblich ist (1 = Montag … 7 = Sonntag)
+  weekdays     Int[]
+  /// z. B. Pressespiegel-Dienst: legt die Pressespiegel-Aufgabe an
+  createsTask  Boolean  @default(false)
+  sortOrder    Int      @default(0)
+  isSampleData Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  createdBy    String?  @db.Uuid
+  updatedAt    DateTime @updatedAt
+  updatedBy    String?  @db.Uuid
+
+  shifts Shift[]
+}
+
+model Shift {
+  id           String    @id @default(uuid()) @db.Uuid
+  shiftTypeId  String    @db.Uuid
+  userId       String    @db.Uuid
+  /// Kalendertag in Europe/Berlin
+  date         DateTime  @db.Date
+  start        DateTime
+  end          DateTime
+  isSampleData Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  createdBy    String?   @db.Uuid
+  updatedAt    DateTime  @updatedAt
+  updatedBy    String?   @db.Uuid
+
+  shiftType ShiftType @relation(fields: [shiftTypeId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([date])
+}
+
+// ---------------------------------------------------------------- Querschnitt
+
+model Notification {
+  id           String    @id @default(uuid()) @db.Uuid
+  userId       String    @db.Uuid
+  kind         String
+  title        String
+  link         String?
+  isPush       Boolean   @default(false)
+  readAt       DateTime?
+  isSampleData Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  createdBy    String?   @db.Uuid
+  updatedAt    DateTime  @updatedAt
+  updatedBy    String?   @db.Uuid
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+}
+
+model File {
+  id           String   @id @default(uuid()) @db.Uuid
+  storageKey   String   @unique
+  name         String
+  mimeType     String
+  size         Int
+  clientId     String?  @db.Uuid
+  uploadedBy   String   @db.Uuid
+  isSampleData Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  createdBy    String?  @db.Uuid
+  updatedAt    DateTime @updatedAt
+  updatedBy    String?  @db.Uuid
+
+  client             Client?             @relation("ClientFiles", fields: [clientId], references: [id], onDelete: SetNull)
+  logoOf             Client?             @relation("ClientLogo")
+  profileSuggestions ProfileSuggestion[]
+  monitoringImports  MonitoringImport[]
+}
+
+/// Einträge sind unveränderlich; ein Datenbank-Trigger verhindert UPDATE und DELETE
+/// (DELETE nur für Beispieldaten erlaubt).
+model AuditLog {
+  id           String   @id @default(uuid()) @db.Uuid
+  actorId      String?  @db.Uuid
+  action       String
+  entity       String
+  entityId     String?
+  before       Json?
+  after        Json?
+  at           DateTime @default(now())
+  isSampleData Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  createdBy    String?  @db.Uuid
+  updatedAt    DateTime @default(now())
+  updatedBy    String?  @db.Uuid
+
+  @@index([entity, entityId])
+  @@index([at])
+}
+
+/// Einstellungen der Verwaltung; überschreiben Umgebungsvariablen (DECISIONS D-033).
+model Setting {
+  id           String   @id @default(uuid()) @db.Uuid
+  key          String   @unique
+  value        Json
+  isSampleData Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  createdBy    String?  @db.Uuid
+  updatedAt    DateTime @updatedAt
+  updatedBy    String?  @db.Uuid
+}

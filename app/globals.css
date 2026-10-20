@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+/* Farbwerte nach shadcn/ui; Akzent = RP_LIGHT_BLUE (Platzhalter #5BB5E5, BRIEFING 7.3).
+   Hell- und Dunkelmodus folgen der Systemeinstellung (BRIEFING 10.6). */
+:root {
+  --rp-light-blue: #5bb5e5;
+  --background: oklch(0.99 0 0);
+  --foreground: oklch(0.2 0.01 250);
+  --muted: oklch(0.96 0.005 250);
+  --muted-foreground: oklch(0.45 0.01 250);
+  --card: oklch(1 0 0);
+  --card-foreground: var(--foreground);
+  --border: oklch(0.9 0.005 250);
+  --input: oklch(0.88 0.005 250);
+  --primary: oklch(0.38 0.09 240);
+  --primary-foreground: oklch(0.99 0 0);
+  --accent: oklch(0.94 0.03 230);
+  --accent-foreground: oklch(0.3 0.08 240);
+  --destructive: oklch(0.55 0.2 27);
+  --destructive-foreground: oklch(0.99 0 0);
+  --ring: oklch(0.55 0.13 240);
+  --sidebar: oklch(0.97 0.006 250);
+  --radius: 0.5rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: oklch(0.17 0.01 250);
+    --foreground: oklch(0.95 0.005 250);
+    --muted: oklch(0.24 0.01 250);
+    --muted-foreground: oklch(0.72 0.01 250);
+    --card: oklch(0.2 0.01 250);
+    --border: oklch(0.32 0.01 250);
+    --input: oklch(0.36 0.01 250);
+    --primary: oklch(0.75 0.11 230);
+    --primary-foreground: oklch(0.17 0.01 250);
+    --accent: oklch(0.3 0.04 240);
+    --accent-foreground: oklch(0.92 0.03 230);
+    --destructive: oklch(0.65 0.2 27);
+    --ring: oklch(0.75 0.11 230);
+    --sidebar: oklch(0.2 0.01 250);
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-rp-light-blue: var(--rp-light-blue);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 4px);
+  --font-sans: Arial, "Helvetica Neue", Helvetica, sans-serif;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+  /* sichtbarer Fokus für Tastaturbedienung (BRIEFING 10.6) */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
+}

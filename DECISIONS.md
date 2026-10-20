@@ -1,6 +1,6 @@
 # DECISIONS.md
 
-Entscheidungen zu Punkten, die das Briefing nicht oder widersprüchlich regelt (Arbeitsregel 2). Format: Datum, Frage, Entscheidung, Begründung in einem Satz. Einträge mit **[offen]** warten auf eine Bestätigung durch Lars; bis dahin gilt die genannte Entscheidung.
+Entscheidungen zu Punkten, die das Briefing nicht oder widersprüchlich regelt (Arbeitsregel 2). Format: Datum, Frage, Entscheidung, Begründung in einem Satz. Einträge mit **[offen]** warten auf eine Bestätigung durch Lars; bis dahin gilt die genannte Entscheidung. Einträge mit **[bestätigt]** hat Lars freigegeben.
 
 ## Dokument und Daten
 
@@ -26,7 +26,7 @@ Begründung: So entfernt `npm run seed:clear-samples` genau die erfundenen Inhal
 
 **D-005** · 2026-10-20
 Frage: Das Datenmodell braucht für einige beschriebene Funktionen zusätzliche Tabellen.
-Entscheidung: Ergänzt werden `Setting` (Einstellungen der Verwaltung), `DocumentFormat` (Darstellungsformen, in der Verwaltung erweiterbar), `ImportMapping` (gespeicherte Spaltenzuordnungen, auf die `MonitoringImport.mappingId` verweist), `ContactBookmark` (Kontakt für einen Text vormerken) und `Session` für Auth.js.
+Entscheidung: Ergänzt werden `Setting` (Einstellungen der Verwaltung), `DocumentFormat` (Darstellungsformen, in der Verwaltung erweiterbar), `ImportMapping` (gespeicherte Spaltenzuordnungen, auf die `MonitoringImport.mappingId` verweist), `ContactBookmark` (Kontakt für einen Text vormerken) und `PushSubscription` (die Liste `pushSubscriptions[]` am Nutzer als eigene Tabelle, ein Eintrag pro Gerät). Nachtrag Phase 0: Eine `Session`-Tabelle entfällt, siehe D-029.
 Begründung: Alle fünf sind im Briefing als Funktion beschrieben, nur nicht als Tabelle; Bedeutung und Beziehungen des Kernmodells bleiben unverändert.
 
 **D-006** · 2026-10-20
@@ -51,7 +51,7 @@ Frage: Freigaberecht für einen Kunden existiert doppelt: `ClientMember.canAppro
 Entscheidung: Kunden-Leads erhalten das Recht über `canApprove`, alle anderen Redakteure über `PermissionGrant`; die Rechteprüfung wertet beides aus, beides wird protokolliert.
 Begründung: Entspricht 3.2 (Lead-Schalter durch CVD) und 3.3 (Zusatzrecht pro Person) ohne neue Konzepte.
 
-**D-010** · 2026-10-20 **[offen]**
+**D-010** · 2026-10-20 **[bestätigt 2026-10-20]**
 Frage: Rechtematrix und 6.8 sagen „Ziele pflegt nur der CVD“, 7.7 sagt „Ziele und Kernbotschaften pflegt der Kunden-Lead“.
 Entscheidung: Im Abschnitt „Ziele und Kernbotschaften“ pflegt der CVD die Kommunikationsziele, Kunden-Lead und CVD pflegen die Kernbotschaften.
 Begründung: Erfüllt beide Textstellen, ohne einer zu widersprechen.
@@ -139,10 +139,10 @@ Begründung: Übliche Kernzeit, jederzeit anpassbar.
 
 **D-026** · 2026-10-20
 Frage: Welche Versionen sind „aktuell stabil“?
-Entscheidung: Node 22, Next.js 16, React 19, Tailwind CSS 4, Prisma 7 (Prisma 8 ist nur als Release Candidate verfügbar, obwohl unter „latest“ veröffentlicht), Zod 4, Vitest, Playwright 1.64, TipTap 3, pg-boss 12.
+Entscheidung: Node 22, Next.js 16, React 19, Tailwind CSS 4, Prisma 7 (Prisma 8 ist nur als Release Candidate verfügbar, obwohl unter „latest“ veröffentlicht), Zod 4, Vitest 5, TipTap 3, pg-boss 12. Nachtrag Phase 0: Playwright 1.56, weil die Cloud-Umgebung genau diesen Chromium vorinstalliert hat und keinen Browser herunterladen soll; ein Update ist ein Einzeiler.
 Begründung: Neueste Versionen ohne Vorabstatus, Stand 20.10.2026.
 
-**D-027** · 2026-10-20 **[offen]**
+**D-027** · 2026-10-20 **[bestätigt 2026-10-20]**
 Frage: Auth.js v5 ist weiterhin nur als Beta verfügbar (5.0.0-beta.32), die stabile Linie ist v4.
 Entscheidung: Auth.js v5 (Beta) hinter der Schnittstelle `AuthProvider`, damit ein späterer Wechsel nur den Adapter betrifft.
 Begründung: Das Briefing verlangt Auth.js, v5 ist die für den App Router vorgesehene Version.
@@ -154,8 +154,8 @@ Begründung: Tests brauchen den Login, und für den Betrieb bleibt er hart ausge
 
 **D-029** · 2026-10-20
 Frage: Gesperrte Nutzer sollen sofort den Zugang verlieren, auch in laufenden Sitzungen.
-Entscheidung: Sitzungen in der Datenbank (12 Stunden), bei jeder Anfrage wird `User.active` geprüft.
-Begründung: Reine Token-Sitzungen lassen sich nicht sofort widerrufen.
+Entscheidung: Nachtrag Phase 0: Auth.js-Sitzungen als signiertes Token (12 Stunden), und bei jeder Anfrage lädt impress den Nutzer aus der Datenbank und prüft `User.active`; ist er gesperrt, gilt er sofort als abgemeldet.
+Begründung: Der Entwickler-Login über Credentials funktioniert in Auth.js nur mit Token-Sitzungen, und die Prüfung pro Anfrage erfüllt „sofort, auch laufende Sitzungen“ genauso wie Datenbanksitzungen.
 
 **D-030** · 2026-10-20
 Frage: Wo laufen die pg-boss-Jobs?
@@ -192,7 +192,39 @@ Frage: Wird beim Übernehmen eines Autors aus dem Pressespiegel jemand Owner?
 Entscheidung: Nein, der Kontakt bleibt ohne Owner, bis sich jemand einträgt oder verifiziert.
 Begründung: Owner heißt „kennt den Journalisten persönlich“, ein Klick im Pressespiegel belegt das nicht.
 
-**D-037** · 2026-10-20 **[offen]**
+**D-037** · 2026-10-20 **[bestätigt 2026-10-20]**
 Frage: Das Briefing nennt Lars Scholtyssyk und Valentin Abel mit vollem Namen im Seed; die Arbeitsregel verbietet echte Personendaten im Code.
 Entscheidung: Der Seed enthält die Namen wie in 3.4, aber nur Platzhalter-Mailadressen (`lars@example.com`, `valentin@example.com`). Die echten Adressen werden vor dem Livegang in der Verwaltung eingetragen.
 Begründung: Die Namen sind für die Zuordnung im Team nötig, Mailadressen sind es lokal nicht.
+
+## Nachträge Phase 0
+
+**D-038** · 2026-10-20
+Frage: Wie werden die Testdatenbanken zurückgesetzt? Prisma verweigert `migrate reset`, wenn ein KI-Agent den Befehl ausführt.
+Entscheidung: Das Test-Setup legt eigene Datenbanken `impress_test` und `impress_e2e` an, leert dort das Schema und wendet die Migrationen mit `migrate deploy` an. Es verweigert jede Datenbank, deren Name nicht auf `_test` oder `_e2e` endet.
+Begründung: Tests bleiben wiederholbar, und keine Entwicklungs- oder Betriebsdatenbank kann versehentlich geleert werden.
+
+**D-039** · 2026-10-20
+Frage: Sollen `createdBy` und `updatedBy` Fremdschlüssel auf `User` sein?
+Entscheidung: Nein, es sind UUID-Spalten ohne Fremdschlüssel; `null` steht für das System (Seed, Jobs). Wo das Briefing eine fachliche Beziehung zu einem Nutzer nennt (Owner, Freigeber, Vergeber eines Rechts), gibt es einen echten Fremdschlüssel.
+Begründung: Vermeidet über hundert Relationen ohne fachlichen Nutzen und hält das Löschen von Beispieldaten einfach.
+
+**D-040** · 2026-10-20
+Frage: Was tun die echten Adapter vor Phase 6?
+Entscheidung: Sie existieren, prüfen beim Start ihre Pflicht-Umgebungsvariablen und melden bei Benutzung „folgt in Phase 6“.
+Begründung: Die Umschaltung per Umgebungsvariable ist damit ab Phase 0 vollständig testbar, die eigentliche Anbindung ist laut Briefing Teil von Phase 6.
+
+**D-041** · 2026-10-20
+Frage: Wie wird das Protokoll unveränderlich?
+Entscheidung: Ein Datenbank-Trigger verbietet UPDATE auf `AuditLog` immer und DELETE außer für Beispieldaten.
+Begründung: Der Schutz gilt so auch gegen Fehler im Anwendungscode und gegen direkte Datenbankzugriffe.
+
+**D-042** · 2026-10-20
+Frage: Wie werden Dienste gespeichert, wenn Zeiten in UTC liegen sollen, ein Dienst aber ein Kalendertag in Berlin ist?
+Entscheidung: `Shift.date` ist der Kalendertag in Europe/Berlin, `start` und `end` sind UTC-Zeitpunkte; Diensttypen speichern ihre Standardzeiten als Ortszeit „HH:MM“ und ihre üblichen Wochentage.
+Begründung: „Wer hat jetzt Dienst“ ist damit eine einfache Abfrage, und Sommerzeitwechsel werden beim Anlegen korrekt umgerechnet.
+
+**D-043** · 2026-10-20
+Frage: Wie wird in der Cloud-Umgebung gearbeitet, in der Docker kein Image bauen kann?
+Entscheidung: Für Claude-Code-Sitzungen startet ein SessionStart-Hook (`scripts/claude-session-start.sh`) die lokal installierte PostgreSQL 16 und spielt Migrationen und Seed ein. Docker Compose bleibt der Weg für das Team.
+Begründung: Tests laufen so in jeder Sitzung ohne Handarbeit, ohne den lokalen Ablauf zu verändern.
