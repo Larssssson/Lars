@@ -81,5 +81,6 @@ Konkrete Versionen und Abweichungen: siehe DECISIONS.md.
 - `prisma migrate reset` ist für KI-Agenten gesperrt und wird nicht umgangen. Tests setzen nur ihre eigenen Datenbanken `impress_test` und `impress_e2e` zurück (`tests/test-db.ts`).
 - Next.js 16 weicht von älterem Wissen ab: vor Änderungen an Routing, Caching oder Konfiguration die Doku in `node_modules/next/dist/docs/` lesen (siehe AGENTS.md).
 - Prisma 7: Client wird nach `lib/generated/prisma` erzeugt, Import aus `@/lib/generated/prisma/client`, Datenbankzugang über `@/lib/db`.
-- Befehle: `npm test` (alle Tests), `npm run typecheck`, `npm run lint`, `npm run setup` (Client, Migrationen, Seed).
+- Befehle: `npm test` (alle Tests), `npm run typecheck`, `npm run lint`, `npm run setup` (Client, Migrationen, Seed), `npm run db:migrate -- <name>` (neue Migration; `prisma migrate dev` verweigert nicht-interaktiv).
+- Fachlogik bekommt ihre Abhängigkeiten als `Deps` (`lib/domain/deps.ts`, Uhr austauschbar); Server Actions bauen sie mit `serverDeps()`, Jobs mit `jobDeps()`. Integrationstests nutzen `tests/integration/helpers.ts` (feste Uhr, `resetAndSeed`).
 - Git: Entwicklung auf dem zugewiesenen Arbeitszweig, keine Pull Requests ohne ausdrücklichen Auftrag.

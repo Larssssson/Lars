@@ -6,6 +6,12 @@ export const common = {
   sampleDataHint: "Beispieldaten",
   roles: { REDAKTEUR: "Redakteur", CVD: "CVD" } as const,
   admin: "Admin",
+  saved: "Gespeichert.",
+  yes: "ja",
+  no: "nein",
+  back: "Zurück",
+  edit: "Bearbeiten",
+  open: "Öffnen",
   clientStatus: { ONBOARDING: "Onboarding", AKTIV: "Aktiv", ARCHIVIERT: "Archiviert" } as const,
   memberKind: { LEAD: "Kunden-Lead", TEAM: "Team" } as const,
 } as const;

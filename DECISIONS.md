@@ -228,3 +228,50 @@ Begründung: „Wer hat jetzt Dienst“ ist damit eine einfache Abfrage, und Som
 Frage: Wie wird in der Cloud-Umgebung gearbeitet, in der Docker kein Image bauen kann?
 Entscheidung: Für Claude-Code-Sitzungen startet ein SessionStart-Hook (`scripts/claude-session-start.sh`) die lokal installierte PostgreSQL 16 und spielt Migrationen und Seed ein. Docker Compose bleibt der Weg für das Team.
 Begründung: Tests laufen so in jeder Sitzung ohne Handarbeit, ohne den lokalen Ablauf zu verändern.
+
+## Nachträge Phase 1
+
+**D-044** · 2026-10-20
+Frage: Wer darf eine Aufgabe bearbeiten und ihren Status ändern? Die Rechtematrix regelt nur das Anlegen.
+Entscheidung: Owner, Kunden-Lead des Kunden und CVDs. Wer den Owner ändert, braucht zusätzlich das Recht, für den neuen Owner Aufgaben anzulegen.
+Begründung: Entspricht den Leuten, die eine Aufgabe auch hätten anlegen dürfen, ohne neue Rollen.
+
+**D-045** · 2026-10-20
+Frage: Anhänge an Aufgaben (6.1) haben im Datenmodell keine Verbindung zur Aufgabe.
+Entscheidung: `File` bekommt ein optionales Feld `taskId`.
+Begründung: Kleinste Ergänzung, die Anhänge einer Aufgabe zuordnet; Bedeutung von `File` bleibt gleich.
+
+**D-046** · 2026-10-20
+Frage: Kundenstatus in Phase 1, bevor es das Kundenprofil gibt.
+Entscheidung: Erlaubt sind Onboarding → Aktiv, Onboarding/Aktiv → Archiviert und Archiviert → Onboarding (Wiederherstellen). Die Prüfung der Pflichtabschnitte vor „Aktiv“ kommt in Phase 3. Archivierte Kunden verschwinden aus der Kundenauswahl aller Nutzer.
+Begründung: Wiederherstellen ins Onboarding zwingt zur erneuten Bestätigung des Profils, statt einen veralteten Stand still zu aktivieren.
+
+**D-047** · 2026-10-20
+Frage: Was passiert beim Kopieren einer Woche mit schon vorhandenen Diensten der Zielwoche?
+Entscheidung: Sie bleiben; kopiert wird nur, was noch fehlt (gleicher Dienst, Tag und Person). Kopiert wird in die direkt folgende Woche.
+Begründung: Kopieren zerstört so nie eine schon gepflegte Planung.
+
+**D-048** · 2026-10-20
+Frage: Wann und wie oft entstehen Profilwarnungen und Leistungsrückstand in der Glocke (7.9)?
+Entscheidung: Ein täglicher Job um 7 Uhr prüft alle aktiven Kunden und benachrichtigt Kunden-Lead und alle CVDs, dieselbe Warnung höchstens einmal in 7 Tagen. Die 90-Tage-Warnung zählt die Profilabschnitte, deren Bestätigung älter ist.
+Begründung: Die Warnungen ändern sich nur langsam; täglich mit Wochensperre hält die Glocke ruhig.
+
+**D-049** · 2026-10-20
+Frage: Wer wird benachrichtigt, wenn jemand seine eigene Aufgabe ändert oder für sich selbst anlegt?
+Entscheidung: Niemand. „Aufgabe wird mir zugewiesen“ und „wird Dringend“ gehen nur an den Owner, wenn jemand anderes die Änderung auslöst; der 5-Minuten-Job benachrichtigt immer.
+Begründung: Eine Nachricht über die eigene Handlung ist Lärm und widerspricht „Push nur, wenn es brennt“.
+
+**D-050** · 2026-10-20
+Frage: Wie werden neue Migrationen erzeugt, wenn `prisma migrate dev` in nicht-interaktiven Umgebungen verweigert wird?
+Entscheidung: `npm run db:migrate -- <name>` erzeugt die Migration mit `prisma migrate diff` gegen die Entwicklungsdatenbank und wendet sie mit `migrate deploy` an (`scripts/new-migration.sh`).
+Begründung: Beide Befehle sind nicht-destruktiv und funktionieren lokal wie in der Cloud gleich.
+
+**D-051** · 2026-10-20
+Frage: Was zeigt Phase 1 für Dinge, deren Funktionen erst später kommen?
+Entscheidung: Dokument-Aufgaben zeigen die Bausteine ihrer Vorlage statt des Editors (Phase 2); die Team-Ansicht zählt offene Kontaktanfragen bereits aus der Tabelle (bis Phase 4 immer 0); die Pressespiegel-Kachel fehlt (Phase 5). Seed-Freigabeanfragen gehen an beide CVDs, weil kein Lead eines aktiven Kunden ein eigenes Freigaberecht hat.
+Begründung: Jede Phase zeigt ehrlich, was es schon gibt, ohne Funktionen vorzutäuschen.
+
+**D-052** · 2026-10-20
+Frage: Was darf ein Admin ohne CVD-Rolle in der Verwaltung?
+Entscheidung: Er sieht Nutzer, Diensttypen und Protokoll, ändert aber nichts davon; seine eigenen technischen Einstellungen (Integrationen, KI, Kennzahlen) kommen in Phase 6.
+Begründung: „Nur CVDs vergeben Rechte“ (BRIEFING 3) gilt auch für Admins.

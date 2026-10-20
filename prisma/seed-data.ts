@@ -164,3 +164,94 @@ export const seedFormats: {
     sharePointFolder: "08_Briefings_und_Konzepte",
   },
 ];
+
+/** Vereinbarte Leistungen (BRIEFING 13.1), Zeiträume in Berliner Ortszeit. */
+export const seedServices: {
+  client: string;
+  key: string;
+  title: string;
+  category: "ROUNDTABLE" | "PRESSEMITTEILUNG" | "HINTERGRUNDGESPRAECH" | "LINKEDIN" | "MEDIEN_PITCH";
+  targetCount: number;
+  from: string;
+  to: string;
+}[] = [
+  { client: "Covenant", key: "cov_roundtable", title: "Journalisten-Roundtable", category: "ROUNDTABLE", targetCount: 1, from: "2026-07-01", to: "2026-12-31" },
+  { client: "Covenant", key: "cov_pm", title: "Pressemitteilungen", category: "PRESSEMITTEILUNG", targetCount: 6, from: "2026-07-01", to: "2026-12-31" },
+  { client: "Ground A", key: "ga_hintergrund", title: "Hintergrundgespräche", category: "HINTERGRUNDGESPRAECH", targetCount: 2, from: "2026-10-01", to: "2026-12-31" },
+  { client: "Ground A", key: "ga_linkedin", title: "LinkedIn-Beiträge", category: "LINKEDIN", targetCount: 8, from: "2026-10-01", to: "2026-12-31" },
+  { client: "Rafael", key: "raf_pitches", title: "Medien-Pitches", category: "MEDIEN_PITCH", targetCount: 3, from: "2026-10-01", to: "2026-12-31" },
+];
+
+/**
+ * Bestätigungsdaten der Profilabschnitte (BRIEFING 13.1): Ground A Compliance 400 Tage alt,
+ * Rafael insgesamt 95 Tage nicht bestätigt. Die Inhalte entstehen in Phase 3.
+ */
+export const seedProfileAges: Record<string, { default: number; overrides?: Record<string, number> }> = {
+  Covenant: { default: 10 },
+  "Ground A": { default: 10, overrides: { compliance: 400 } },
+  Rafael: { default: 95 },
+};
+export const seededProfileSections = [
+  "stammdaten", "ziele_kernbotschaften", "vereinbarte_leistungen", "sprecher", "themen_suchbegriffe", "compliance", "factsheet",
+];
+
+/** Erfundene Factsheet-Zahl für Covenant; die PM Standortentscheidung widerspricht ihr absichtlich (BRIEFING 13.5). */
+export const covenantFacts = { jobs: 450, contradictingJobs: 600 };
+
+/** Fristangaben aus BRIEFING 13.5, relativ zum Seed-Zeitpunkt. */
+export type SeedDue =
+  | { minutes: number }
+  | { days: number }
+  | { workdays: number }
+  | { todayAt: string }
+  | { tomorrowAt: string };
+
+export type SeedTask = {
+  client: string;
+  title: string;
+  format: string | null;
+  owner: SeedUserKey;
+  due: SeedDue;
+  status: "OFFEN" | "IN_BEARBEITUNG" | "FREIGABE_ANGEFRAGT" | "AENDERUNGEN_ANGEFORDERT" | "FREIGEGEBEN" | "BEIM_KUNDEN" | "ERLEDIGT";
+  category: "MEDIENARBEIT" | "DIGITALE_KOMMUNIKATION" | "EVENT" | "INTERN";
+  service?: string;
+  project?: string;
+  approver?: SeedUserKey;
+  texts?: Record<string, string>;
+};
+
+const pmStandort: Record<string, string> = {
+  dachzeile: "[Beispiel] Neuer Produktionsstandort",
+  headline: "[Beispiel] Covenant entscheidet sich für Standort in Sachsen",
+  subheadline: "[Beispiel] Produktion soll 2028 beginnen",
+  // Ortsmarke fehlt absichtlich (BRIEFING 13.5)
+  ortsmarke: "",
+  lead: `[Beispiel] Covenant wird einen Produktionsstandort bei Leipzig errichten. Das US-Unternehmen plant dort ${covenantFacts.contradictingJobs} neue Arbeitsplätze und will eng mit der Bundeswehr zusammenarbeiten.`,
+  haupttext:
+    "[Beispiel] Nach einer mehrmonatigen Prüfung mehrerer Standorte fiel die Wahl auf ein Gewerbegebiet im Norden von Leipzig. Ausschlaggebend waren die Verkehrsanbindung, die Nähe zu Zulieferern und die Fachkräfte in der Region.\n\n[Beispiel] Der Bau soll im kommenden Jahr beginnen. Die ersten Stellen werden ab Herbst ausgeschrieben.",
+  zitat: "[Beispiel] „Sachsen bietet uns genau das, was wir für den Aufbau brauchen“, sagt Dr. Anna Weber, Geschäftsführerin Deutschland.",
+  boilerplate: "[Beispiel] Covenant ist ein US-amerikanisches Unternehmen der Verteidigungsindustrie.",
+  pressekontakt: "[Beispiel] Pressestelle Covenant Deutschland, presse@example.com",
+  sperrfrist: "",
+};
+
+export const seedTasks: SeedTask[] = [
+  { client: "Covenant", title: "PM Standortentscheidung", format: "PRESSEMITTEILUNG", owner: "laura", due: { minutes: 90 }, status: "FREIGABE_ANGEFRAGT", category: "MEDIENARBEIT", service: "cov_pm", texts: pmStandort },
+  { client: "Covenant", title: "Q&A Standort aktualisieren", format: "QA", owner: "robin", due: { todayAt: "17:00" }, status: "IN_BEARBEITUNG", category: "MEDIENARBEIT", texts: { stand: "[Beispiel] Stand: heute", verwendung: "[Beispiel] intern", fragen: "[Beispiel] Warum Sachsen?\n\n[Beispiel] Antwort folgt." } },
+  { client: "Covenant", title: "Roundtable Herbst: Konzept", format: "KONZEPT", owner: "lukas", due: { days: 10 }, status: "IN_BEARBEITUNG", category: "EVENT", project: "Roundtable Herbst", texts: { ziel: "[Beispiel] Vertrauen bei Fachjournalisten aufbauen", zielgruppe: "[Beispiel] Verteidigungs- und Wirtschaftsjournalisten" } },
+  { client: "Covenant", title: "Roundtable Herbst: Einladung", format: "EINLADUNG", owner: "lukas", due: { days: 10 }, status: "IN_BEARBEITUNG", category: "EVENT", project: "Roundtable Herbst", texts: { anlass: "[Beispiel] Hintergrundgespräch zum neuen Standort" } },
+  { client: "Covenant", title: "Roundtable Herbst: Agenda", format: "AGENDA", owner: "lukas", due: { days: 10 }, status: "IN_BEARBEITUNG", category: "EVENT", project: "Roundtable Herbst", texts: { titel: "[Beispiel] Roundtable Herbst" } },
+  { client: "Ground A", title: "LinkedIn-Beitrag Messe", format: "LINKEDIN_POST", owner: "mika", due: { tomorrowAt: "12:00" }, status: "OFFEN", category: "DIGITALE_KOMMUNIKATION", service: "ga_linkedin" },
+  { client: "Ground A", title: "Statement zur Förderung", format: "STATEMENT", owner: "juliana", due: { workdays: 3 }, status: "AENDERUNGEN_ANGEFORDERT", category: "MEDIENARBEIT", approver: "lars", texts: { sprecher: "[Beispiel] Tobias Klein, Pressesprecher", anlass: "[Beispiel] Neues Förderprogramm des Bundes", text: "[Beispiel] Wir begrüßen das Förderprogramm. Es stärkt die Lasertechnik in Deutschland." } },
+  { client: "Ground A", title: "Hintergrundgespräch Hauptstadt Kurier", format: null, owner: "juliana", due: { days: 5 }, status: "OFFEN", category: "MEDIENARBEIT", service: "ga_hintergrund" },
+  { client: "Rafael", title: "Pitch Luftverteidigung", format: "MEDIEN_PITCH", owner: "hannah", due: { todayAt: "15:00" }, status: "FREIGEGEBEN", category: "MEDIENARBEIT", service: "raf_pitches", approver: "lars", texts: { betreff: "[Beispiel] Gesprächsangebot zur Luftverteidigung", aufhaenger: "[Beispiel] Die Bundeswehr erhöht ihre Bestellungen.", angebot: "[Beispiel] Hintergrundgespräch mit Daniel Roth", ansprechpartner: "[Beispiel] Hannah, Rud Pedersen" } },
+  { client: "Rafael", title: "Briefing für Gespräch im Ministerium", format: "BRIEFING", owner: "robin", due: { workdays: 2 }, status: "BEIM_KUNDEN", category: "MEDIENARBEIT", approver: "lars", texts: { anlass: "[Beispiel] Gespräch im Ministerium", hintergrund: "[Beispiel] Beschaffungsvorhaben Luftverteidigung", kernbotschaften: "[Beispiel] Verlässlicher Partner" } },
+  { client: "SAFENET", title: "Profil aufsetzen", format: null, owner: "valentin", due: { days: 7 }, status: "OFFEN", category: "INTERN" },
+  { client: "Covenant", title: "PM Spatenstich", format: "PRESSEMITTEILUNG", owner: "laura", due: { days: -20 }, status: "ERLEDIGT", category: "MEDIENARBEIT", service: "cov_pm", approver: "lukas", texts: { headline: "[Beispiel] Covenant feiert Spatenstich", ortsmarke: "[Beispiel] Leipzig, 30. September 2026" } },
+];
+
+/** Dienstplan (BRIEFING 13.6): CVD vom Dienst abwechselnd, Pressespiegel rotierend. */
+export const seedShiftRotation = {
+  cvd: ["lars", "lukas"] as SeedUserKey[],
+  pressespiegel: ["laura", "robin", "mika", "juliana", "hannah"] as SeedUserKey[],
+};

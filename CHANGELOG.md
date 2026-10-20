@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## Phase 1: Aufgaben, Dashboard, Rechte, Dienstplan · 2026-10-20
+
+- Rechteprüfung für die ganze Matrix aus BRIEFING 3.3 in `/lib/domain/permissions`, mit Zusatzrechten (Freigaberecht pro Kunde, Aufgaben für andere, Selbstfreigabe) und je einem Test pro Zeile und Spalte.
+- Verwaltung: Nutzer anlegen, Grundrolle und Admin ändern, Zugang sperren, Zusatzrechte vergeben und entziehen, Kundenzuordnungen; jede Rechteänderung steht im Protokoll.
+- Kunden: anlegen mit Kunden-Lead, Stammdaten und Logo, Zuordnungen, Status Onboarding/Aktiv/Archiviert, vereinbarte Leistungen mit Stand und Rückstand.
+- Aufgaben anlegen nach 6.1 mit Fristen-Schnellwahl, Anhängen und Vorlage für Dokumente; bearbeiten; Statusmodell der einfachen Aufgaben; CVD-Hochstufung.
+- Priorität aus der Frist mit Berliner Werktagen und Feiertagen, beim Lesen berechnet und alle 5 Minuten per Job gespeichert; Archivierung 30 Tage nach Erledigt.
+- Dashboard: Meine Aufgaben (Dringend, Heute, Demnächst), Wartet auf meine Freigabe, Dienst heute mit Wochenansicht, Kachel Redaktion, Warnungen, Team-Ansicht für CVDs, leerer Zustand.
+- Redaktion als Liste und Tafel mit Filtern nach Projekt, Owner, Status, Darstellungsform, Priorität und Zeitraum; Kunde über die Kopfzeile.
+- Dienstplan mit Wochenansicht, Eintragen, Austragen, Woche kopieren; Diensttypen in der Verwaltung.
+- Glocke mit „Aufgabe zugewiesen“, „Aufgabe wird Dringend“ (Push), Profilwarnungen und Leistungsrückstand.
+- Suche über Aufgaben und Kunden.
+- Seed: Beispielaufgaben aus 13.5 mit Dokumenten, Freigaben und Versand, Projekt Roundtable, vereinbarte Leistungen aus 13.1, Bestätigungsdaten der Profilabschnitte, Dienstplan aus 13.6.
+- Neue Migration `phase1_attachments_shifts`; `npm run db:migrate -- <name>` erzeugt Migrationen ohne interaktives Prisma.
+
 ## Phase 0: Grundgerüst · 2026-10-20
 
 - Projekt mit Next.js 16 (App Router), React 19, TypeScript strikt, Tailwind CSS 4 und shadcn/ui, Struktur nach BRIEFING 10.5.

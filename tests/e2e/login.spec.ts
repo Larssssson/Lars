@@ -1,10 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
-
-async function loginAs(page: Page, name: string) {
-  await page.goto("/login");
-  await page.getByRole("button", { name: new RegExp(`Als ${name} anmelden`) }).click();
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Guten Tag");
-}
+import { expect, test } from "@playwright/test";
+import { loginAs } from "./helpers";
 
 test("ohne Anmeldung führt jede Seite zum Login", async ({ page }) => {
   await page.goto("/redaktion");
@@ -25,7 +20,7 @@ test("Kundenauswahl gilt für alle Bereiche und bleibt gespeichert", async ({ pa
 
   await nav.getByRole("link", { name: "Redaktion" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Redaktion");
-  await expect(page.getByTestId("client-filter")).toHaveText("Gefiltert auf Covenant");
+  await expect(page.getByTestId("client-filter")).toContainText("Gefiltert auf Covenant");
   await expect(page.getByLabel("Kundenauswahl")).toHaveValue(/.+/);
 
   // gespeichert pro Nutzer: auch nach Abmelden und erneutem Anmelden

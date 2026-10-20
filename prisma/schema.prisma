@@ -370,6 +370,7 @@ model Task {
   owner             User            @relation("TaskOwner", fields: [ownerId], references: [id])
   preferredApprover User?           @relation("TaskPreferredApprover", fields: [preferredApproverId], references: [id], onDelete: SetNull)
   document          Document?
+  attachments       File[]
   contactRequests   ContactRequest[]
   articleActions    ArticleAction[]
 
@@ -1038,6 +1039,7 @@ model Shift {
   shiftType ShiftType @relation(fields: [shiftTypeId], references: [id], onDelete: Cascade)
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@unique([shiftTypeId, date, userId])
   @@index([date])
 }
 
@@ -1069,6 +1071,8 @@ model File {
   mimeType     String
   size         Int
   clientId     String?  @db.Uuid
+  /// Anhang einer Aufgabe (BRIEFING 6.1, DECISIONS D-045)
+  taskId       String?  @db.Uuid
   uploadedBy   String   @db.Uuid
   isSampleData Boolean  @default(false)
   createdAt    DateTime @default(now())
@@ -1077,6 +1081,7 @@ model File {
   updatedBy    String?  @db.Uuid
 
   client             Client?             @relation("ClientFiles", fields: [clientId], references: [id], onDelete: SetNull)
+  task               Task?               @relation(fields: [taskId], references: [id], onDelete: Cascade)
   logoOf             Client?             @relation("ClientLogo")
   profileSuggestions ProfileSuggestion[]
   monitoringImports  MonitoringImport[]

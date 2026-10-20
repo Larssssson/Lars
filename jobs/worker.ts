@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { PgBoss } from "pg-boss";
 import { env } from "../lib/env";
-import { jobs } from "./index";
+import { jobDeps, jobs } from "./index";
 
 /** Eigener Worker-Prozess für pg-boss (DECISIONS D-030). Start: npm run worker */
 async function main() {
@@ -11,7 +11,10 @@ async function main() {
 
   for (const job of jobs) {
     await boss.createQueue(job.name);
-    await boss.work(job.name, async () => job.handler());
+    await boss.work(job.name, async () => {
+      const result = await job.handler(jobDeps());
+      console.info(`[worker] ${job.name}: ${JSON.stringify(result ?? null)}`);
+    });
     if (job.cron) await boss.schedule(job.name, job.cron, null, { tz: "Europe/Berlin" });
   }
   console.info(`[worker] bereit, ${jobs.length} Jobs registriert.`);

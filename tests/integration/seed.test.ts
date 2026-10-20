@@ -4,11 +4,12 @@ import { setSelectedClient } from "@/lib/domain/clients/selection";
 import { ForbiddenError } from "@/lib/domain/permissions";
 import { clearSamples } from "@/prisma/clear-samples";
 import { seed } from "@/prisma/seed";
+import { resetAndSeed } from "./helpers";
 
 const db = createPrismaClient();
 
 beforeAll(async () => {
-  await seed(db);
+  await resetAndSeed(db);
 });
 
 afterAll(async () => {
