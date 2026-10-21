@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { authProvider } from "@/auth";
+import { getAuthProvider } from "@/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { t } from "@/i18n";
@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 export default async function LoginPage() {
   if (await getCurrentUser()) redirect("/");
   const devUsers =
-    authProvider.kind === "dev"
+    getAuthProvider().kind === "dev"
       ? await prisma.user.findMany({ where: { active: true }, orderBy: [{ role: "desc" }, { name: "asc" }] })
       : [];
 
@@ -22,7 +22,7 @@ export default async function LoginPage() {
         <p className="text-2xl font-bold tracking-tight">{t.common.appName}</p>
         <p className="text-sm text-muted-foreground">{t.common.appClaim}</p>
       </div>
-      {authProvider.kind === "entra" ? (
+      {getAuthProvider().kind === "entra" ? (
         <Card>
           <CardTitle>{t.auth.loginTitle}</CardTitle>
           <p className="mt-2 mb-4 text-sm text-muted-foreground">{t.auth.loginIntro}</p>

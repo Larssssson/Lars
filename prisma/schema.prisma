@@ -50,6 +50,24 @@ model User {
   contactOwnerships ContactOwner[]
   notifications     Notification[]
   shifts            Shift[]
+  activity          UserActivity[]
+}
+
+/// Ein Eintrag je Nutzer und Berliner Tag mit Nutzung, nur für die Kennzahl "aktive Nutzer pro Woche" (BRIEFING 7.10).
+model UserActivity {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @db.Uuid
+  day          DateTime @db.Date
+  isSampleData Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  createdBy    String?  @db.Uuid
+  updatedAt    DateTime @updatedAt
+  updatedBy    String?  @db.Uuid
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, day])
+  @@index([day])
 }
 
 /// pushSubscriptions[] aus Abschnitt 5, als eigene Tabelle (ein Eintrag pro Gerät).
@@ -521,6 +539,8 @@ model Approval {
   decidedAt      DateTime?
   note           String?
   isSelfApproval Boolean           @default(false)
+  /// Eskalationsstufe dringender Freigaben (BRIEFING 6.4): 0 keine, 1 Freigabeberechtigte, 2 CVD vom Dienst
+  escalationLevel Int              @default(0)
   checkRunId     String?           @db.Uuid
   isSampleData   Boolean           @default(false)
   createdAt      DateTime          @default(now())
@@ -1059,6 +1079,9 @@ model Shift {
   createdBy    String?   @db.Uuid
   updatedAt    DateTime  @updatedAt
   updatedBy    String?   @db.Uuid
+
+  /// automatisch angelegte Aufgabe "Pressespiegel [Datum]" (BRIEFING 7.6 Schritt 1), für die Kennzahl in 7.10
+  taskId       String?   @db.Uuid
 
   shiftType ShiftType @relation(fields: [shiftTypeId], references: [id], onDelete: Cascade)
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)

@@ -12,7 +12,7 @@ export default async function AdministrationLayout({ children }: { children: Rea
   return (
     <div className="flex flex-col gap-5">
       <h1 className="text-2xl font-semibold tracking-tight">{t.admin.title}</h1>
-      <AdminTabs />
+      <AdminTabs isAdmin={user.isAdmin} />
       {children}
     </div>
   );

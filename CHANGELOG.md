@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## Phase 6: Push, Livegang-Reife, Übergabe · 2026-10-21
+
+- PWA: Web App Manifest, App-Icons, Service Worker für Push (ohne Offline-Cache), Sicherheits-Header; installierbar auf Desktop, Android und iOS ab 16.4.
+- Profil mit „Push einrichten“: Anleitung je Gerät, Erlaubnis, Abonnement, mehrere Geräte einzeln entfernbar, Testnachricht; ungültige Geräte werden entfernt. Im Ersatz-Modus ein Ersatz-Gerät.
+- Push genau für die Ereignisse aus 7.9, an alle Geräte der Person; Eskalation dringender Freigaben nach 30 Minuten an alle Freigabeberechtigten und nach 60 Minuten an den CVD vom Dienst (sonst alle CVDs), Job `freigaben-eskalieren`.
+- Verwaltung: Einstellungen (Eskalationszeiten, Relevanzschwelle, Anzahl Top-Artikel, RP-Vorlage mit Farbe, Schrift und Logo), Integrationen und KI (Status aller Dienste, Modellwahl), Kennzahlen (aktive Nutzer pro Woche, Aufgaben pro Status, mittlere Freigabezeit, Push pro Person und Tag, verifizierte Kontakte im Zeitverlauf, Pressespiegel-Dienste erledigt), Protokoll mit Suche, Bereich, Aktion und Zeitraum; Einstellungen im Protokoll.
+- Smartphone-Ansicht für Dashboard, Freigabe und Kontaktanfragen geprüft.
+- Echte Adapter: Microsoft Graph (SharePoint), Azure Blob, Web Push (VAPID, aes128gcm), Entra ID mit schlankem Profil und Gesundheitsprüfung; getestet gegen Azurite und Mock-Server (`npm run test:adapters`).
+- Betrieb: Dockerfile (App, Worker, Migration in einem Image, Chromium für PDF), `/api/health` (Datenbank, Speicher, KI, SharePoint), OPERATIONS.md mit Variablen, Jobs, Sicherung, Logs und bekannten Grenzen; Build ohne Zugangsdaten.
+- `npm run seed:clear-samples` löscht auch die Beispieldateien im Speicher; `npm run user:bootstrap` legt den ersten echten CVD an.
+- Migrationen `phase6_escalation` und `phase6_metrics`.
+
 ## Phase 5: Pressespiegel · 2026-10-21
 
 - Import des Meltwater-Exports (CSV und XLSX) mit Spaltenzuordnung, die gespeichert und beim nächsten Import vorgeschlagen wird; gleiche Artikel (URL oder Headline, Medium, Tag) werden zusammengefasst; Artikel von Hand anlegen.

@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/form";
 import { t } from "@/i18n";
 import type { ArticleView } from "@/lib/domain/monitoring/relevance";
-import { RELEVANT_FROM } from "@/lib/domain/monitoring/relevance";
 import type { CardClient } from "@/lib/domain/monitoring/view";
 import { formatDate } from "@/lib/time";
 import { cn } from "@/lib/utils";
@@ -18,7 +17,7 @@ const KINDS = ["EINSCHAETZUNG", "LINKEDIN_KOMMENTAR", "NEWSHOOK_PITCH", "KONTAKT
  * Ein Artikel (BRIEFING 7.6 Schritt 4): Headline, Medium, Autor, Datum, Teaser, Link, je Kunde Wert,
  * Begründung, Aufnehmen und die Aktionen für aufgenommene Artikel.
  */
-export function ArticleCard({ article, clients }: { article: ArticleView; clients: CardClient[] }) {
+export function ArticleCard({ article, clients, threshold }: { article: ArticleView; clients: CardClient[]; threshold: number }) {
   const m = t.monitoring;
   return (
     <li className="flex flex-col gap-2 rounded-lg border bg-card p-4" data-testid="article">
@@ -41,7 +40,7 @@ export function ArticleCard({ article, clients }: { article: ArticleView; client
             <li key={client.id} className="flex flex-col gap-1.5 rounded-md bg-muted/40 p-2" data-testid={`relevance-${client.name}`}>
               <div className="flex flex-wrap items-center gap-2 text-sm">
                 <span className="font-medium">{client.name}</span>
-                <Badge className={cn(relevance?.score != null && relevance.score >= RELEVANT_FROM ? "border-emerald-400 bg-emerald-50 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-100" : "")}>
+                <Badge className={cn(relevance?.score != null && relevance.score >= threshold ? "border-emerald-400 bg-emerald-50 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-100" : "")}>
                   {m.fields.score}: {relevance?.score ?? m.notRated}
                 </Badge>
                 <SelectToggle articleId={article.id} clientId={client.id} clientName={client.name} selected={Boolean(relevance?.selected)} />

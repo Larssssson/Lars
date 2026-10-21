@@ -7,6 +7,8 @@ import { notify } from "@/lib/domain/notifications";
 import { assert, canApproveText, canEditTask, canRequestApproval, hasApprovalRight, type NamedActor } from "@/lib/domain/permissions";
 import { loadPermissionContext } from "@/lib/domain/permissions/context";
 import { approversForClient } from "@/lib/domain/permissions/queries";
+import { generalSettings } from "@/lib/domain/settings";
+import { cvdOnDuty } from "@/lib/domain/shifts";
 import { computePriority } from "@/lib/domain/tasks/rules";
 import type { Prisma } from "@/lib/generated/prisma/client";
 import { formatDateTime } from "@/lib/time";
@@ -204,3 +206,49 @@ export async function latestApproval(deps: Pick<Deps, "db">, documentId: string)
 }
 
 export { hasApprovalRight };
+
+/**
+ * Eskalation dringender Freigaben (BRIEFING 6.4, 7.9): ohne Entscheidung nach der ersten Frist
+ * (Standard 30 Minuten) Push an alle Freigabeberechtigten des Kunden, nach der zweiten (Standard 60)
+ * an den CVD vom Dienst, ohne eingetragenen CVD an alle CVDs. Jede Stufe genau einmal.
+ */
+export async function escalateApprovals(deps: Deps): Promise<number> {
+  const now = deps.now();
+  const { escalationFirstMinutes, escalationSecondMinutes } = await generalSettings(deps.db);
+  const open = await deps.db.approval.findMany({
+    where: { decision: null, escalationLevel: { lt: 2 }, requestedAt: { lte: new Date(now.getTime() - escalationFirstMinutes * 60_000) } },
+    include: { document: { include: { task: { include: { client: { select: { name: true } } } } } } },
+  });
+  let sent = 0;
+  for (const approval of open) {
+    const task = approval.document.task;
+    if (task.status !== "FREIGABE_ANGEFRAGT" || !isUrgent(task, now)) continue;
+    const waited = (now.getTime() - approval.requestedAt.getTime()) / 60_000;
+    let level = approval.escalationLevel;
+    const recipients = new Set<string>();
+    if (level < 1) {
+      for (const a of await approversForClient(deps.db, task.clientId)) if (a.id !== task.ownerId) recipients.add(a.id);
+      level = 1;
+    }
+    if (level < 2 && waited >= escalationSecondMinutes) {
+      const onDuty = await cvdOnDuty(deps.db, now);
+      const cvds = onDuty ? [onDuty] : await deps.db.user.findMany({ where: { role: "CVD", active: true }, select: { id: true } });
+      for (const c of cvds) if (c.id !== task.ownerId) recipients.add(c.id);
+      level = 2;
+    }
+    const minutes = level === 2 ? escalationSecondMinutes : escalationFirstMinutes;
+    for (const userId of recipients) {
+      await notify(deps, {
+        userId,
+        kind: "APPROVAL_ESCALATED",
+        title: t.notifications.approvalEscalated(task.title, minutes),
+        link: `/aufgaben/${task.id}`,
+        push: true,
+        pushBody: pushBody(task.client.name, task.title, task.dueAt),
+      });
+      sent++;
+    }
+    await deps.db.approval.update({ where: { id: approval.id }, data: { escalationLevel: level } });
+  }
+  return sent;
+}

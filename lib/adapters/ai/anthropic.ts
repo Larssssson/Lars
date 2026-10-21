@@ -17,10 +17,16 @@ export class AnthropicAiProvider implements AiProvider {
   readonly kind = "anthropic" as const;
   private readonly client: Anthropic;
 
-  /** fetch nur für Tests austauschbar */
-  constructor(config: { apiKey?: string; fetch?: typeof fetch }) {
+  /** fetch und baseURL nur für Tests (Mock-Server) austauschbar */
+  constructor(config: { apiKey?: string; fetch?: typeof fetch; baseURL?: string }) {
     requireVars("Claude API", { ANTHROPIC_API_KEY: config.apiKey });
-    this.client = new Anthropic({ apiKey: config.apiKey, maxRetries: 2, timeout: 120_000, ...(config.fetch ? { fetch: config.fetch } : {}) });
+    this.client = new Anthropic({
+      apiKey: config.apiKey,
+      maxRetries: 2,
+      timeout: 120_000,
+      ...(config.fetch ? { fetch: config.fetch } : {}),
+      ...(config.baseURL ? { baseURL: config.baseURL } : {}),
+    });
   }
 
   async complete(request: AiRequest): Promise<AiResponse> {

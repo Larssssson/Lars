@@ -257,6 +257,7 @@ export async function createPressReviewTasks(deps: Deps): Promise<number> {
       ownerId: shift.userId,
       dueAt: atTime(key, shift.shiftType.taskDueTime ?? "09:30"),
     });
+    await deps.db.shift.update({ where: { id: shift.id }, data: { taskId: task.id } });
     await notify(deps, { userId: shift.userId, kind: "TASK_ASSIGNED", title: t.notifications.taskAssigned(task.title), link: `/aufgaben/${task.id}`, push: false });
     created += 1;
   }

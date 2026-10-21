@@ -6,6 +6,7 @@ import { createUser, grantPermission, revokePermission, setUserActive, setUserRo
 import { completeOffboarding, reassignTask, resolveOwnedContact, type ContactResolution } from "@/lib/domain/permissions/offboarding";
 import { createFormat, updateFormat } from "@/lib/domain/documents/formats";
 import { createShiftType, updateShiftType } from "@/lib/domain/shifts";
+import { updateAiModels, updateGeneralSettings, updateRpTemplate } from "@/lib/domain/settings";
 import type { Permission } from "@/lib/generated/prisma/enums";
 import { bool, runAction, str, type ActionState } from "@/lib/server/action";
 import { serverDeps } from "@/lib/server/deps";
@@ -139,6 +140,43 @@ export async function completeOffboardingAction(offboardUserId: string, _state: 
   const result = await runAction(async () => {
     await completeOffboarding(serverDeps(), await requireUser(), offboardUserId);
     return t.admin.offboarding.completed;
+  });
+  revalidatePath("/verwaltung", "layout");
+  return result;
+}
+
+export async function updateGeneralSettingsAction(_state: ActionState, form: FormData): Promise<ActionState> {
+  const result = await runAction(async () => {
+    await updateGeneralSettings(serverDeps(), await requireUser(), {
+      escalationFirstMinutes: str(form, "escalationFirstMinutes"),
+      escalationSecondMinutes: str(form, "escalationSecondMinutes"),
+      relevanceThreshold: str(form, "relevanceThreshold"),
+      topArticles: str(form, "topArticles"),
+    });
+    return t.admin.settings.saved;
+  });
+  revalidatePath("/", "layout");
+  return result;
+}
+
+export async function updateRpTemplateAction(_state: ActionState, form: FormData): Promise<ActionState> {
+  const result = await runAction(async () => {
+    const logo = form.get("logo");
+    await updateRpTemplate(serverDeps(), await requireUser(), {
+      color: str(form, "color") ?? "",
+      font: str(form, "font") ?? "",
+      logo: logo instanceof File && logo.size > 0 ? { name: logo.name, mimeType: logo.type, data: new Uint8Array(await logo.arrayBuffer()) } : null,
+    });
+    return t.admin.settings.saved;
+  });
+  revalidatePath("/verwaltung", "layout");
+  return result;
+}
+
+export async function updateAiModelsAction(_state: ActionState, form: FormData): Promise<ActionState> {
+  const result = await runAction(async () => {
+    await updateAiModels(serverDeps(), await requireUser(), { quality: str(form, "quality") ?? "", fast: str(form, "fast") ?? "" });
+    return t.admin.settings.saved;
   });
   revalidatePath("/verwaltung", "layout");
   return result;

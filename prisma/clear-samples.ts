@@ -1,11 +1,16 @@
+import type { FileStorage } from "../lib/adapters";
 import type { Prisma, PrismaClient } from "../lib/generated/prisma/client";
 
 /**
  * Entfernt alle Beispieldaten (isSampleData = true), Nutzer und Konfiguration bleiben
- * (BRIEFING 13, Phase 6). Reihenfolge: abhängige Tabellen zuerst.
+ * (BRIEFING 13, Phase 6). Reihenfolge: abhängige Tabellen zuerst. Mit `files` werden auch die
+ * gespeicherten Beispieldateien (Logos, Unterlagen) aus dem Dateispeicher gelöscht.
  */
-export async function clearSamples(client: PrismaClient): Promise<Record<string, number>> {
-  return client.$transaction(async (tx) => clearSamplesIn(tx), { timeout: 60_000 });
+export async function clearSamples(client: PrismaClient, files?: FileStorage): Promise<Record<string, number>> {
+  const keys = (await client.file.findMany({ where: { isSampleData: true }, select: { storageKey: true } })).map((f) => f.storageKey);
+  const result = await client.$transaction(async (tx) => clearSamplesIn(tx), { timeout: 60_000 });
+  if (files) for (const key of keys) await files.delete(key).catch(() => undefined);
+  return result;
 }
 
 async function clearSamplesIn(db: Prisma.TransactionClient): Promise<Record<string, number>> {
@@ -51,6 +56,7 @@ async function clearSamplesIn(db: Prisma.TransactionClient): Promise<Record<stri
     ["DocumentFormat", () => db.documentFormat.deleteMany({ where })],
     ["Setting", () => db.setting.deleteMany({ where })],
     ["PushSubscription", () => db.pushSubscription.deleteMany({ where })],
+    ["UserActivity", () => db.userActivity.deleteMany({ where })],
   ];
   const result: Record<string, number> = {};
   for (const [name, step] of steps) result[name] = (await step()).count;
@@ -60,9 +66,10 @@ async function clearSamplesIn(db: Prisma.TransactionClient): Promise<Record<stri
 if (import.meta.url === `file://${process.argv[1]}`) {
   await import("dotenv/config");
   const { createPrismaClient } = await import("../lib/db");
+  const { adapters } = await import("../lib/adapters");
   const db = createPrismaClient();
   try {
-    const result = await clearSamples(db);
+    const result = await clearSamples(db, adapters.fileStorage());
     const total = Object.values(result).reduce((sum, n) => sum + n, 0);
     console.info(`Beispieldaten entfernt: ${total} Datensätze. Nutzer bleiben erhalten.`);
   } finally {

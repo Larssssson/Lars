@@ -7,9 +7,13 @@ import {
   decideApproval,
   reopenForEditing,
   requestApproval,
+  escalateApprovals,
   withdrawApproval,
 } from "@/lib/domain/approvals/service";
 import { createClient } from "@/lib/domain/clients/service";
+import { approversForClient } from "@/lib/domain/permissions/queries";
+import { updateGeneralSettings } from "@/lib/domain/settings";
+import { cvdOnDuty } from "@/lib/domain/shifts";
 import { doneCount } from "@/lib/domain/clients/services";
 import { clientAgreed, exportDocument, recordDispatch } from "@/lib/domain/documents/dispatch";
 import {
@@ -273,5 +277,62 @@ describe("Projekte (BRIEFING 6.6) und Kundenordner (9)", () => {
       "06_Pressespiegel_und_Einschaetzungen", "07_Projekte", "08_Briefings_und_Konzepte", "99_Archiv",
     ]);
     expect((await readdir(path.join(root, "01_Kundenprofil"))).sort()).toEqual(["Factsheets", "QA", "Strategie_und_Ansatz", "Styleguide_und_Compliance"]);
+  });
+});
+
+describe("Eskalation dringender Freigaben (BRIEFING 6.4, 7.9)", () => {
+  // offene Freigaben aus den Seed-Aufgaben (13.5) gelten hier als schon eskaliert
+  beforeEach(async () => {
+    await db.approval.updateMany({ data: { escalationLevel: 2 } });
+  });
+
+  it("nach 30 Minuten alle Freigabeberechtigten, nach 60 der CVD vom Dienst, sonst alle CVDs; jede Stufe einmal", async () => {
+    const [laura] = await usersByKey(db, ["laura"]);
+    const covenant = await clientByName(db, "Covenant");
+    const task = await createTask(deps, laura, {
+      clientId: covenant.id, category: "MEDIENARBEIT", type: "DOKUMENT", format: "PRESSEMITTEILUNG", title: "Eilmeldung", ownerId: laura.id, dueAt: later(90),
+    });
+    await saveContent(deps, laura, task.id, await contentWith(task.id, { headline: "Covenant baut", lead: "Covenant errichtet einen Standort." }));
+    await requestApproval(deps, laura, task.id, { confirmWithoutCheck: true });
+    const approvers = (await approversForClient(db, covenant.id)).filter((a) => a.id !== laura.id).map((a) => a.id);
+    deps.push.sent.length = 0;
+
+    deps.clock.now = later(29);
+    expect(await escalateApprovals(deps)).toBe(0);
+    deps.clock.now = later(31);
+    expect(await escalateApprovals(deps)).toBe(approvers.length);
+    expect(deps.push.sent.map((m) => m.userId).sort()).toEqual([...approvers].sort());
+    expect(await escalateApprovals(deps)).toBe(0);
+
+    deps.clock.now = later(61);
+    const onDuty = await cvdOnDuty(db, deps.clock.now);
+    expect(onDuty).not.toBeNull();
+    expect(await escalateApprovals(deps)).toBe(1);
+    expect(deps.push.sent.at(-1)!.userId).toBe(onDuty!.id);
+    expect(await db.notification.count({ where: { kind: "APPROVAL_ESCALATED", isPush: true } })).toBe(approvers.length + 1);
+    expect(await escalateApprovals(deps)).toBe(0);
+  });
+
+  it("ohne CVD vom Dienst an alle CVDs; nicht dringende Freigaben eskalieren nicht; Zeiten einstellbar", async () => {
+    const [laura, lars] = await usersByKey(db, ["laura", "lars"]);
+    await updateGeneralSettings(deps, lars, { escalationFirstMinutes: 10, escalationSecondMinutes: 20, relevanceThreshold: 50, topArticles: 10 });
+    const urgent = await createTask(deps, laura, {
+      clientId: (await clientByName(db, "Covenant")).id, category: "MEDIENARBEIT", type: "DOKUMENT", format: "PRESSEMITTEILUNG", title: "Eilig", ownerId: laura.id, dueAt: later(60),
+    });
+    const relaxed = await newPm(laura);
+    for (const task of [urgent, relaxed]) {
+      await saveContent(deps, laura, task.id, await contentWith(task.id, { headline: "Covenant baut", lead: "Covenant errichtet einen Standort." }));
+      await requestApproval(deps, laura, task.id, { confirmWithoutCheck: true });
+    }
+    await db.shift.deleteMany({ where: { shiftType: { key: "CVD_VOM_DIENST" } } });
+    deps.push.sent.length = 0;
+    deps.clock.now = later(21);
+    await escalateApprovals(deps);
+    const cvds = await db.user.findMany({ where: { role: "CVD", active: true } });
+    const escalated = await db.notification.findMany({ where: { kind: "APPROVAL_ESCALATED" } });
+    expect(escalated.every((n) => n.link === `/aufgaben/${urgent.id}`)).toBe(true);
+    for (const cvd of cvds) expect(escalated.some((n) => n.userId === cvd.id)).toBe(true);
+    expect((await db.approval.findFirstOrThrow({ where: { document: { taskId: urgent.id } } })).escalationLevel).toBe(2);
+    expect((await db.approval.findFirstOrThrow({ where: { document: { taskId: relaxed.id } } })).escalationLevel).toBe(0);
   });
 });

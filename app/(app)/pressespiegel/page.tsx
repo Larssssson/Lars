@@ -5,18 +5,19 @@ import { t } from "@/i18n";
 import { prisma } from "@/lib/db";
 import { todayRelevant } from "@/lib/domain/monitoring/relevance";
 import { cardClients } from "@/lib/domain/monitoring/view";
+import { generalSettings } from "@/lib/domain/settings";
 import { requireUser } from "@/lib/session";
 
 /** "Heute relevant" je Kunde (BRIEFING 7.6 Schritt 4) mit "Pressespiegel erstellen" (Schritt 8). */
 export default async function TodayPage() {
   const user = await requireUser();
   const now = new Date();
-  const clients = await cardClients(prisma, user.selectedClientId);
+  const [clients, settings] = await Promise.all([cardClients(prisma, user.selectedClientId), generalSettings(prisma)]);
   const lists = await Promise.all(clients.map((c) => todayRelevant(prisma, c.id, now)));
   const m = t.monitoring;
   return (
     <div className="flex flex-col gap-6">
-      <p className="text-sm text-muted-foreground">{m.today.hint}{user.selectedClientId ? "" : ` ${m.today.chooseClient}`}</p>
+      <p className="text-sm text-muted-foreground">{m.today.hint(settings.topArticles, settings.relevanceThreshold)}{user.selectedClientId ? "" : ` ${m.today.chooseClient}`}</p>
       {clients.map((client, i) => (
         <section key={client.id} className="flex flex-col gap-3" aria-labelledby={`today-${client.id}`} data-testid={`today-${client.name}`}>
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -26,10 +27,10 @@ export default async function TodayPage() {
             </ActionForm>
           </div>
           {lists[i]!.length === 0 ? (
-            <p className="text-sm text-muted-foreground">{m.today.empty}</p>
+            <p className="text-sm text-muted-foreground">{m.today.empty(settings.relevanceThreshold)}</p>
           ) : (
             <ul className="flex flex-col gap-3">
-              {lists[i]!.map((article) => <ArticleCard key={article.id} article={article} clients={[client]} />)}
+              {lists[i]!.map((article) => <ArticleCard key={article.id} article={article} clients={[client]} threshold={settings.relevanceThreshold} />)}
             </ul>
           )}
         </section>

@@ -19,6 +19,17 @@ export default defineConfig({
       {
         extends: true,
         test: {
+          name: "adapters",
+          include: ["tests/adapters/**/*.test.ts"],
+          environment: "node",
+          // echte Adapter gegen Azurite und lokale Mock-Server, ohne Datenbank und ohne Internet
+          env: { DATABASE_URL: "postgresql://adaptertest-ohne-datenbank" },
+          testTimeout: 30_000,
+        },
+      },
+      {
+        extends: true,
+        test: {
           name: "integration",
           include: ["tests/integration/**/*.test.ts"],
           environment: "node",

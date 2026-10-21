@@ -6,6 +6,7 @@ import { t } from "@/i18n";
 import { prisma } from "@/lib/db";
 import { allArticles } from "@/lib/domain/monitoring/relevance";
 import { cardClients } from "@/lib/domain/monitoring/view";
+import { generalSettings } from "@/lib/domain/settings";
 import { requireUser } from "@/lib/session";
 import { addDays, startOfDay } from "@/lib/time";
 
@@ -18,7 +19,7 @@ export default async function AllArticlesPage({ searchParams }: { searchParams: 
   const p = await searchParams;
   const from = p.von && DAY.test(p.von) ? startOfDay(p.von) : null;
   const to = p.bis && DAY.test(p.bis) ? new Date(startOfDay(addDays(p.bis, 1)).getTime() - 1) : null;
-  const [articles, clients] = await Promise.all([allArticles(prisma, { q: p.q, from, to }), cardClients(prisma, user.selectedClientId)]);
+  const [articles, clients, settings] = await Promise.all([allArticles(prisma, { q: p.q, from, to }), cardClients(prisma, user.selectedClientId), generalSettings(prisma)]);
   const a = t.monitoring.all;
   return (
     <div className="flex flex-col gap-4">
@@ -36,7 +37,7 @@ export default async function AllArticlesPage({ searchParams }: { searchParams: 
         <p className="text-sm text-muted-foreground">{a.empty}</p>
       ) : (
         <ul className="flex flex-col gap-3">
-          {articles.map((article) => <ArticleCard key={article.id} article={article} clients={clients} />)}
+          {articles.map((article) => <ArticleCard key={article.id} article={article} clients={clients} threshold={settings.relevanceThreshold} />)}
         </ul>
       )}
     </div>

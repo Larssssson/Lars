@@ -3,7 +3,7 @@ import { t } from "@/i18n";
 import { AuditAction, writeAudit } from "@/lib/domain/audit";
 import type { Deps } from "@/lib/domain/deps";
 import { DomainError, NotFoundError } from "@/lib/domain/errors";
-import type { Permission, Role, User } from "@/lib/generated/prisma/client";
+import type { Permission, Prisma, Role, User } from "@/lib/generated/prisma/client";
 import { assert, canGrantPermission, canManageUsers, type Actor } from "./index";
 
 /**
@@ -129,9 +129,34 @@ export async function revokePermission(deps: Deps, actor: Actor, grantId: string
 }
 
 /** Protokoll der Rechteänderungen für die Verwaltung (BRIEFING 7.10). */
-export function listAudit(deps: Pick<Deps, "db">, filter: { entity?: string | null; limit?: number } = {}) {
+export type AuditFilter = { entity?: string | null; action?: string | null; from?: Date | null; to?: Date | null; q?: string | null; limit?: number };
+
+/**
+ * Protokoll durchsuchen und filtern (BRIEFING 7.10): Bereich, Aktion, Zeitraum und Suche über
+ * die Bezeichnung der Aktion sowie Namen von handelnder Person, Nutzer, Kunde oder Kontakt.
+ */
+export async function listAudit(deps: Pick<Deps, "db">, filter: AuditFilter = {}) {
+  const q = filter.q?.trim();
+  let search: Prisma.AuditLogWhereInput = {};
+  if (q) {
+    const name = { contains: q, mode: "insensitive" as const };
+    const [users, clients, contacts] = await Promise.all([
+      deps.db.user.findMany({ where: { name }, select: { id: true } }),
+      deps.db.client.findMany({ where: { name }, select: { id: true } }),
+      deps.db.journalist.findMany({ where: { OR: [{ firstName: name }, { lastName: name }] }, select: { id: true } }),
+    ]);
+    const ids = [...users, ...clients, ...contacts].map((x) => x.id);
+    const needle = q.toLowerCase();
+    const actions = Object.entries(t.admin.audit.actions).filter(([, label]) => label.toLowerCase().includes(needle)).map(([key]) => key);
+    search = { OR: [{ actorId: { in: users.map((u) => u.id) } }, { entityId: { in: ids } }, { action: { in: actions } }] };
+  }
   return deps.db.auditLog.findMany({
-    where: { entity: filter.entity ?? undefined },
+    where: {
+      entity: filter.entity || undefined,
+      action: filter.action || undefined,
+      at: filter.from || filter.to ? { gte: filter.from ?? undefined, lte: filter.to ?? undefined } : undefined,
+      ...search,
+    },
     orderBy: { at: "desc" },
     take: filter.limit ?? 200,
   });

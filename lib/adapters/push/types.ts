@@ -10,12 +10,18 @@ export type PushMessage = {
   link: string;
 };
 
+/** Ein registriertes Gerät (Push-Abonnement des Browsers). */
+export type PushDevice = { endpoint: string; keys: { p256dh: string; auth: string } };
+
 /**
  * Versand von Push-Nachrichten. Der Eintrag in der Benachrichtigungstabelle
- * (isPush = true) entsteht immer im Benachrichtigungsdienst, der Adapter versendet nur.
+ * (isPush = true) entsteht immer im Benachrichtigungsdienst, der Adapter versendet nur
+ * an die übergebenen Geräte und meldet Geräte zurück, die der Push-Dienst nicht mehr kennt.
  */
 export interface PushSender {
   readonly kind: "mock" | "webpush";
-  send(message: PushMessage): Promise<void>;
+  /** öffentlicher VAPID-Schlüssel für das Abonnement im Browser (Ersatz: null) */
+  readonly publicKey: string | null;
+  send(message: PushMessage, devices: PushDevice[]): Promise<{ expired: string[] }>;
   health(): Promise<HealthStatus>;
 }

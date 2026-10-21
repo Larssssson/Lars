@@ -1,8 +1,8 @@
 # impress
 
-Interne Presse- und Content-Plattform von Rud Pedersen Berlin. Die verbindliche Bauanleitung steht in [BRIEFING.md](BRIEFING.md), Entscheidungen zu offenen Punkten in [DECISIONS.md](DECISIONS.md), Änderungen je Phase in [CHANGELOG.md](CHANGELOG.md).
+Interne Presse- und Content-Plattform von Rud Pedersen Berlin. Die verbindliche Bauanleitung steht in [BRIEFING.md](BRIEFING.md), Entscheidungen zu offenen Punkten in [DECISIONS.md](DECISIONS.md), Änderungen je Phase in [CHANGELOG.md](CHANGELOG.md), Betrieb und Übergabe in [OPERATIONS.md](OPERATIONS.md).
 
-**Stand:** Phase 5 (Pressespiegel). Push, Livegang-Reife und Übergabe folgen in Phase 6.
+**Stand:** Phase 6 (Push, Livegang-Reife, Übergabe). Alle Bauphasen aus BRIEFING 12 sind umgesetzt.
 
 ## Start in drei Befehlen
 
@@ -40,8 +40,9 @@ Führt nacheinander aus:
 | Befehl | Art | Inhalt |
 |---|---|---|
 | `npm run test:unit` | Vitest, Einheit | Rechtematrix (jede Zeile), Priorität, Werktage und Feiertage, Statusregeln, Adapter (auch Claude ohne Netz), Änderungsverfolgung, Word-Export und -Import, Dateinamen und Ordner, Versionsvergleich, ai-service, Strukturprüfung, Fundstellen, KI-Bausteine im Editor, Kontaktdaten verdecken, Telefonnummern, Importformate |
-| `npm run test:integration` | Vitest, Integration | Seed, Aufgaben, Priorität-Job, Archivierung, Redaktion-Filter, Dashboard, Warnungen, Nutzer- und Kundenverwaltung, Protokoll, Dienstplan, Leistung bei 500 Aufgaben, Sperre, Freigabe, Selbstfreigabe, Versand, Rückläufer, PDF, SharePoint-Ablage, Kommentare, Versionen, Projekte, Kundenprofil, Onboarding, Aktivierung, Vorschläge, lernendes Profil, Prüfung in beiden Modi, Verwerfungsregeln, KI-Bausteine, „KI erlaubt“, Journo Hub (Liste, Aufdecken, Verifizieren, Owner, Anfragen, Import, Pflege, Auskunft, Löschen, Journalistenvorschläge, Offboarding, Suche), Pressespiegel (Import CSV/XLSX, Zusammenfassen, Autorenzuordnung, Relevanz, Heute relevant, Volltext-Löschung, Aktionen, LinkedIn nur mit Leistung, Autor übernehmen, Pressespiegel-Dokument, Aufgabe aus dem Dienstplan mit Frist, Kachel) |
-| `npm run test:e2e` | Playwright, Ende zu Ende | Login, Kundenauswahl, Aufgaben, Glocke, Hochstufen, Redaktion, Dashboard, Dienstplan, Verwaltung, Kunden, Suche; der ganze Redaktionsablauf aus Phase 2 (PM schreiben, Freigabe mit Änderungsverfolgung, Kunde, Rückläufer, zweite Freigabe, Medien, Datei im SharePoint-Ordner); Sperre, Mitlesen, Kommentare, Versionsvergleich; Projekte; Live-Hinweise, Prüfung, KI-Baustein mit Sperre der Freigabe, Kundenwissen, Kundenprofil, Onboarding SAFENET, KI aus; Journo Hub mit Anfrage und Freigabe, Verifizieren, Import, Reiter Journalisten, Pflege, Auskunft, Löschen, Offboarding |
+| `npm run test:adapters` | Vitest, echte Adapter | Azure Blob gegen Azurite; Microsoft Graph (SharePoint), Entra ID, Claude API und Web Push (verschlüsselt, mit VAPID) gegen lokale Mock-Server |
+| `npm run test:integration` | Vitest, Integration | Seed, Aufgaben, Priorität-Job, Archivierung, Redaktion-Filter, Dashboard, Warnungen, Nutzer- und Kundenverwaltung, Protokoll, Dienstplan, Leistung bei 500 Aufgaben, Sperre, Freigabe, Selbstfreigabe, Versand, Rückläufer, PDF, SharePoint-Ablage, Kommentare, Versionen, Projekte, Kundenprofil, Onboarding, Aktivierung, Vorschläge, lernendes Profil, Prüfung in beiden Modi, Verwerfungsregeln, KI-Bausteine, „KI erlaubt“, Journo Hub (Liste, Aufdecken, Verifizieren, Owner, Anfragen, Import, Pflege, Auskunft, Löschen, Journalistenvorschläge, Offboarding, Suche), Pressespiegel (Import CSV/XLSX, Zusammenfassen, Autorenzuordnung, Relevanz, Heute relevant, Volltext-Löschung, Aktionen, LinkedIn nur mit Leistung, Autor übernehmen, Pressespiegel-Dokument, Aufgabe aus dem Dienstplan mit Frist, Kachel), Eskalation dringender Freigaben, Push-Geräte und Testnachricht, Einstellungen, Kennzahlen, Protokollsuche, Beispieldaten entfernen, erster CVD |
+| `npm run test:e2e` | Playwright, Ende zu Ende | Login, Kundenauswahl, Aufgaben, Glocke, Hochstufen, Redaktion, Dashboard, Dienstplan, Verwaltung, Kunden, Suche; der ganze Redaktionsablauf aus Phase 2 (PM schreiben, Freigabe mit Änderungsverfolgung, Kunde, Rückläufer, zweite Freigabe, Medien, Datei im SharePoint-Ordner); Sperre, Mitlesen, Kommentare, Versionsvergleich; Projekte; Live-Hinweise, Prüfung, KI-Baustein mit Sperre der Freigabe, Kundenwissen, Kundenprofil, Onboarding SAFENET, KI aus; Journo Hub mit Anfrage und Freigabe, Verifizieren, Import, Reiter Journalisten, Pflege, Auskunft, Löschen, Offboarding; Pressespiegel mit der Beispieldatei aus 13.3 (Import, Heute relevant, Aufnehmen, Einschätzung, Autor übernehmen, Pressespiegel erstellen, Kachel), Artikel von Hand; PWA (Manifest, Service Worker, `/api/health`), Push einrichten mit mehreren Geräten, Verwaltung (Einstellungen, Integrationen, Kennzahlen, Protokoll), Smartphone-Ansicht von Dashboard, Freigabe und Kontaktanfragen |
 
 Integrationstests laufen mit fester Uhr (Dienstag, 20.10.2026, 10:00 Uhr), damit jede Priorität aus 13.5 vorkommt.
 
@@ -73,7 +74,7 @@ Jeder externe Dienst läuft über einen Adapter mit Ersatz für lokal und Tests,
 | `PUSH_PROVIDER` | `mock`: Konsolenausgabe | `webpush`: Web Push mit VAPID |
 | `MONITORING_SOURCE` | `sample`: Beispieldatei aus `fixtures/monitoring/` (ab Phase 5) | `file`: hochgeladener Meltwater-Export (Standard) |
 
-Die echten Adapter prüfen ihre Zugangsdaten. Der Claude-Adapter ist umgesetzt (Modelle über `AI_MODEL_QUALITY` und `AI_MODEL_FAST`); die übrigen folgen in Phase 6. Der Entwickler-Login ist bei `NODE_ENV=production` gesperrt.
+Alle echten Adapter sind umgesetzt und prüfen ihre Zugangsdaten; welche Variablen sie brauchen, steht in [OPERATIONS.md](OPERATIONS.md). Den Zustand zeigen `/api/health` und die Verwaltung (Integrationen und KI). Der Entwickler-Login ist bei `NODE_ENV=production` gesperrt.
 
 ## Projektstruktur
 
@@ -137,11 +138,21 @@ Die KI antwortet lokal mit den Beispielantworten aus `fixtures/ai/` (abgestimmt 
 - **Alle Artikel** mit Suche und Zeitraum, **Artikel von Hand** unter Import.
 - **Dashboard:** Kachel Pressespiegel (heute importiert, relevant, aufgenommen, wer Dienst hat). Die Aufgabe „Pressespiegel [Datum]“ legt der Worker zu Dienstbeginn an (Kunde „RP intern“, Frist am Diensttyp in Verwaltung → Diensttypen).
 
+## Was man in Phase 6 ausprobieren kann
+
+- **Profil → Push einrichten** (als beliebiger Nutzer): Anleitung passend zum Gerät. Lokal läuft Push im Ersatz-Modus: „Ersatz-Gerät registrieren“ (mehrmals für mehrere Geräte), einzeln entfernen, „Testnachricht senden“; die Nachricht steht in der Glocke und in der Konsole des Servers. Mit VAPID-Schlüsseln (`npx web-push generate-vapid-keys`, `PUSH_PROVIDER=webpush`) kommt sie echt auf dem Gerät an.
+- **Als App installieren:** In Chrome oder Edge über das Installationssymbol in der Adressleiste, auf dem Telefon über „Zum Home-Bildschirm“.
+- **Eskalation:** Die Seed-Aufgabe „PM Standortentscheidung“ wartet dringend auf Freigabe. Mit laufendem Worker bekommen nach 30 Minuten alle Freigabeberechtigten von Covenant eine Push-Nachricht, nach 60 der CVD vom Dienst (Glocke von Lars und Lukas). Die Zeiten stehen in Verwaltung → Einstellungen.
+- **Verwaltung als Lars:** Einstellungen (Eskalationszeiten, Relevanzschwelle, Top-Artikel, RP-Vorlage), Integrationen und KI (Status aller Dienste, Modellwahl), Kennzahlen, Protokoll mit Suche, Aktion und Zeitraum.
+- **Smartphone:** Browser auf Telefonbreite stellen, Dashboard, Freigabe und Journo Hub → Anfragen.
+- **Betrieb:** `curl localhost:3000/api/health`; Beispieldaten entfernen mit `npm run seed:clear-samples`; Betriebs-Image mit `docker build -t impress .` (siehe [OPERATIONS.md](OPERATIONS.md)).
+
 ## Hintergrundjobs
 
 | Job | Zeitplan (Berlin) | Zweck |
 |---|---|---|
 | `prioritaet-neu-berechnen` | alle 5 Minuten | Priorität aus der Frist, Push beim Übergang nach Dringend |
+| `freigaben-eskalieren` | jede Minute | dringende Freigaben nach 30 und 60 Minuten (einstellbar) eskalieren |
 | `archivierung` | täglich 2:30 | Aufgaben 30 Tage nach Erledigt archivieren |
 | `kunden-warnungen` | täglich 7:00 | Profilwarnungen und Leistungsrückstand in die Glocke |
 | `kontaktanfragen-erinnern` | stündlich | Owner einmal erinnern, wenn eine Kontaktanfrage 24 Stunden offen ist |
@@ -159,3 +170,5 @@ Ohne laufenden Worker berechnen die Listen die Priorität trotzdem beim Anzeigen
 | `npm run db:deploy` | Migrationen anwenden |
 | `npm run db:seed` | Seed einspielen |
 | `npm run seed:clear-samples` | Beispieldaten entfernen, Nutzer bleiben |
+| `npm run user:bootstrap -- "Name" mail@…` | ersten echten CVD mit Admin-Recht anlegen (Livegang) |
+| `node scripts/pwa-icons.mjs` | App-Icons neu erzeugen (z. B. mit dem RP-Logo) |

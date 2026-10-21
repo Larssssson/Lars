@@ -13,5 +13,8 @@ export const notifications = {
   approved: (name: string, title: string) => `${name} hat freigegeben: ${title}`,
   changesRequested: (name: string, title: string) => `${name} fordert Änderungen an: ${title}`,
   comment: (name: string, title: string) => `${name} hat kommentiert: ${title}`,
+  approvalEscalated: (title: string, minutes: number) => `Dringende Freigabe wartet seit ${minutes} Minuten: ${title}`,
+  testTitle: "Testnachricht von impress",
+  testBody: "Push ist auf diesem Gerät eingerichtet.",
   lockRequested: (name: string, title: string) => `${name} möchte bearbeiten: ${title}`,
 } as const;

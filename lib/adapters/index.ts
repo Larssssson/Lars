@@ -32,7 +32,14 @@ export function createAuthProvider(e: Env, lookup: DevUserLookup): AuthProvider 
 
 export function createDocumentStore(e: Env): DocumentStore {
   return e.DOCUMENT_STORE === "sharepoint"
-    ? new SharePointDocumentStore({ siteId: e.SHAREPOINT_SITE_ID, driveId: e.SHAREPOINT_DRIVE_ID, rootPath: e.SHAREPOINT_ROOT_PATH })
+    ? new SharePointDocumentStore({
+        siteId: e.SHAREPOINT_SITE_ID,
+        driveId: e.SHAREPOINT_DRIVE_ID,
+        rootPath: e.SHAREPOINT_ROOT_PATH,
+        tenantId: e.ENTRA_TENANT_ID,
+        clientId: e.ENTRA_CLIENT_ID,
+        clientSecret: e.ENTRA_CLIENT_SECRET,
+      })
     : new MockDocumentStore(path.join(e.STORAGE_DIR, "sharepoint-mock"), e.SHAREPOINT_ROOT_PATH);
 }
 

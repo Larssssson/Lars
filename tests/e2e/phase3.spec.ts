@@ -11,10 +11,14 @@ async function waitSaved(page: Page) {
 async function newDocument(page: Page, client: string, format: string, title: string) {
   await selectClient(page, client);
   await page.goto("/aufgaben/neu");
+  // erst nach der Hydrierung ausfüllen, sonst setzt React die Auswahlfelder zurück
+  await page.waitForLoadState("networkidle");
   await page.getByLabel("Kunde", { exact: true }).selectOption({ label: client });
   await page.getByLabel("Kategorie").selectOption({ label: "Medienarbeit" });
   await page.getByLabel("Darstellungsform").selectOption({ label: format });
   await page.getByLabel("Titel").fill(title);
+  await expect(page.getByLabel("Kategorie")).toHaveValue("MEDIENARBEIT");
+  await expect(page.getByLabel("Darstellungsform")).not.toHaveValue("");
   await page.getByRole("button", { name: "Aufgabe anlegen" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(title, { timeout: 20_000 });
   await expect(page.getByTestId("save-state")).toHaveText(/Gespeichert|^$/, { timeout: 15_000 });

@@ -51,8 +51,8 @@ export const monitoring = {
   },
   today: {
     perClient: (name: string) => `Heute relevant für ${name}`,
-    empty: "Heute noch keine relevanten Artikel (Wert ab 50).",
-    hint: "Die 10 höchsten Werte ab 50 aus den heutigen Importen.",
+    empty: (threshold: number) => `Heute noch keine relevanten Artikel (Wert ab ${threshold}).`,
+    hint: (top: number, threshold: number) => `Die ${top} höchsten Werte ab ${threshold} aus den heutigen Importen.`,
     chooseClient: "Ohne Kundenauswahl siehst du alle Kunden.",
   },
   all: {

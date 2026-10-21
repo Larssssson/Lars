@@ -1,10 +1,16 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import { beforeEach, describe, expect, it } from "vitest";
 import { createPrismaClient } from "@/lib/db";
 import { createClient, removeMembership, setClientLogo, setClientStatus, setMembership } from "@/lib/domain/clients/service";
 import { setSelectedClient } from "@/lib/domain/clients/selection";
 import { DomainError } from "@/lib/domain/errors";
 import { ForbiddenError, hasApprovalRight } from "@/lib/domain/permissions";
-import { createUser, grantPermission, revokePermission, setUserActive, setUserRole } from "@/lib/domain/permissions/admin";
+import { metrics, recordActivity } from "@/lib/domain/metrics";
+import { createPressReviewTasks } from "@/lib/domain/monitoring/actions";
+import { createUser, grantPermission, listAudit, revokePermission, setUserActive, setUserRole } from "@/lib/domain/permissions/admin";
+import { aiModelSettings, generalSettings, rpTemplateSettings, updateAiModels, updateGeneralSettings, updateRpTemplate } from "@/lib/domain/settings";
+import { atTime } from "@/lib/time";
 import { loadPermissionContext } from "@/lib/domain/permissions/context";
 import { assignShift, copyWeek, cvdOnDuty, removeShift, weekView } from "@/lib/domain/shifts";
 import { clientByName, FIXED_NOW, resetAndSeed, testDeps, userByKey, usersByKey, type TestDeps } from "./helpers";
@@ -132,5 +138,87 @@ describe("Dienstplan (BRIEFING 7.8, 13.6)", () => {
     expect(await copyWeek(deps, lars, "2026-10-20", "2026-11-02")).toBe(0);
     const copied = await weekView(db, "2026-11-02");
     expect(copied.rows.find((r) => r.type.key === "PRESSESPIEGEL")!.cells[0]?.entries[0]?.userName).toBe("Laura");
+  });
+});
+
+describe("Einstellungen (BRIEFING 7.10)", () => {
+  it("Standardwerte aus dem Briefing, Änderung durch CVD protokolliert, Prüfung der Werte", async () => {
+    const [lars, laura] = await usersByKey(db, ["lars", "laura"]);
+    expect(await generalSettings(db)).toEqual({ escalationFirstMinutes: 30, escalationSecondMinutes: 60, relevanceThreshold: 50, topArticles: 10 });
+    await expect(updateGeneralSettings(deps, laura, { escalationFirstMinutes: 10, escalationSecondMinutes: 20, relevanceThreshold: 50, topArticles: 10 })).rejects.toThrow(ForbiddenError);
+    await expect(updateGeneralSettings(deps, lars, { escalationFirstMinutes: 40, escalationSecondMinutes: 20, relevanceThreshold: 50, topArticles: 10 })).rejects.toThrow("später");
+    await expect(updateGeneralSettings(deps, lars, { escalationFirstMinutes: 10, escalationSecondMinutes: 20, relevanceThreshold: 120, topArticles: 10 })).rejects.toThrow("zwischen 0 und 100");
+    await updateGeneralSettings(deps, lars, { escalationFirstMinutes: "15", escalationSecondMinutes: "45", relevanceThreshold: "70", topArticles: "5" });
+    expect(await generalSettings(db)).toEqual({ escalationFirstMinutes: 15, escalationSecondMinutes: 45, relevanceThreshold: 70, topArticles: 5 });
+    expect(await db.auditLog.count({ where: { action: "SETTINGS_CHANGED", entityId: "general", actorId: lars.id } })).toBe(1);
+  });
+
+  it("RP-Vorlage mit Farbe, Schrift und Logo; Modellwahl nur für Admins", async () => {
+    const [lars, laura, juliana] = await usersByKey(db, ["lars", "laura", "juliana"]);
+    await expect(updateRpTemplate(deps, lars, { color: "blau", font: "Arial" })).rejects.toThrow("Hex");
+    const png = await readFile(path.resolve("fixtures/templates/rp_logo_placeholder.png"));
+    await updateRpTemplate(deps, lars, { color: "#0a6ebd", font: "TT Hoves Pro", logo: { name: "rp.png", mimeType: "image/png", data: new Uint8Array(png) } });
+    const template = await rpTemplateSettings(db);
+    expect(template).toMatchObject({ color: "0A6EBD", font: "TT Hoves Pro" });
+    expect((await db.file.findUniqueOrThrow({ where: { id: template.logoFileId! } })).name).toBe("rp.png");
+    await expect(updateAiModels(deps, laura, { quality: "claude-opus-5-5", fast: "" })).rejects.toThrow(ForbiddenError);
+    await db.user.update({ where: { id: juliana.id }, data: { role: "CVD" } });
+    await expect(updateAiModels(deps, { ...juliana, role: "CVD" }, { quality: "claude-opus-5-5", fast: "" })).rejects.toThrow(ForbiddenError);
+    await expect(updateAiModels(deps, lars, { quality: "gpt-irgendwas", fast: "" })).rejects.toThrow("claude-");
+    await updateAiModels(deps, lars, { quality: "claude-opus-5-5", fast: "" });
+    expect(await aiModelSettings(db)).toEqual({ quality: "claude-opus-5-5" });
+  });
+});
+
+describe("Kennzahlen (BRIEFING 7.10)", () => {
+  it("aktive Nutzer pro Woche, Aufgaben pro Status, Freigabezeit, Push pro Person und Tag, verifizierte Kontakte, Pressespiegel-Dienste", async () => {
+    const [lars, laura, mika] = await usersByKey(db, ["lars", "laura", "mika"]);
+    await expect(metrics(deps, laura)).rejects.toThrow(ForbiddenError);
+    await recordActivity(db, laura.id, FIXED_NOW);
+    await recordActivity(db, laura.id, FIXED_NOW);
+    await recordActivity(db, mika.id, FIXED_NOW);
+    await recordActivity(db, mika.id, new Date(FIXED_NOW.getTime() - 7 * 86_400_000));
+    await db.notification.createMany({ data: [
+      { userId: laura.id, kind: "TASK_URGENT", title: "x", isPush: true, createdAt: FIXED_NOW },
+      { userId: laura.id, kind: "TASK_URGENT", title: "y", isPush: true, createdAt: FIXED_NOW },
+      { userId: laura.id, kind: "COMMENT", title: "z", isPush: false, createdAt: FIXED_NOW },
+    ] });
+    const m = await metrics(deps, lars);
+    expect(m.activeUsersPerWeek).toHaveLength(8);
+    expect(m.activeUsersPerWeek.at(-1)).toEqual({ week: "2026-10-19", users: 2 });
+    expect(m.activeUsersPerWeek.at(-2)).toEqual({ week: "2026-10-12", users: 1 });
+    expect(m.tasksByStatus.reduce((n, s) => n + s.count, 0)).toBe(await db.task.count());
+    expect(m.pushPerPersonDay).toContainEqual({ name: "Laura", day: "2026-10-20", count: 2 });
+    expect(m.verifiedContacts).toHaveLength(6);
+    expect(m.verifiedContacts.at(-1)).toEqual({ month: "2026-10", count: await db.journalist.count({ where: { verifiedAt: { not: null } } }) });
+    expect(m.approvalTime.count).toBe(await db.approval.count({ where: { decidedAt: { gte: new Date(FIXED_NOW.getTime() - 31 * 86_400_000) }, decision: { in: ["FREIGEGEBEN", "AENDERUNGEN"] } } }));
+
+    // Pressespiegel-Dienst: Aufgabe aus dem Dienstplan, erledigt zählt
+    deps.clock.now = atTime("2026-10-20", "07:05");
+    await createPressReviewTasks(deps);
+    const before = (await metrics(deps, lars)).reviewShifts;
+    const shift = await db.shift.findFirstOrThrow({ where: { date: new Date("2026-10-20T00:00:00.000Z"), shiftType: { key: "PRESSESPIEGEL" } } });
+    expect(shift.taskId).not.toBeNull();
+    await db.task.update({ where: { id: shift.taskId! }, data: { status: "ERLEDIGT" } });
+    const after = (await metrics(deps, lars)).reviewShifts;
+    expect(after.total).toBe(before.total);
+    expect(after.done).toBe(before.done + 1);
+  });
+});
+
+describe("Protokoll durchsuchen und filtern (BRIEFING 7.10)", () => {
+  it("nach Aktion, Person, Kunde, Zeitraum und Bezeichnung", async () => {
+    const [lars, laura] = await usersByKey(db, ["lars", "laura"]);
+    const covenant = await clientByName(db, "Covenant");
+    await grantPermission(deps, lars, { userId: laura.id, permission: "APPROVE", clientId: covenant.id });
+    await updateGeneralSettings(deps, lars, { escalationFirstMinutes: 10, escalationSecondMinutes: 20, relevanceThreshold: 50, topArticles: 10 });
+    const granted = await listAudit(deps, { action: "PERMISSION_GRANTED" });
+    expect(granted.length).toBeGreaterThan(0);
+    expect(granted.every((e) => e.action === "PERMISSION_GRANTED")).toBe(true);
+    expect((await listAudit(deps, { q: "Einstellung" })).every((e) => e.action === "SETTINGS_CHANGED")).toBe(true);
+    expect((await listAudit(deps, { q: "laura" })).some((e) => e.action === "PERMISSION_GRANTED" && e.entityId === laura.id)).toBe(true);
+    expect((await listAudit(deps, { q: "Lars Scholtyssyk" })).every((e) => e.actorId === lars.id || e.entityId === lars.id)).toBe(true);
+    expect(await listAudit(deps, { from: new Date("2000-01-01"), to: new Date("2000-01-02") })).toEqual([]);
+    expect((await listAudit(deps, { entity: "Setting" })).map((e) => e.entityId)).toEqual(["general"]);
   });
 });

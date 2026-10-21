@@ -54,6 +54,7 @@ export const AuditAction = {
   CONTACT_EXPORTED: "CONTACT_EXPORTED",
   CONTACT_DELETED: "CONTACT_DELETED",
   USER_OFFBOARDED: "USER_OFFBOARDED",
+  SETTINGS_CHANGED: "SETTINGS_CHANGED",
 } as const;
 
 export type AuditActionKey = keyof typeof AuditAction;

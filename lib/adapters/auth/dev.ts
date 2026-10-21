@@ -26,4 +26,8 @@ export class DevAuthProvider implements AuthProvider {
       }),
     ];
   }
+
+  async health() {
+    return { ok: true, detail: "Entwickler-Login mit Seed-Nutzern" };
+  }
 }

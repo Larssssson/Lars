@@ -1,20 +1,26 @@
 import NextAuth from "next-auth";
-import { createAuthProvider } from "@/lib/adapters";
+import { createAuthProvider, type AuthProvider } from "@/lib/adapters";
 import { prisma } from "@/lib/db";
 import { env } from "@/lib/env";
 
 const SESSION_MAX_AGE = 12 * 60 * 60; // BRIEFING 11: Sitzungen laufen nach 12 Stunden ab
 
-export const authProvider = createAuthProvider(env(), async (userId) =>
-  prisma.user.findFirst({ where: { id: userId, active: true }, select: { id: true, name: true, email: true } }),
-);
+let provider: AuthProvider | undefined;
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+/** Login-Adapter, erst bei der ersten Anfrage gebaut: der Build läuft ohne Zugangsdaten (BRIEFING 16). */
+export function getAuthProvider(): AuthProvider {
+  provider ??= createAuthProvider(env(), async (userId) =>
+    prisma.user.findFirst({ where: { id: userId, active: true }, select: { id: true, name: true, email: true } }),
+  );
+  return provider;
+}
+
+export const { handlers, auth, signIn, signOut } = NextAuth(() => ({
   secret: env().AUTH_SECRET,
   trustHost: true,
   session: { strategy: "jwt", maxAge: SESSION_MAX_AGE },
   pages: { signIn: "/login", error: "/kein-zugang" },
-  providers: authProvider.providers(),
+  providers: getAuthProvider().providers(),
   callbacks: {
     /** Nur angelegte, aktive Nutzer kommen herein; Zuordnung über die Mailadresse. */
     async signIn({ user }) {
@@ -39,4 +45,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return { ...session, userId: typeof token.userId === "string" ? token.userId : undefined };
     },
   },
-});
+}));

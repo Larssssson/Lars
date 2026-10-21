@@ -1,4 +1,5 @@
 import type { PushSender } from "@/lib/adapters";
+import type { PushDevice, PushMessage } from "@/lib/adapters/push/types";
 import type { PrismaClient } from "@/lib/generated/prisma/client";
 import { assert, type Actor } from "@/lib/domain/permissions";
 import { NotFoundError } from "@/lib/domain/errors";
@@ -15,6 +16,8 @@ export const NotificationKind = {
   SERVICE_BACKLOG: "SERVICE_BACKLOG",
   APPROVAL_REQUESTED: "APPROVAL_REQUESTED",
   APPROVAL_DECIDED: "APPROVAL_DECIDED",
+  APPROVAL_ESCALATED: "APPROVAL_ESCALATED",
+  PUSH_TEST: "PUSH_TEST",
   COMMENT: "COMMENT",
   LOCK_REQUESTED: "LOCK_REQUESTED",
   CONTACT_REQUEST: "CONTACT_REQUEST",
@@ -40,7 +43,7 @@ export async function notify(deps: { db: PrismaClient; push: PushSender }, input
     data: { userId: input.userId, kind: input.kind, title: input.title, link: input.link, isPush: input.push },
   });
   if (input.push) {
-    await deps.push.send({
+    await sendPush(deps, {
       userId: input.userId,
       notificationId: notification.id,
       title: t.notifications.pushTitle,
@@ -48,6 +51,17 @@ export async function notify(deps: { db: PrismaClient; push: PushSender }, input
       link: input.link,
     });
   }
+}
+
+/** An alle Geräte der Person senden; Geräte, die der Push-Dienst nicht mehr kennt, entfernen. */
+export async function sendPush(deps: { db: PrismaClient; push: PushSender }, message: PushMessage, deviceIds?: string[]): Promise<number> {
+  const devices = await deps.db.pushSubscription.findMany({ where: { userId: message.userId, ...(deviceIds ? { id: { in: deviceIds } } : {}) } });
+  const { expired } = await deps.push.send(
+    message,
+    devices.map((d) => ({ endpoint: d.endpoint, keys: d.keys as PushDevice["keys"] })),
+  );
+  if (expired.length) await deps.db.pushSubscription.deleteMany({ where: { endpoint: { in: expired } } });
+  return devices.length - expired.length;
 }
 
 export function listNotifications(db: PrismaClient, userId: string, limit = 50) {

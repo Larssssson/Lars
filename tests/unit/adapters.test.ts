@@ -102,7 +102,7 @@ describe("Ersatz-Adapter", () => {
 
   it("PushSender merkt sich gesendete Nachrichten", async () => {
     const push = createPushSender(readEnv(base));
-    await push.send({ userId: "u", notificationId: "n", title: "T", body: "B", link: "/" });
+    await push.send({ userId: "u", notificationId: "n", title: "T", body: "B", link: "/" }, []);
     expect("sent" in push && push.sent).toHaveLength(1);
   });
 
@@ -137,5 +137,24 @@ describe("Claude-Adapter (echt, ohne Netz geprüft)", () => {
     await provider.complete({ ...base, model: "claude-sonnet-4-6" });
     expect(bodies[1]).toMatchObject({ temperature: 0.4 });
     expect(acceptsTemperature("claude-haiku-5-5")).toBe(false);
+  });
+});
+
+describe("Push im Browser: Gerät und Schlüssel", () => {
+  it("erkennt Plattform und Bezeichnung aus dem User-Agent", async () => {
+    const { detectPlatform, deviceLabel, urlBase64ToUint8Array } = await import("@/lib/push-client");
+    const iphone = "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1";
+    const ipad = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Safari/605.1.15";
+    const android = "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36";
+    const edge = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0";
+    expect(detectPlatform(iphone)).toBe("ios");
+    expect(detectPlatform(ipad, 5)).toBe("ios");
+    expect(detectPlatform(ipad, 0)).toBe("desktop");
+    expect(detectPlatform(android)).toBe("android");
+    expect(deviceLabel(iphone)).toBe("iPhone · Safari");
+    expect(deviceLabel(ipad, 5)).toBe("iPad · Safari");
+    expect(deviceLabel(android)).toBe("Android · Chrome");
+    expect(deviceLabel(edge)).toBe("Windows · Edge");
+    expect([...urlBase64ToUint8Array("AQID_-8")]).toEqual([1, 2, 3, 255, 239]);
   });
 });

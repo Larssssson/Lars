@@ -7,11 +7,10 @@ import { NotFoundError } from "@/lib/domain/errors";
 import { assert, canWorkOnMonitoring, type Actor } from "@/lib/domain/permissions";
 import type { Prisma, PrismaClient } from "@/lib/generated/prisma/client";
 import { dateKey, startOfDay, addDays } from "@/lib/time";
+import { generalSettings } from "@/lib/domain/settings";
 import { requireArticle } from "./articles";
 
-/** "Heute relevant": die 10 höchsten Werte ab 50 (BRIEFING 7.6 Schritt 4). */
-export const RELEVANT_FROM = 50;
-export const TODAY_LIMIT = 10;
+/** "Heute relevant": die höchsten Werte ab der Schwelle; Schwelle und Anzahl in den Einstellungen (Standard 50 und 10). */
 const BATCH = 15;
 const FULL_TEXT_FOR_AI = 4000;
 
@@ -110,13 +109,14 @@ function todayRange(now: Date) {
   return { gte: startOfDay(key), lt: startOfDay(addDays(key, 1)) };
 }
 
-/** "Heute relevant" pro Kunde: Top 10 ab Wert 50 aus den heutigen Importen. */
+/** "Heute relevant" pro Kunde: die Top-Artikel ab der Schwelle aus den heutigen Importen. */
 export async function todayRelevant(db: PrismaClient, clientId: string, now: Date) {
+  const { relevanceThreshold, topArticles } = await generalSettings(db);
   const relevances = await db.articleRelevance.findMany({
-    where: { clientId, score: { gte: RELEVANT_FROM }, article: { createdAt: todayRange(now) } },
+    where: { clientId, score: { gte: relevanceThreshold }, article: { createdAt: todayRange(now) } },
     include: { article: { include: articleInclude } },
     orderBy: [{ score: "desc" }],
-    take: TODAY_LIMIT,
+    take: topArticles,
   });
   return relevances.map((r) => r.article);
 }
@@ -161,9 +161,10 @@ export async function setSelected(deps: Deps, actor: Actor, articleId: string, c
 export async function monitoringTile(db: PrismaClient, clientId: string | null, now: Date) {
   const range = todayRange(now);
   const key = dateKey(now);
+  const { relevanceThreshold } = await generalSettings(db);
   const [imported, relevant, selected, shift] = await Promise.all([
     db.article.count({ where: { createdAt: range } }),
-    db.articleRelevance.count({ where: { score: { gte: RELEVANT_FROM }, article: { createdAt: range }, clientId: clientId ?? undefined, client: { isInternal: false } } }),
+    db.articleRelevance.count({ where: { score: { gte: relevanceThreshold }, article: { createdAt: range }, clientId: clientId ?? undefined, client: { isInternal: false } } }),
     db.articleRelevance.count({ where: { selected: true, article: { createdAt: range }, clientId: clientId ?? undefined } }),
     db.shift.findFirst({ where: { date: new Date(`${key}T00:00:00.000Z`), shiftType: { createsTask: true } }, include: { user: { select: { name: true } } } }),
   ]);

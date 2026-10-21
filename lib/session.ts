@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { recordActivity } from "@/lib/domain/metrics";
+import { dateKey } from "@/lib/time";
 
 /**
  * Aktueller Nutzer. Bei jeder Anfrage wird active geprüft, damit gesperrte Nutzer
@@ -12,8 +14,20 @@ export const getCurrentUser = cache(async () => {
   const session = await auth();
   const userId = (session as { userId?: string } | null)?.userId;
   if (!userId) return null;
-  return prisma.user.findFirst({ where: { id: userId, active: true } });
+  const user = await prisma.user.findFirst({ where: { id: userId, active: true } });
+  if (user) await noteActivity(user.id);
+  return user;
 });
+
+/** Nutzung je Tag für die Kennzahl "aktive Nutzer pro Woche"; pro Prozess höchstens ein Schreibzugriff je Nutzer und Tag. */
+const noted = new Map<string, string>();
+async function noteActivity(userId: string) {
+  const now = new Date();
+  const day = dateKey(now);
+  if (noted.get(userId) === day) return;
+  await recordActivity(prisma, userId, now);
+  noted.set(userId, day);
+}
 
 export async function requireUser() {
   const user = await getCurrentUser();

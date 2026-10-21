@@ -1,5 +1,6 @@
 import { adapters } from "../lib/adapters";
 import { prisma } from "../lib/db";
+import { escalateApprovals } from "../lib/domain/approvals/service";
 import { notifyClientWarnings } from "../lib/domain/clients/service";
 import type { Deps } from "../lib/domain/deps";
 import { weeklyContactMaintenance } from "../lib/domain/journo/maintenance";
@@ -10,8 +11,6 @@ import { archiveCompletedTasks, recalculatePriorities } from "../lib/domain/task
 
 /**
  * Hintergrundjobs mit Zeitplan (BRIEFING 10.1, 16). Zeitpläne in Europe/Berlin.
- * Weitere Jobs kommen mit ihren Phasen dazu (Eskalation, Erinnerungen, Pressespiegel-Aufgabe,
- * wöchentliche Pflege, Volltexte löschen).
  */
 export type JobDefinition = {
   name: string;
@@ -27,6 +26,12 @@ export const jobs: JobDefinition[] = [
     cron: "*/5 * * * *",
     description: "Priorität aller offenen Aufgaben aus der Frist neu bestimmen, Owner bei Übergang nach Dringend benachrichtigen (6.2).",
     handler: recalculatePriorities,
+  },
+  {
+    name: "freigaben-eskalieren",
+    cron: "* * * * *",
+    description: "Dringende Freigaben ohne Entscheidung nach 30 und 60 Minuten (einstellbar) per Push eskalieren (6.4, 7.9).",
+    handler: escalateApprovals,
   },
   {
     name: "archivierung",
