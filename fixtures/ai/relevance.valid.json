@@ -1,0 +1,148 @@
+{
+ "results": [
+  {
+   "articleId": "https://example.org/tagesblatt/a1",
+   "clientId": "Covenant",
+   "score": 95,
+   "reason": "Berichtet direkt über die geplante Produktionsstätte bei Leipzig."
+  },
+  {
+   "articleId": "https://example.org/sachsen/d2",
+   "clientId": "Covenant",
+   "score": 72,
+   "reason": "Das Gewerbegebiet Nord könnte der Standort von Covenant sein."
+  },
+  {
+   "articleId": "https://example.org/sachsen/d5",
+   "clientId": "Covenant",
+   "score": 88,
+   "reason": "Leipzig wirbt um einen US-Investor aus der Rüstungsindustrie."
+  },
+  {
+   "articleId": "https://example.org/sachsen/d6",
+   "clientId": "Covenant",
+   "score": 64,
+   "reason": "Fachkräftebedarf berührt die geplanten Arbeitsplätze am Standort."
+  },
+  {
+   "articleId": "https://example.org/tagesblatt/a4",
+   "clientId": "Covenant",
+   "score": 70,
+   "reason": "Ansiedlungen der Verteidigungsindustrie in Ostdeutschland betreffen Covenant direkt."
+  },
+  {
+   "articleId": "https://example.org/tagesblatt/a5",
+   "clientId": "Covenant",
+   "score": 58,
+   "reason": "Langfristige Munitionsverträge der Bundeswehr sind ein Thema des Kunden."
+  },
+  {
+   "articleId": "https://example.org/agentur/f1",
+   "clientId": "Covenant",
+   "score": 76,
+   "reason": "US-Rüstungskonzerne auf Standortsuche in Europa."
+  },
+  {
+   "articleId": "https://example.org/sachsen/d7",
+   "clientId": "Covenant",
+   "score": 81,
+   "reason": "Ungenannter Investor im Gewerbegebiet Nord, möglicher Bezug zu Covenant."
+  },
+  {
+   "articleId": "https://example.org/hauptstadt/b9",
+   "clientId": "Covenant",
+   "score": 52,
+   "reason": "Neue Exportregeln betreffen die Rüstungsindustrie allgemein."
+  },
+  {
+   "articleId": "https://example.org/wehrtechnik/g1",
+   "clientId": "Covenant",
+   "score": 79,
+   "reason": "Fachmedium berichtet über eine geplante Munitionsfertigung in Deutschland."
+  },
+  {
+   "articleId": "https://example.org/hauptstadt/b7",
+   "clientId": "Covenant",
+   "score": 35,
+   "reason": "Luftverteidigung ist kein Schwerpunkt von Covenant."
+  },
+  {
+   "articleId": "https://example.org/kurier/c3",
+   "clientId": "Ground A",
+   "score": 86,
+   "reason": "Lasertechnik aus Deutschland ist das Kernthema von Ground A."
+  },
+  {
+   "articleId": "https://example.org/kurier/c4",
+   "clientId": "Ground A",
+   "score": 90,
+   "reason": "Neue Förderung für Laserforschung betrifft Ground A direkt."
+  },
+  {
+   "articleId": "https://example.org/kurier/c5",
+   "clientId": "Ground A",
+   "score": 68,
+   "reason": "Gute Lage der Photonik-Branche, Fachkräfte als Thema."
+  },
+  {
+   "articleId": "https://example.org/tagesblatt/a7",
+   "clientId": "Ground A",
+   "score": 74,
+   "reason": "Ein Berliner Mittelständler zeigt Hochleistungslaser, Wettbewerbsumfeld."
+  },
+  {
+   "articleId": "https://example.org/agentur/f4",
+   "clientId": "Ground A",
+   "score": 61,
+   "reason": "Exportkontrolle ist ein Regulierungsthema im Profil."
+  },
+  {
+   "articleId": "https://example.org/hauptstadt/b10",
+   "clientId": "Ground A",
+   "score": 83,
+   "reason": "Förderprogramm nennt Laser als Schwerpunkt."
+  },
+  {
+   "articleId": "https://example.org/hauptstadt/b7",
+   "clientId": "Rafael",
+   "score": 92,
+   "reason": "Bundeswehr erhöht Bestellungen bei Luftverteidigung, israelische Anbieter gelten als gesetzt."
+  },
+  {
+   "articleId": "https://example.org/wehrtechnik/g2",
+   "clientId": "Rafael",
+   "score": 89,
+   "reason": "Test eines israelischen Luftverteidigungssystems bei der Bundeswehr."
+  },
+  {
+   "articleId": "https://example.org/wehrtechnik/g3",
+   "clientId": "Rafael",
+   "score": 66,
+   "reason": "Drohnenabwehr als Priorität der Luftwaffe."
+  },
+  {
+   "articleId": "https://example.org/hauptstadt/b11",
+   "clientId": "Rafael",
+   "score": 87,
+   "reason": "Beschaffung für Luftverteidigung wird beschleunigt."
+  },
+  {
+   "articleId": "https://example.org/tagesblatt/a8",
+   "clientId": "Rafael",
+   "score": 71,
+   "reason": "Ausbau der Luftverteidigung über Großstädten."
+  },
+  {
+   "articleId": "https://example.org/wehrtechnik/g4",
+   "clientId": "Rafael",
+   "score": 63,
+   "reason": "Abwehrsysteme gegen Drohnen auf einer Fachmesse."
+  },
+  {
+   "articleId": "https://example.org/radio/e9",
+   "clientId": "Covenant",
+   "score": 5,
+   "reason": "Kein Bezug zum Kunden."
+  }
+ ]
+}

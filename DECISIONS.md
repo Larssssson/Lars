@@ -442,7 +442,7 @@ Begründung: Fakten und Boilerplate sind vom Menschen gepflegtes Profilwissen, k
 
 ## Nachträge Phase 4
 
-**D-085** · 2026-10-21 · **Rückfrage an Lars**
+**D-085** · 2026-10-21 **[bestätigt 2026-10-21]**
 Frage: Mit welcher Bibliothek werden XLSX-Dateien gelesen?
 Entscheidung: Mit exceljs (MIT) statt SheetJS. Die aktuelle SheetJS-Version gibt es nur über das CDN von SheetJS, das in der Bauumgebung gesperrt ist; die Version im npm-Verzeichnis (0.18.5) hat bekannte Sicherheitslücken beim Lesen fremder Dateien. Das Lesen steckt in einer Funktion (`lib/domain/journo/import.ts`), ein Wechsel betrifft nur sie.
 Begründung: Importdateien kommen von außen; eine Bibliothek mit offenen Lücken wäre das größere Risiko.
@@ -522,3 +522,49 @@ Frage: Wie kommt der Projekt-Kontext für Freigaben zustande (D-012)?
 Entscheidung: Wird ein Kontakt aus einer Aufgabe geöffnet (Reiter Journalisten), gelten Kunde und Projekt dieser Aufgabe; sonst der Kunde in der Kopfzeile.
 Begründung: So greift eine Projektfreigabe genau dort, wo am Projekt gearbeitet wird.
 
+## Phase 5: Pressespiegel
+
+**D-101** · 2026-10-21 **[bestätigt 2026-10-21]**
+Frage: Zu welchem Kunden gehört die tägliche Aufgabe „Pressespiegel [Datum]“, wenn jede Aufgabe einen Kunden braucht (5.1), der Pressespiegel aber alle Kunden betrifft?
+Entscheidung: Zu einem internen Kunden „RP intern“ (`Client.isInternal`), der in Kundenauswahl, Kundenliste, Prüfung und Relevanz nicht erscheint; seine Aufgaben zeigen Listen bei jeder Kundenauswahl.
+Begründung: Rückfrage an Lars; so bleibt die Pflichtangabe Kunde erhalten, ohne die Aufgabe einem echten Kunden zuzuschlagen.
+
+**D-102** · 2026-10-21
+Frage: Welche Meltwater-Spalte wird zum Teaser?
+Entscheidung: „Opening Text“ und „Hit Sentence“ lassen sich beide dem Teaser zuordnen und werden mit Leerzeichen verbunden; Datumsangaben ohne Uhrzeit gelten als 12:00 Uhr Berliner Zeit.
+Begründung: Meltwater verteilt den Anriss auf zwei Spalten; 12 Uhr verhindert, dass ein Datum durch die Zeitzone auf den Vortag rutscht.
+
+**D-103** · 2026-10-21
+Frage: Wie bewertet die KI die Relevanz?
+Entscheidung: Direkt nach dem Import, in Paketen zu 15 Artikeln für alle aktiven Kunden mit „KI erlaubt“ gemeinsam; Artikel heißen für die KI nach ihrer URL (sonst A1, A2 …), Kunden nach dem Kurznamen. Kunden ohne KI bleiben unbewertet, Aufnehmen geht trotzdem. Eingefügter Volltext löst eine neue Bewertung aus.
+Begründung: Stabile Schlüssel machen die Antwort eindeutig prüfbar, Pakete halten die Anfrage klein.
+
+**D-104** · 2026-10-21
+Frage: Was zählt als „heute“ in „Heute relevant“ und auf der Kachel?
+Entscheidung: Artikel, die am heutigen Berliner Tag importiert oder angelegt wurden, nicht das Erscheinungsdatum; „Heute relevant“ zeigt je Kunde die 10 höchsten Werte ab 50.
+Begründung: Der Meltwater-Export eines Morgens enthält auch Artikel vom Vortag; gesichtet wird, was heute hereinkam.
+
+**D-105** · 2026-10-21
+Frage: Welche Darstellungsform und Frist bekommen die Aktionen Einschätzung, LinkedIn-Kommentar und Newshook-Pitch?
+Entscheidung: Einschätzung als Format Einschätzung (Medienarbeit), LinkedIn-Kommentar als Digitale Kommunikation (Leistung LinkedIn), Newshook-Pitch als Medien-Pitch an Autor und Medium des Artikels; Frist nächster Werktag 12 Uhr; gibt es genau eine passende laufende Leistung, wird sie verknüpft. Der ganze KI-Entwurf ist ein KI-Baustein, der Bezugsartikel enthält nur Fakten. Ohne KI entsteht die Aufgabe mit leeren Bausteinen.
+Begründung: Grundsätze 1 und 2: der Entwurf bleibt erkennbar KI, bis ein Mensch ihn annimmt.
+
+**D-106** · 2026-10-21
+Frage: Was steht im Pressespiegel-Dokument?
+Entscheidung: Format Pressespiegel mit Datum und je aufgenommenem Artikel Headline, Medium, Datum, Autor, Link, einer KI-Kurzfassung als KI-Baustein und dem Platzhalter „Einschätzung: [Einschätzung ergänzen]“ für die menschliche Einschätzung. Jeder Artikel kommt je Kunde nur einmal in einen Pressespiegel (Aktion PRESSESPIEGEL); Frist 2 Stunden nach Anlage.
+Begründung: Grundsatz 1: die Einschätzung schreibt ein Mensch; ein zweiter Klick am selben Tag soll keine Artikel doppeln.
+
+**D-107** · 2026-10-21
+Frage: Wer wird Owner eines per Klick übernommenen Autors?
+Entscheidung: Die Person, die klickt; der Kontakt bekommt das Label Pressespiegel (nicht verifiziert), alle Artikel dieses Autors im selben Medium werden ihm zugeordnet. Bekannte Autoren (Name plus Medium) werden beim Import automatisch zugeordnet.
+Begründung: BRIEFING 7.6 Schritt 7; so hat jeder neue Kontakt eine Ansprechperson.
+
+**D-108** · 2026-10-21
+Frage: Wann und mit welcher Frist entsteht die Aufgabe „Pressespiegel [Datum]“?
+Entscheidung: Der Job `pressespiegel-aufgabe` prüft alle 15 Minuten, ob an einem Werktag ein Dienst mit „Legt Aufgabe an“ begonnen hat, und legt die Aufgabe einmal je Dienst an; die Frist steht am Diensttyp („Frist der Aufgabe“, Standard 9:30 Uhr).
+Begründung: BRIEFING 7.6 Schritt 1 („Frist Standard 9:30 Uhr, einstellbar“).
+
+**D-109** · 2026-10-21
+Frage: Wie wird „Volltext nach 30 Tagen löschen“ umgesetzt?
+Entscheidung: Ablauf am Beginn des 31. Tages nach dem Einfügen; der Job `volltexte-loeschen` leert täglich um 3:15 Uhr abgelaufene Volltexte, Headline, Teaser und Link bleiben.
+Begründung: Grundsatz 9: keine fremden Volltexte auf Dauer.

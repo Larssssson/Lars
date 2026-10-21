@@ -8,4 +8,4 @@ Erfundene Kontakte, Telefonnummern aus dem fiktiven Bereich 555, Mailadressen un
 - `kontakte_sample.vcf`: 10 Einträge im vCard-Format 3.0 wie aus iCloud exportiert (N, FN, ORG, TITLE, EMAIL, TEL, NOTE),
   Greta Fischer mit zwei Telefonnummern, Peter Albrecht als Dublette zum Seed.
 
-- `kontakte_sample.xlsx`: dieselben Daten wie die CSV-Datei (erzeugt mit `node scripts/contacts-xlsx.mjs`).
+- `kontakte_sample.xlsx`: dieselben Daten wie die CSV-Datei (erzeugt mit `node scripts/fixtures-xlsx.mjs`).

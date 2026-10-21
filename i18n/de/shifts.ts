@@ -19,6 +19,7 @@ export const shifts = {
     end: "Ende",
     weekdays: "Wochentage",
     createsTask: "Legt Aufgabe an (Pressespiegel)",
+    taskDueTime: "Frist der Aufgabe",
     add: "Diensttyp anlegen",
     save: "Speichern",
   },

@@ -10,7 +10,7 @@ import type { ProfileContext } from "./profile-view";
 export async function loadProfileContext(clientId: string, user: NamedActor): Promise<ProfileContext | null> {
   const now = new Date();
   const profile = await loadProfile(prisma, clientId).catch(() => null);
-  if (!profile) return null;
+  if (!profile || profile.client.isInternal) return null;
   const [services, ctx, users, members] = await Promise.all([
     servicesWithProgress(prisma, clientId, now),
     loadPermissionContext(prisma, user.id),

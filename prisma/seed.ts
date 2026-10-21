@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import type { DocumentStore, FileStorage } from "../lib/adapters";
+import { internalClientId } from "../lib/domain/clients/internal";
 import { ensureClientFolders } from "../lib/domain/documents/filing";
 import { buildFilledContent, buildTemplateContent, parseBlocks } from "../lib/domain/documents/template";
 import { computePriority } from "../lib/domain/tasks/rules";
@@ -91,6 +92,8 @@ export async function seed(db: PrismaClient, now: Date = new Date(), stores: See
       });
     }
   }
+
+  await internalClientId(db);
 
   for (const s of seedShiftTypes) {
     await db.shiftType.upsert({ where: { key: s.key }, update: {}, create: s });

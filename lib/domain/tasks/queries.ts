@@ -37,7 +37,8 @@ export type TaskFilter = {
 export async function listTasks(db: PrismaClient, filter: TaskFilter, now: Date): Promise<TaskRow[]> {
   const status = filter.status ?? "OFFEN_ALLE";
   const where: Prisma.TaskWhereInput = {
-    clientId: filter.clientId ?? undefined,
+    // Aufgaben von "RP intern" gehören zu keinem Kunden und bleiben bei jeder Kundenauswahl sichtbar (DECISIONS D-101)
+    ...(filter.clientId ? { OR: [{ clientId: filter.clientId }, { client: { isInternal: true } }] } : {}),
     projectId: filter.projectId ?? undefined,
     ownerId: filter.ownerId ?? undefined,
     status:
@@ -91,7 +92,7 @@ export async function search(db: PrismaClient, query: string) {
       take: 50,
     }),
     db.client.findMany({
-      where: { OR: [{ name: { contains: q, mode: "insensitive" } }, { shortName: { contains: q, mode: "insensitive" } }] },
+      where: { isInternal: false, OR: [{ name: { contains: q, mode: "insensitive" } }, { shortName: { contains: q, mode: "insensitive" } }] },
       orderBy: { name: "asc" },
       take: 20,
     }),

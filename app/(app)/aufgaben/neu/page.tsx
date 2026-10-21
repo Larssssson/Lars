@@ -11,7 +11,7 @@ import { toLocalInput } from "@/lib/time";
 export default async function NewTaskPage({ searchParams }: { searchParams: Promise<{ kunde?: string }> }) {
   const user = await requireUser();
   const { kunde } = await searchParams;
-  const clients = await prisma.client.findMany({ where: { status: { not: "ARCHIVIERT" } }, orderBy: { name: "asc" } });
+  const clients = await prisma.client.findMany({ where: { status: { not: "ARCHIVIERT" }, isInternal: false }, orderBy: { name: "asc" } });
   // vorbelegt mit der Kundenauswahl der Kopfzeile (BRIEFING 6.1)
   const clientId = clients.find((c) => c.id === (kunde ?? user.selectedClientId))?.id ?? null;
   const ctx = await loadPermissionContext(prisma, user.id);

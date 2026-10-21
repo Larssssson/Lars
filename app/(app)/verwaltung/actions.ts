@@ -69,6 +69,7 @@ function shiftTypeInput(form: FormData) {
     defaultEnd: str(form, "defaultEnd") ?? "",
     weekdays: form.getAll("weekdays").map(Number),
     createsTask: bool(form, "createsTask"),
+    taskDueTime: str(form, "taskDueTime"),
   };
 }
 

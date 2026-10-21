@@ -1,10 +1,9 @@
-import ExcelJS from "exceljs";
 import ICAL from "ical.js";
-import Papa from "papaparse";
 import { z } from "zod";
 import { t } from "@/i18n";
 import type { Deps } from "@/lib/domain/deps";
 import { DomainError, NotFoundError } from "@/lib/domain/errors";
+import { parseCsvText, parseXlsxData } from "@/lib/files/tabular";
 import { assert, canEditContact, type Actor } from "@/lib/domain/permissions";
 import type { Prisma, PrismaClient } from "@/lib/generated/prisma/client";
 import { mediaByName, normalizeMail, normalizePhone } from "./contacts";
@@ -27,33 +26,6 @@ const VCF_COLUMNS = ["Vorname", "Nachname", "Name", "Medium", "Funktion", "E-Mai
 export function fileKind(name: string): ParsedFile["kind"] | null {
   const ext = name.toLowerCase().split(".").pop();
   return ext === "csv" ? "CSV" : ext === "xlsx" ? "XLSX" : ext === "vcf" ? "VCF" : null;
-}
-
-function parseCsv(text: string): Omit<ParsedFile, "kind"> {
-  const result = Papa.parse<Record<string, string>>(text.replace(/^﻿/, ""), { header: true, skipEmptyLines: "greedy", transformHeader: (h) => h.trim() });
-  return { columns: (result.meta.fields ?? []).filter(Boolean), rows: result.data };
-}
-
-/** XLSX: erstes Blatt, erste Zeile als Spaltennamen (DECISIONS D-085: exceljs statt SheetJS). */
-async function parseXlsx(data: Uint8Array): Promise<Omit<ParsedFile, "kind">> {
-  const workbook = new ExcelJS.Workbook();
-  await workbook.xlsx.load(data as unknown as ArrayBuffer);
-  const sheet = workbook.worksheets[0];
-  if (!sheet) return { columns: [], rows: [] };
-  const columns: string[] = [];
-  sheet.getRow(1).eachCell({ includeEmpty: true }, (cell, col) => {
-    columns[col - 1] = cell.text.trim();
-  });
-  const rows: Record<string, string>[] = [];
-  sheet.eachRow((row, index) => {
-    if (index === 1) return;
-    const record: Record<string, string> = {};
-    columns.forEach((name, i) => {
-      if (name) record[name] = row.getCell(i + 1).text.trim();
-    });
-    if (Object.values(record).some(Boolean)) rows.push(record);
-  });
-  return { columns: columns.filter(Boolean), rows };
 }
 
 function parseVcf(text: string): Omit<ParsedFile, "kind"> {
@@ -87,7 +59,7 @@ export async function parseContactFile(file: { name: string; data: Uint8Array })
   const text = () => new TextDecoder("utf-8").decode(file.data);
   let parsed: Omit<ParsedFile, "kind">;
   try {
-    parsed = kind === "CSV" ? parseCsv(text()) : kind === "XLSX" ? await parseXlsx(file.data) : parseVcf(text());
+    parsed = kind === "CSV" ? parseCsvText(text()) : kind === "XLSX" ? await parseXlsxData(file.data) : parseVcf(text());
   } catch {
     throw new DomainError(t.journo.errors.fileType);
   }

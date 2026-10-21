@@ -61,7 +61,7 @@ export async function warningsFor(
   now: Date,
 ): Promise<ClientWarning[]> {
   const clients = await db.client.findMany({
-    where: { status: "AKTIV", id: clientId ?? undefined },
+    where: { status: "AKTIV", isInternal: false, id: clientId ?? undefined },
     orderBy: { name: "asc" },
     select: { id: true, name: true },
   });

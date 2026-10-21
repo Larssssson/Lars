@@ -88,7 +88,7 @@ export function RevokeGrantButton({ grantId }: { grantId: string }) {
   );
 }
 
-type ShiftTypeValues = { name: string; defaultStart: string; defaultEnd: string; weekdays: number[]; createsTask: boolean };
+type ShiftTypeValues = { name: string; defaultStart: string; defaultEnd: string; weekdays: number[]; createsTask: boolean; taskDueTime: string | null };
 
 export function ShiftTypeForm({ id, values }: { id?: string; values?: ShiftTypeValues }) {
   const s = t.shifts.types;
@@ -108,7 +108,10 @@ export function ShiftTypeForm({ id, values }: { id?: string; values?: ShiftTypeV
           ))}
         </div>
       </fieldset>
-      <Checkbox label={s.createsTask} name="createsTask" defaultChecked={values?.createsTask ?? false} />
+      <div className="flex flex-wrap items-end gap-4">
+        <Checkbox label={s.createsTask} name="createsTask" defaultChecked={values?.createsTask ?? false} />
+        <Field label={s.taskDueTime} htmlFor={`st-due-${prefix}`}><Input id={`st-due-${prefix}`} name="taskDueTime" type="time" defaultValue={values?.taskDueTime ?? "09:30"} /></Field>
+      </div>
       <div><SubmitButton variant={id ? "outline" : "default"}>{id ? s.save : s.add}</SubmitButton></div>
     </ActionForm>
   );

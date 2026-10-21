@@ -21,7 +21,7 @@ export default async function ClientPage({ params }: { params: Promise<{ id: str
   const client = await prisma.client
     .findUnique({ where: { id }, include: { members: { include: { user: { select: { id: true, name: true } } } } } })
     .catch(() => null);
-  if (!client) notFound();
+  if (!client || client.isInternal) notFound();
 
   const now = new Date();
   const ctx = await loadPermissionContext(prisma, user.id);

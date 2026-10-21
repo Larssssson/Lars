@@ -38,7 +38,7 @@ export const seedClients: {
 /** Diensttypen zum Start (BRIEFING 7.8, Wochenenddienst nach DECISIONS D-025). Konfiguration, keine Beispieldaten. */
 export const seedShiftTypes = [
   { key: "CVD_VOM_DIENST", name: "CVD vom Dienst", defaultStart: "08:00", defaultEnd: "18:00", weekdays: [1, 2, 3, 4, 5], createsTask: false, sortOrder: 1 },
-  { key: "PRESSESPIEGEL", name: "Pressespiegel-Dienst", defaultStart: "07:00", defaultEnd: "10:00", weekdays: [1, 2, 3, 4, 5], createsTask: true, sortOrder: 2 },
+  { key: "PRESSESPIEGEL", name: "Pressespiegel-Dienst", defaultStart: "07:00", defaultEnd: "10:00", weekdays: [1, 2, 3, 4, 5], createsTask: true, taskDueTime: "09:30", sortOrder: 2 },
   { key: "WOCHENENDE", name: "Wochenenddienst", defaultStart: "09:00", defaultEnd: "17:00", weekdays: [6, 7], createsTask: false, sortOrder: 3 },
 ];
 

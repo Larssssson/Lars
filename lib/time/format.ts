@@ -20,6 +20,13 @@ export function formatDate(date: Date): string {
   return dateFormatter.format(date);
 }
 
+const longDateFormatter = new Intl.DateTimeFormat("de-DE", { timeZone: "Europe/Berlin", day: "numeric", month: "long", year: "numeric" });
+
+/** "20. Oktober 2026" in Berliner Zeit. */
+export function formatLongDate(date: Date): string {
+  return longDateFormatter.format(date);
+}
+
 /** "Di., 20.10." für einen Kalendertag. */
 export function formatDayKey(key: string): string {
   const [y, m, d] = key.split("-").map(Number) as [number, number, number];

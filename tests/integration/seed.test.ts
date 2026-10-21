@@ -26,7 +26,7 @@ describe("Seed (BRIEFING 3.4, 13.1)", () => {
   });
 
   it("legt die vier Startkunden mit Status, Leads und Teams an", async () => {
-    const clients = await db.client.findMany({ include: { members: { include: { user: true } } } });
+    const clients = await db.client.findMany({ where: { isInternal: false }, include: { members: { include: { user: true } } } });
     const byName = Object.fromEntries(clients.map((c) => [c.name, c]));
     expect(Object.keys(byName).sort()).toEqual(["Covenant", "Ground A", "Rafael", "SAFENET"]);
     expect(byName.SAFENET?.status).toBe("ONBOARDING");
@@ -42,7 +42,8 @@ describe("Seed (BRIEFING 3.4, 13.1)", () => {
   it("ist idempotent", async () => {
     await seed(db);
     expect(await db.user.count()).toBe(8);
-    expect(await db.client.count()).toBe(4);
+    expect(await db.client.count({ where: { isInternal: false } })).toBe(4);
+    expect(await db.client.count({ where: { isInternal: true, isSampleData: false } })).toBe(1);
     expect(await db.documentFormat.count()).toBe(13);
     expect(await db.shiftType.count()).toBe(3);
   });
@@ -84,7 +85,7 @@ describe("Beispieldaten entfernen (BRIEFING 13)", () => {
 
     await clearSamples(db);
 
-    expect(await db.client.count()).toBe(0);
+    expect(await db.client.count({ where: { isInternal: false } })).toBe(0);
     expect(await db.clientMember.count()).toBe(0);
     expect(await db.user.count()).toBe(8);
     expect(await db.documentFormat.count()).toBe(13);

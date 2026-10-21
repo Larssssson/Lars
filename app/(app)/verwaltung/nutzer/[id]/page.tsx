@@ -25,7 +25,7 @@ export default async function UserPage({ params }: { params: Promise<{ id: strin
   if (!user) notFound();
   const manage = canManageUsers(actor);
   const self = actor.id === user.id;
-  const clients = await prisma.client.findMany({ where: { status: { not: "ARCHIVIERT" } }, orderBy: { name: "asc" }, select: { id: true, name: true } });
+  const clients = await prisma.client.findMany({ where: { status: { not: "ARCHIVIERT" }, isInternal: false }, orderBy: { name: "asc" }, select: { id: true, name: true } });
   const g = t.admin.grants;
 
   return (

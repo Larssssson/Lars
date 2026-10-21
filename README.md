@@ -2,7 +2,7 @@
 
 Interne Presse- und Content-Plattform von Rud Pedersen Berlin. Die verbindliche Bauanleitung steht in [BRIEFING.md](BRIEFING.md), Entscheidungen zu offenen Punkten in [DECISIONS.md](DECISIONS.md), Änderungen je Phase in [CHANGELOG.md](CHANGELOG.md).
 
-**Stand:** Phase 4 (Journo Hub). Der Pressespiegel ist noch ein Platzhalter und folgt in Phase 5.
+**Stand:** Phase 5 (Pressespiegel). Push, Livegang-Reife und Übergabe folgen in Phase 6.
 
 ## Start in drei Befehlen
 
@@ -40,7 +40,7 @@ Führt nacheinander aus:
 | Befehl | Art | Inhalt |
 |---|---|---|
 | `npm run test:unit` | Vitest, Einheit | Rechtematrix (jede Zeile), Priorität, Werktage und Feiertage, Statusregeln, Adapter (auch Claude ohne Netz), Änderungsverfolgung, Word-Export und -Import, Dateinamen und Ordner, Versionsvergleich, ai-service, Strukturprüfung, Fundstellen, KI-Bausteine im Editor, Kontaktdaten verdecken, Telefonnummern, Importformate |
-| `npm run test:integration` | Vitest, Integration | Seed, Aufgaben, Priorität-Job, Archivierung, Redaktion-Filter, Dashboard, Warnungen, Nutzer- und Kundenverwaltung, Protokoll, Dienstplan, Leistung bei 500 Aufgaben, Sperre, Freigabe, Selbstfreigabe, Versand, Rückläufer, PDF, SharePoint-Ablage, Kommentare, Versionen, Projekte, Kundenprofil, Onboarding, Aktivierung, Vorschläge, lernendes Profil, Prüfung in beiden Modi, Verwerfungsregeln, KI-Bausteine, „KI erlaubt“, Journo Hub (Liste, Aufdecken, Verifizieren, Owner, Anfragen, Import, Pflege, Auskunft, Löschen, Journalistenvorschläge, Offboarding, Suche) |
+| `npm run test:integration` | Vitest, Integration | Seed, Aufgaben, Priorität-Job, Archivierung, Redaktion-Filter, Dashboard, Warnungen, Nutzer- und Kundenverwaltung, Protokoll, Dienstplan, Leistung bei 500 Aufgaben, Sperre, Freigabe, Selbstfreigabe, Versand, Rückläufer, PDF, SharePoint-Ablage, Kommentare, Versionen, Projekte, Kundenprofil, Onboarding, Aktivierung, Vorschläge, lernendes Profil, Prüfung in beiden Modi, Verwerfungsregeln, KI-Bausteine, „KI erlaubt“, Journo Hub (Liste, Aufdecken, Verifizieren, Owner, Anfragen, Import, Pflege, Auskunft, Löschen, Journalistenvorschläge, Offboarding, Suche), Pressespiegel (Import CSV/XLSX, Zusammenfassen, Autorenzuordnung, Relevanz, Heute relevant, Volltext-Löschung, Aktionen, LinkedIn nur mit Leistung, Autor übernehmen, Pressespiegel-Dokument, Aufgabe aus dem Dienstplan mit Frist, Kachel) |
 | `npm run test:e2e` | Playwright, Ende zu Ende | Login, Kundenauswahl, Aufgaben, Glocke, Hochstufen, Redaktion, Dashboard, Dienstplan, Verwaltung, Kunden, Suche; der ganze Redaktionsablauf aus Phase 2 (PM schreiben, Freigabe mit Änderungsverfolgung, Kunde, Rückläufer, zweite Freigabe, Medien, Datei im SharePoint-Ordner); Sperre, Mitlesen, Kommentare, Versionsvergleich; Projekte; Live-Hinweise, Prüfung, KI-Baustein mit Sperre der Freigabe, Kundenwissen, Kundenprofil, Onboarding SAFENET, KI aus; Journo Hub mit Anfrage und Freigabe, Verifizieren, Import, Reiter Journalisten, Pflege, Auskunft, Löschen, Offboarding |
 
 Integrationstests laufen mit fester Uhr (Dienstag, 20.10.2026, 10:00 Uhr), damit jede Priorität aus 13.5 vorkommt.
@@ -126,6 +126,17 @@ Die KI antwortet lokal mit den Beispielantworten aus `fixtures/ai/` (abgestimmt 
 - **Im Editor** (z. B. PM Standortentscheidung): Reiter Journalisten mit Begründungen; „Vormerken“ und beim Versand an Medien als Empfänger übernehmen.
 - **Als Lars (CVD):** Journo Hub → Pflege, auf einem Kontakt „Auskunft als JSON/PDF“ und „Kontakt endgültig löschen“; Verwaltung → Nutzer → „Offboarding starten“.
 
+## Was man in Phase 5 ausprobieren kann
+
+- **Import als Mika:** Pressespiegel → Import mit `fixtures/monitoring/meltwater_sample.csv` (oder `.xlsx`). Die Spalten sind vorgeschlagen; nach „Importieren“: 37 Artikel, 3 gleiche zusammengefasst, 19 bekannten Autoren zugeordnet. Die Zuordnung wird für den nächsten Import gespeichert.
+- **Heute relevant:** je Kunde die 10 höchsten Werte ab 50 mit Begründung (Beispielantworten der KI aus `fixtures/ai/relevance.valid.json`). Die Kundenauswahl in der Kopfzeile filtert.
+- **Aufnehmen** per Häkchen; danach „Einschätzung erzeugen“, „Newshook-Pitch erzeugen“, „Autor in Journo Hub übernehmen“ und, nur bei Kunden mit Leistung LinkedIn, „LinkedIn-Kommentar erzeugen“. Die Aufgabe öffnet sich über den Link am Artikel, der Entwurf ist hellblau mit Label KI.
+- **Autor übernehmen:** „Wehrtechnik: Neue Fertigung für Munition in Planung“ (Karla Weiß) ist unbekannt und wird Kontakt mit Label Pressespiegel; bei bekannten Autoren meldet impress „schon im Journo Hub“.
+- **Volltext einfügen** am Artikel: wird neu bewertet und nach 30 Tagen gelöscht.
+- **Pressespiegel erstellen** je Kunde: ein Dokument mit allen heute aufgenommenen Artikeln, Kurzfassung als KI-Baustein, Einschätzung als Platzhalter.
+- **Alle Artikel** mit Suche und Zeitraum, **Artikel von Hand** unter Import.
+- **Dashboard:** Kachel Pressespiegel (heute importiert, relevant, aufgenommen, wer Dienst hat). Die Aufgabe „Pressespiegel [Datum]“ legt der Worker zu Dienstbeginn an (Kunde „RP intern“, Frist am Diensttyp in Verwaltung → Diensttypen).
+
 ## Hintergrundjobs
 
 | Job | Zeitplan (Berlin) | Zweck |
@@ -135,6 +146,8 @@ Die KI antwortet lokal mit den Beispielantworten aus `fixtures/ai/` (abgestimmt 
 | `kunden-warnungen` | täglich 7:00 | Profilwarnungen und Leistungsrückstand in die Glocke |
 | `kontaktanfragen-erinnern` | stündlich | Owner einmal erinnern, wenn eine Kontaktanfrage 24 Stunden offen ist |
 | `journo-pflege` | Montag 6:00 | mögliche Dubletten und Kontakte ohne Aktivität den CVDs vorlegen |
+| `pressespiegel-aufgabe` | alle 15 Minuten | zu Beginn eines Pressespiegel-Dienstes die Aufgabe „Pressespiegel [Datum]“ anlegen |
+| `volltexte-loeschen` | täglich 3:15 | eingefügte Volltexte nach 30 Tagen löschen |
 
 Ohne laufenden Worker berechnen die Listen die Priorität trotzdem beim Anzeigen; nur die Benachrichtigungen des Jobs fehlen dann.
 

@@ -11,7 +11,7 @@ export default async function ClientsPage({ searchParams }: { searchParams: Prom
   const { archiviert } = await searchParams;
   const showArchived = archiviert === "1";
   const clients = await prisma.client.findMany({
-    where: showArchived ? {} : { status: { not: "ARCHIVIERT" } },
+    where: showArchived ? { isInternal: false } : { status: { not: "ARCHIVIERT" }, isInternal: false },
     include: { members: { include: { user: { select: { name: true } } } } },
     orderBy: { name: "asc" },
   });

@@ -39,7 +39,7 @@ export default async function ContactPage({ params, searchParams }: { params: Pr
   const [missing, media, clients, projects, myRequests] = await Promise.all([
     missingForVerification(prisma, contact.id),
     prisma.media.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
-    prisma.client.findMany({ where: { status: { not: "ARCHIVIERT" } }, orderBy: { name: "asc" }, select: { id: true, name: true } }),
+    prisma.client.findMany({ where: { status: { not: "ARCHIVIERT" }, isInternal: false }, orderBy: { name: "asc" }, select: { id: true, name: true } }),
     prisma.project.findMany({ where: { status: { in: ["GEPLANT", "LAUFEND"] } }, orderBy: { title: "asc" }, include: { client: { select: { name: true } } } }),
     prisma.contactRequest.findMany({ where: { journalistId: contact.id, requesterId: user.id }, include: { client: { select: { name: true } } }, orderBy: { createdAt: "desc" } }),
   ]);

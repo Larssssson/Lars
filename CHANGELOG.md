@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## Phase 5: Pressespiegel · 2026-10-21
+
+- Import des Meltwater-Exports (CSV und XLSX) mit Spaltenzuordnung, die gespeichert und beim nächsten Import vorgeschlagen wird; gleiche Artikel (URL oder Headline, Medium, Tag) werden zusammengefasst; Artikel von Hand anlegen.
+- Bekannte Autoren (Name plus Medium) werden beim Import automatisch der Artikel-Historie im Journo Hub zugeordnet; neue Autoren nur per Klick „Autor in Journo Hub übernehmen“ (Label Pressespiegel, wer klickt, wird Owner).
+- Relevanz je Kunde mit Wert und Begründung über die KI (Prompt `relevance`), Kunden ohne „KI erlaubt“ bleiben unbewertet. Ansichten „Heute relevant“ (Top 10 ab 50 je Kunde) und „Alle Artikel“ mit Suche und Zeitraum.
+- Aufnehmen je Kunde; Volltext einfügen mit Neubewertung und Löschung nach 30 Tagen (Job `volltexte-loeschen`).
+- Aktionen: Einschätzung, LinkedIn-Kommentar (nur mit Leistung LinkedIn), Newshook-Pitch an Autor und Medium, Autor übernehmen; Ergebnisse als Aufgaben in der Redaktion mit KI-Entwurf als KI-Baustein und Link am Artikel.
+- Pressespiegel-Dokument pro Kunde mit allen heute aufgenommenen Artikeln, KI-Kurzfassung und Platzhalter für die Einschätzung.
+- Aufgabe „Pressespiegel [Datum]“ automatisch zu Dienstbeginn (Job `pressespiegel-aufgabe`) beim internen Kunden „RP intern“, sichtbar bei jeder Kundenauswahl; Frist am Diensttyp einstellbar (Standard 9:30).
+- Kachel Pressespiegel auf dem Dashboard.
+- Beispieldatei 13.3 `fixtures/monitoring/meltwater_sample.csv` und `.xlsx`, KI-Beispielantworten für Relevanz, Kurzfassung und Entwürfe; XLSX-Lesen gemeinsam für Journo Hub und Pressespiegel (`lib/files/tabular.ts`).
+- Migrationen `phase5_internal_relevance` und `phase5_review_due`.
+
 ## Phase 4: Journo Hub · 2026-10-21
 
 - Kontaktverzeichnis mit Medien (Typ, Ressorts) und Kontakten (Name, Medium, Ressort, Funktion, Themen, Region, Notizen, Kontaktdaten), Status-Labels in Farbe und Wort, Liste mit Filtern nach Medium, Medientyp, Ressort, Thema, Status und Owner; zuletzt geschrieben aus der Artikel-Historie.

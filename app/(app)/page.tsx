@@ -10,6 +10,7 @@ import { warningsFor } from "@/lib/domain/clients/warnings";
 import { canSeeTeamView, isCvd } from "@/lib/domain/permissions";
 import { loadPermissionContext } from "@/lib/domain/permissions/context";
 import { shiftsOn, weekView } from "@/lib/domain/shifts";
+import { monitoringTile } from "@/lib/domain/monitoring/relevance";
 import { approvalsWaitingFor, myTasksGrouped, openDocumentsByStatus, teamView } from "@/lib/domain/tasks/dashboard";
 import { OPEN_STATUSES } from "@/lib/domain/tasks/rules";
 import { requireUser } from "@/lib/session";
@@ -27,7 +28,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const mayApprove = isCvd(user) || ctx.memberships.some((m) => m.canApprove) || ctx.grants.some((g) => g.permission === "APPROVE");
   const isLeadSomewhere = ctx.memberships.some((m) => m.kind === "LEAD");
 
-  const [clientName, mine, approvals, docCounts, todayShifts, week, warnings, team] = await Promise.all([
+  const [clientName, mine, approvals, docCounts, todayShifts, week, warnings, team, monitoring] = await Promise.all([
     selectedClientName(prisma, clientId),
     myTasksGrouped(prisma, user.id, clientId, now),
     mayApprove ? approvalsWaitingFor(prisma, user, ctx, clientId) : Promise.resolve([]),
@@ -36,6 +37,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     weekView(prisma, today),
     isCvd(user) || isLeadSomewhere ? warningsFor(prisma, user, ctx, clientId, now) : Promise.resolve(null),
     showTeam ? teamView(prisma, clientId, now) : Promise.resolve(null),
+    monitoringTile(prisma, clientId, now),
   ]);
   const d = t.dashboard;
 
@@ -179,6 +181,15 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 ))}
               </ul>
               <Button asChild variant="outline" size="sm" className="mt-4"><Link href="/redaktion">{d.toRedaktion}</Link></Button>
+            </Card>
+            <Card data-testid="monitoring-tile">
+              <CardTitle>{t.monitoring.tile.title}</CardTitle>
+              <ul className="mt-2 flex flex-col gap-1 text-sm">
+                <li>{monitoring.imported ? t.monitoring.tile.imported(monitoring.imported) : t.monitoring.tile.notImported}</li>
+                {monitoring.imported > 0 && <li>{t.monitoring.tile.relevant(monitoring.relevant)} · {t.monitoring.tile.selected(monitoring.selected)}</li>}
+                <li className="text-muted-foreground">{monitoring.serviceName ? t.monitoring.tile.service(monitoring.serviceName) : t.monitoring.tile.noService}</li>
+              </ul>
+              <Button asChild variant="outline" size="sm" className="mt-4"><Link href="/pressespiegel">{t.monitoring.tile.open}</Link></Button>
             </Card>
           </div>
         </div>

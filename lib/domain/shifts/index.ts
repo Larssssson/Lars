@@ -131,6 +131,8 @@ export const shiftTypeSchema = z.object({
   defaultEnd: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, t.shifts.errors.timeInvalid),
   weekdays: z.array(z.number().int().min(1).max(7)).min(1, t.shifts.errors.weekdaysRequired),
   createsTask: z.boolean().default(false),
+  /** Frist der automatisch angelegten Aufgabe (BRIEFING 7.6 Schritt 1, Standard 9:30 Uhr) */
+  taskDueTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, t.shifts.errors.timeInvalid).nullish(),
 });
 
 export async function createShiftType(deps: Deps, actor: Actor, raw: z.input<typeof shiftTypeSchema>) {

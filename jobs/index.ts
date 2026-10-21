@@ -3,6 +3,8 @@ import { prisma } from "../lib/db";
 import { notifyClientWarnings } from "../lib/domain/clients/service";
 import type { Deps } from "../lib/domain/deps";
 import { weeklyContactMaintenance } from "../lib/domain/journo/maintenance";
+import { createPressReviewTasks } from "../lib/domain/monitoring/actions";
+import { purgeExpiredFullTexts } from "../lib/domain/monitoring/articles";
 import { remindOpenRequests } from "../lib/domain/journo/requests";
 import { archiveCompletedTasks, recalculatePriorities } from "../lib/domain/tasks/service";
 
@@ -50,8 +52,20 @@ export const jobs: JobDefinition[] = [
     description: "Mögliche Dubletten und Kontakte ohne Aktivität seit 24 Monaten den CVDs vorlegen (7.5).",
     handler: weeklyContactMaintenance,
   },
+  {
+    name: "pressespiegel-aufgabe",
+    cron: "*/15 * * * *",
+    description: "Zu Dienstbeginn die Aufgabe \"Pressespiegel [Datum]\" für den Pressespiegel-Dienst anlegen (7.6).",
+    handler: createPressReviewTasks,
+  },
+  {
+    name: "volltexte-loeschen",
+    cron: "15 3 * * *",
+    description: "Eingefügte Volltexte nach 30 Tagen löschen (7.6, Urheberrecht).",
+    handler: purgeExpiredFullTexts,
+  },
 ];
 
 export function jobDeps(): Deps {
-  return { db: prisma, push: adapters.push(), files: adapters.fileStorage(), documents: adapters.documentStore(), ai: adapters.ai(), now: () => new Date() };
+  return { db: prisma, push: adapters.push(), files: adapters.fileStorage(), documents: adapters.documentStore(), ai: adapters.ai(), monitoring: adapters.monitoring(), now: () => new Date() };
 }

@@ -184,7 +184,7 @@ export async function notifyClientWarnings(deps: Deps): Promise<number> {
   const now = deps.now();
   const weekAgo = new Date(now.getTime() - 7 * 86_400_000);
   const [clients, cvds] = await Promise.all([
-    deps.db.client.findMany({ where: { status: "AKTIV" }, include: { members: { where: { kind: "LEAD" } } } }),
+    deps.db.client.findMany({ where: { status: "AKTIV", isInternal: false }, include: { members: { where: { kind: "LEAD" } } } }),
     deps.db.user.findMany({ where: { role: "CVD", active: true }, select: { id: true } }),
   ]);
   let created = 0;

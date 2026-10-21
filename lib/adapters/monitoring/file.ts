@@ -1,26 +1,17 @@
 import { readFile } from "node:fs/promises";
-import Papa from "papaparse";
-import type { MonitoringFile, MonitoringSource, RawArticleRow } from "./types";
+import { parseCsvText, parseXlsxData } from "@/lib/files/tabular";
+import type { MonitoringFile, MonitoringSource } from "./types";
 
-function parseCsv(text: string): { columns: string[]; rows: RawArticleRow[] } {
-  const result = Papa.parse<RawArticleRow>(text.replace(/^﻿/, ""), {
-    header: true,
-    skipEmptyLines: true,
-    transformHeader: (header) => header.trim(),
-  });
-  return { columns: result.meta.fields ?? [], rows: result.data };
-}
-
-/** Datei-Import (Meltwater CSV; XLSX folgt in Phase 5). */
+/** Datei-Import: Meltwater-Export als CSV oder XLSX (BRIEFING 7.6). */
 export class FileMonitoringSource implements MonitoringSource {
   readonly kind: "file" | "sample" = "file";
 
   async readRows(file?: MonitoringFile) {
     if (!file) throw new Error("Keine Datei übergeben.");
-    if (!file.fileName.toLowerCase().endsWith(".csv")) {
-      throw new Error("Dieses Dateiformat wird noch nicht unterstützt.");
-    }
-    return parseCsv(new TextDecoder("utf-8").decode(file.data));
+    const name = file.fileName.toLowerCase();
+    if (name.endsWith(".csv")) return parseCsvText(new TextDecoder("utf-8").decode(file.data));
+    if (name.endsWith(".xlsx")) return parseXlsxData(file.data);
+    throw new Error("Dieses Dateiformat wird nicht unterstützt.");
   }
 }
 

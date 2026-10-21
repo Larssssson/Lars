@@ -6,8 +6,8 @@ import { assert, canSelectClient, type Actor } from "@/lib/domain/permissions";
 export async function setSelectedClient(db: PrismaClient, actor: Actor, clientId: string | null): Promise<void> {
   assert(canSelectClient(actor));
   if (clientId !== null) {
-    const client = await db.client.findUnique({ where: { id: clientId }, select: { status: true } });
-    if (!client || client.status === "ARCHIVIERT") throw new Error(t.errors.clientNotSelectable);
+    const client = await db.client.findUnique({ where: { id: clientId }, select: { status: true, isInternal: true } });
+    if (!client || client.status === "ARCHIVIERT" || client.isInternal) throw new Error(t.errors.clientNotSelectable);
   }
   await db.user.update({
     where: { id: actor.id },
@@ -18,7 +18,7 @@ export async function setSelectedClient(db: PrismaClient, actor: Actor, clientId
 /** Kunden für die Auswahl: alle nicht archivierten, alphabetisch. */
 export function listSelectableClients(db: PrismaClient) {
   return db.client.findMany({
-    where: { status: { not: "ARCHIVIERT" } },
+    where: { status: { not: "ARCHIVIERT" }, isInternal: false },
     orderBy: { name: "asc" },
     select: { id: true, name: true, shortName: true, status: true },
   });
