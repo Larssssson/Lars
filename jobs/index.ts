@@ -2,6 +2,8 @@ import { adapters } from "../lib/adapters";
 import { prisma } from "../lib/db";
 import { notifyClientWarnings } from "../lib/domain/clients/service";
 import type { Deps } from "../lib/domain/deps";
+import { weeklyContactMaintenance } from "../lib/domain/journo/maintenance";
+import { remindOpenRequests } from "../lib/domain/journo/requests";
 import { archiveCompletedTasks, recalculatePriorities } from "../lib/domain/tasks/service";
 
 /**
@@ -35,6 +37,18 @@ export const jobs: JobDefinition[] = [
     cron: "0 7 * * *",
     description: "Profilwarnungen und Leistungsrückstand in die Glocke von Kunden-Lead und CVDs (7.9).",
     handler: notifyClientWarnings,
+  },
+  {
+    name: "kontaktanfragen-erinnern",
+    cron: "0 * * * *",
+    description: "Owner einmal erinnern, wenn eine Kontaktanfrage 24 Stunden unbeantwortet ist (6.7).",
+    handler: remindOpenRequests,
+  },
+  {
+    name: "journo-pflege",
+    cron: "0 6 * * 1",
+    description: "Mögliche Dubletten und Kontakte ohne Aktivität seit 24 Monaten den CVDs vorlegen (7.5).",
+    handler: weeklyContactMaintenance,
   },
 ];
 

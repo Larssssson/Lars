@@ -7,6 +7,7 @@ import { Card, CardTitle } from "@/components/ui/card";
 import { t } from "@/i18n";
 import { prisma } from "@/lib/db";
 import { finalTextsFor } from "@/lib/domain/clients/profile";
+import { bookmarkedRecipients } from "@/lib/domain/journo/suggestions";
 import type { Fact, SectionContent } from "@/lib/domain/clients/profile-sections";
 import { checkLabel, latestCheck } from "@/lib/domain/documents/check";
 import { loadDocument } from "@/lib/domain/documents/service";
@@ -51,7 +52,7 @@ export async function DocumentTaskPage({ taskId, user }: { taskId: string; user:
   const mayEdit = canEditDocument(user, ctx, { ...task, claimedBy: openApproval?.claimedBy ?? null });
   const autoClaim = inReview && decision.allowed && !isOwner;
 
-  const [versions, approvals, dispatches, comments, approvers, users, check, insertions, profileRows, speakers, finalTexts] = await Promise.all([
+  const [versions, approvals, dispatches, comments, approvers, users, check, insertions, profileRows, speakers, finalTexts, bookmarked] = await Promise.all([
     prisma.documentVersion.findMany({ where: { documentId: document.id }, orderBy: { number: "desc" } }),
     prisma.approval.findMany({ where: { documentId: document.id }, orderBy: { requestedAt: "desc" }, include: { version: { select: { number: true } } } }),
     prisma.dispatch.findMany({ where: { documentId: document.id }, orderBy: { sentAt: "desc" } }),
@@ -63,6 +64,7 @@ export async function DocumentTaskPage({ taskId, user }: { taskId: string; user:
     prisma.clientProfileSection.findMany({ where: { clientId: task.clientId, key: { in: ["ziele_kernbotschaften", "factsheet", "qa"] } } }),
     prisma.speaker.findMany({ where: { clientId: task.clientId }, orderBy: { name: "asc" } }),
     finalTextsFor(prisma, task.clientId, 6),
+    bookmarkedRecipients({ db: prisma }, document.id),
   ]);
   const section = (key: string) => (profileRows.find((r) => r.key === key)?.content ?? {}) as SectionContent;
   const asList = (v: unknown) => (Array.isArray(v) ? v.map((x) => (typeof x === "string" ? x : String((x as Fact).text))) : []);
@@ -199,7 +201,7 @@ export async function DocumentTaskPage({ taskId, user }: { taskId: string; user:
             {task.status === "FREIGEGEBEN" && manage && (
               <>
                 <p className="text-sm font-medium">{t.dispatch.nextStep}</p>
-                <DispatchForm taskId={task.id} title={task.title} clientHasLogo={Boolean(task.client.logoFileId)} />
+                <DispatchForm taskId={task.id} title={task.title} clientHasLogo={Boolean(task.client.logoFileId)} bookmarked={bookmarked} />
                 <ReopenButton taskId={task.id} label={t.documents.reopen} />
               </>
             )}

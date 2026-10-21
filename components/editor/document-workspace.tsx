@@ -33,6 +33,7 @@ import { cn } from "@/lib/utils";
 import { AiMenu, type AiKind } from "./ai-menu";
 import { CheckPanel, type CheckView, type FindingView } from "./check-panel";
 import { clientExtensions } from "./extensions";
+import { JournalistsPanel } from "./journalists-panel";
 import { KnowledgePanel, type KnowledgeView } from "./knowledge-panel";
 import { Toolbar } from "./toolbar";
 
@@ -566,7 +567,7 @@ export function DocumentWorkspace(props: Props) {
               onDone={() => router.refresh()}
             />
           )}
-          {tab === "journalisten" && <p className="text-muted-foreground">{d.laterTab(4)}</p>}
+          {tab === "journalisten" && <JournalistsPanel taskId={props.taskId} onBookmarkChange={() => router.refresh()} />}
           {tab === "kundenwissen" && <KnowledgePanel knowledge={props.knowledge} canInsert={editing} onInsert={insertKnowledge} />}
         </div>
       </aside>

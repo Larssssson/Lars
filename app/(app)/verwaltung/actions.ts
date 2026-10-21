@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { t } from "@/i18n";
 import { createUser, grantPermission, revokePermission, setUserActive, setUserRole } from "@/lib/domain/permissions/admin";
+import { completeOffboarding, reassignTask, resolveOwnedContact, type ContactResolution } from "@/lib/domain/permissions/offboarding";
 import { createFormat, updateFormat } from "@/lib/domain/documents/formats";
 import { createShiftType, updateShiftType } from "@/lib/domain/shifts";
 import type { Permission } from "@/lib/generated/prisma/enums";
@@ -113,5 +114,31 @@ export async function updateFormatAction(id: string, _state: ActionState, form: 
     return t.common.saved;
   });
   revalidatePath("/", "layout");
+  return result;
+}
+
+// ------------------------------------------------------------- Offboarding (BRIEFING 6.9)
+
+export async function reassignTaskAction(offboardUserId: string, taskId: string, _state: ActionState, form: FormData): Promise<ActionState> {
+  const result = await runAction(async () => reassignTask(serverDeps(), await requireUser(), offboardUserId, taskId, str(form, "ownerId") ?? ""));
+  revalidatePath(`/verwaltung/nutzer/${offboardUserId}/offboarding`);
+  return result;
+}
+
+export async function resolveContactAction(offboardUserId: string, ownerRowId: string, _state: ActionState, form: FormData): Promise<ActionState> {
+  const kind = str(form, "kind");
+  const resolution: ContactResolution =
+    kind === "TRANSFER" ? { kind, userId: str(form, "userId") ?? "" } : kind === "NOTE" ? { kind, note: str(form, "note") ?? "" } : { kind: "INACTIVE" };
+  const result = await runAction(async () => resolveOwnedContact(serverDeps(), await requireUser(), offboardUserId, ownerRowId, resolution));
+  revalidatePath(`/verwaltung/nutzer/${offboardUserId}/offboarding`);
+  return result;
+}
+
+export async function completeOffboardingAction(offboardUserId: string, _state: ActionState): Promise<ActionState> {
+  const result = await runAction(async () => {
+    await completeOffboarding(serverDeps(), await requireUser(), offboardUserId);
+    return t.admin.offboarding.completed;
+  });
+  revalidatePath("/verwaltung", "layout");
   return result;
 }

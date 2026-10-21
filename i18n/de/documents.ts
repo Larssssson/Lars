@@ -35,7 +35,6 @@ export const documents = {
   reopen: "Text ändern (neue Freigabe nötig)",
   confirmReopen: "Der Text geht zurück in die Bearbeitung und braucht eine neue Freigabe. Fortfahren?",
   tabs: { pruefung: "Prüfung", journalisten: "Journalisten", kundenwissen: "Kundenwissen", kommentare: "Kommentare", aenderungen: "Änderungen" },
-  laterTab: (phase: number) => `Kommt in Phase ${phase}.`,
   knowledge: {
     coreMessages: "Kernbotschaften",
     speakers: "Sprecher",

@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## Phase 4: Journo Hub · 2026-10-21
+
+- Kontaktverzeichnis mit Medien (Typ, Ressorts) und Kontakten (Name, Medium, Ressort, Funktion, Themen, Region, Notizen, Kontaktdaten), Status-Labels in Farbe und Wort, Liste mit Filtern nach Medium, Medientyp, Ressort, Thema, Status und Owner; zuletzt geschrieben aus der Artikel-Historie.
+- Kontaktdaten getrennt gespeichert und immer verdeckt (Telefon mit den letzten 2 Ziffern); Aufdecken für Owner, CVDs und nach Freigabe für den gewählten Kunden bzw. das Projekt, jedes Aufdecken im Protokoll.
+- Verifizieren mit Telefon, Mail und erstem Kontakt, wer verifiziert wird Owner; CVDs entziehen mit Grund.
+- Owner mit „seit“, Beziehungsnotiz und -qualität; höchstens 3 aktive, ein vierter wartet auf einen CVD; inaktive Owner nach Offboarding.
+- Kontaktanfrage (6.7): Push und Glocke an die Owner, Freigeben, Selbst übernehmen (Aufgabe), Ablehnen mit Begründung, Erinnerung nach 24 Stunden, Übersicht für CVDs; danach selbst als Owner eintragen.
+- „Wer kennt jemanden bei diesem Medium“ auf Kontakten ohne Owner.
+- Import von CSV, XLSX und vCard in vier Schritten mit speicherbarer Zuordnung, Dubletten (Mail, Telefon nach E.164, Name plus Medium) und Entscheidung je Zeile.
+- Wöchentliche Pflege (Montag 6 Uhr): mögliche Dubletten und Kontakte ohne Aktivität seit 24 Monaten für die CVDs.
+- Reiter Journalisten im Editor: passende Kontakte mit Begründung, verifizierte zuerst, Sperrfrist oben; Öffnen, Anfragen, Vormerken; vorgemerkte Kontakte als Empfängervorschlag beim Versand an Medien.
+- Offboarding in der Verwaltung: Aufgaben übertragen, Kontakte übertragen, Notiz oder inaktiv, Abschluss sperrt den Zugang.
+- Auskunft als JSON und PDF und endgültiges Löschen von Kontakten (nur CVD), Protokoll ohne personenbezogene Inhalte.
+- Suche findet Kontakte über Name und Medium. Importdateien sind nur für die hochladende Person abrufbar.
+- Seed 13.2 mit Medien, Journalisten, Kontaktdaten, Ownern und Artikel-Historie; Beispieldateien `fixtures/contacts/` (CSV, vCard, XLSX).
+
 ## Phase 3: Kundenprofil, Prüfung, KI-Bausteine · 2026-10-21
 
 - Kundenprofil mit allen 16 Abschnitten aus 7.7: „bestätigt am“ mit Person, Warnung nach 90 Tagen, Compliance nach 365 Tagen rot. Kunden-Lead und CVD bearbeiten (Kommunikationsziele, KPIs, Leistungen, Stammdaten nur CVD), Redakteure schlagen vor.

@@ -120,10 +120,18 @@ export function ClientAgreedButton({ taskId }: { taskId: string }) {
  * Versenden (BRIEFING 6.5): Ziel wählen, exportieren oder kopieren, außerhalb verschicken,
  * Empfänger und Kanal eintragen und "Versendet" bestätigen.
  */
-export function DispatchForm({ taskId, title, clientHasLogo }: { taskId: string; title: string; clientHasLogo: boolean }) {
+export function DispatchForm({ taskId, title, clientHasLogo, bookmarked = [] }: {
+  taskId: string;
+  title: string;
+  clientHasLogo: boolean;
+  /** vorgemerkte Kontakte als Empfängervorschlag beim Versand an Medien (BRIEFING 7.5) */
+  bookmarked?: { id: string; label: string }[];
+}) {
   const s = t.dispatch;
   const e = t.documents.export;
   const [template, setTemplate] = useState<"RP" | "KUNDE">("RP");
+  const [target, setTarget] = useState<string>(Object.keys(s.targets)[0] ?? "");
+  const [recipients, setRecipients] = useState("");
   const [copied, setCopied] = useState(false);
   const exportUrl = (art: "docx" | "pdf") => `/api/dokumente/${taskId}/export?art=${art}&vorlage=${template}`;
 
@@ -134,7 +142,7 @@ export function DispatchForm({ taskId, title, clientHasLogo }: { taskId: string;
         <legend className="mb-1 text-sm font-medium">{s.target}</legend>
         {(Object.keys(s.targets) as (keyof typeof s.targets)[]).map((key, i) => (
           <label key={key} className="flex items-center gap-2 text-sm">
-            <input type="radio" name="target" value={key} defaultChecked={i === 0} className="accent-primary" /> {s.targets[key]}
+            <input type="radio" name="target" value={key} checked={target === key || (!target && i === 0)} onChange={() => setTarget(key)} className="accent-primary" /> {s.targets[key]}
           </label>
         ))}
       </fieldset>
@@ -160,7 +168,23 @@ export function DispatchForm({ taskId, title, clientHasLogo }: { taskId: string;
           {s.mailDraft}
         </Button>
       </div>
-      <Field label={s.recipients} htmlFor="dispatch-recipients"><Input id="dispatch-recipients" name="recipients" required /></Field>
+      <Field label={s.recipients} htmlFor="dispatch-recipients">
+        <Input id="dispatch-recipients" name="recipients" required value={recipients} onChange={(ev) => setRecipients(ev.currentTarget.value)} />
+      </Field>
+      {target === "MEDIEN" && bookmarked.length > 0 && (
+        <div className="flex flex-col gap-1 text-xs" data-testid="recipient-suggestions">
+          <span className="text-muted-foreground">{t.journo.editor.recipientsSuggestion}</span>
+          <div className="flex flex-wrap gap-1">
+            {bookmarked.map((b) => (
+              <Button key={b.id} type="button" size="sm" variant="outline" className="h-7"
+                disabled={recipients.includes(b.label)}
+                onClick={() => setRecipients((current) => [current.trim(), b.label].filter(Boolean).join(", "))}>
+                + {b.label}
+              </Button>
+            ))}
+          </div>
+        </div>
+      )}
       <Field label={s.channel} htmlFor="dispatch-channel"><Input id="dispatch-channel" name="channel" required placeholder={s.channelPlaceholder} /></Field>
       <SubmitButton>{s.confirm}</SubmitButton>
     </ActionForm>

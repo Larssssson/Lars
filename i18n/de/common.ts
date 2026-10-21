@@ -8,6 +8,7 @@ export const common = {
   admin: "Admin",
   saved: "Gespeichert.",
   yes: "ja",
+  pleaseChoose: "Bitte wählen",
   no: "nein",
   back: "Zurück",
   edit: "Bearbeiten",

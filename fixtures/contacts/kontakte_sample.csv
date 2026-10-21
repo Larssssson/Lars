@@ -1,0 +1,26 @@
+Vorname;Nachname;Medium;Ressort;E-Mail;Telefon;Notiz
+Jana;Hofmann;Tagesblatt Nord;Politik;jana.hofmann@example.org;+49 30 5550101;Dublette zum Seed
+Karl;Fischer;Wehrtechnik Aktuell;Redaktion;karl.fischer@example.org;030 5550150;kennt Ole Brandt
+Nina;Berger;Sachsen Rundschau;Wirtschaft;;0151 5550160;keine Mail bekannt
+Peter;Albrecht;Tagesblatt Nord;Wirtschaft;p.albrecht@example.org;030 5550102;Dublette zum Seed über die Telefonnummer
+Stefan;Lorenz;Sachsen Rundschau;Lokales;stefan.lorenz.privat@example.org;;Dublette zum Seed über Name und Medium
+Anna;Schmidt;Hauptstadt Kurier;Politik;anna.schmidt@example.org;030 5550111;
+Lukas;Meyer;Radio Mitte;Nachrichten;lukas.meyer@example.org;030 5550112;
+Julia;Wagner;Nachrichtendienst Deutschland;Wirtschaft;julia.wagner@example.org;030 5550113;
+Felix;Becker;Wehrtechnik Aktuell;Redaktion;felix.becker@example.org;030 5550114;Schwerpunkt Marine
+Laura;Hoffmann;Tagesblatt Nord;Feuilleton;laura.hoffmann@example.org;030 5550115;
+Jonas;Schulz;Sachsen Rundschau;Lokales;jonas.schulz@example.org;030 5550116;
+Marie;Koch;Hauptstadt Kurier;Wirtschaft;marie.koch@example.org;030 5550117;
+Paul;Richter;Radio Mitte;Politik;paul.richter@example.org;030 5550118;
+Sophie;Klein;Wirtschaftswoche Ost;Unternehmen;sophie.klein@example.org;030 5550119;neues Medium
+Leon;Wolf;Nachrichtendienst Deutschland;Politik;leon.wolf@example.org;030 5550120;
+Emma;Schröder;Tagesblatt Nord;Politik;emma.schroeder@example.org;030 5550121;
+Ben;Neumann;Sachsen Rundschau;Wirtschaft;ben.neumann@example.org;030 5550122;
+Mia;Schwarz;Wehrtechnik Aktuell;Redaktion;mia.schwarz@example.org;030 5550123;
+Noah;Zimmermann;Hauptstadt Kurier;Politik;;030 5550124;keine Mail bekannt
+Lena;Braun;Radio Mitte;Nachrichten;lena.braun@example.org;030 5550125;
+Elias;Krüger;Tagesblatt Nord;Wirtschaft;elias.krueger@example.org;030 5550126;
+Hanna;Hartmann;Nachrichtendienst Deutschland;Politik;hanna.hartmann@example.org;030 5550127;
+Tom;Lange;Sachsen Rundschau;Lokales;tom.lange@example.org;030 5550128;
+Clara;Werner;Hauptstadt Kurier;Feuilleton;clara.werner@example.org;030 5550129;
+Max;Krause;Wehrtechnik Aktuell;Redaktion;max.krause@example.org;030 5550130;

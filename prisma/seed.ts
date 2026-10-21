@@ -9,6 +9,8 @@ import {
   seedClients,
   seededProfileSections,
   seedFormats,
+  seedJournalists,
+  seedMedia,
   seedProfileAges,
   seedProfiles,
   seedServices,
@@ -305,6 +307,69 @@ async function seedPhase1(db: PrismaClient, now: Date, userIds: Record<SeedUserK
         where: { shiftTypeId_date_userId: { shiftTypeId: type.id, date, userId } },
         update: {},
         create: { shiftTypeId: type.id, userId, date, start, end, ...sample },
+      });
+    }
+  }
+
+  await seedJournoHub(db, now, userIds);
+}
+
+/** Journo Hub (BRIEFING 13.2): Medien, Journalisten mit Kontaktdaten, Ownern und Artikel-Historie. */
+async function seedJournoHub(db: PrismaClient, now: Date, userIds: Record<SeedUserKey, string>) {
+  const sample = { isSampleData: true };
+  const mediaIds: Record<string, string> = {};
+  for (const m of seedMedia) {
+    const media = await db.media.upsert({ where: { name: m.name }, update: {}, create: { ...m, ...sample } });
+    mediaIds[m.name] = media.id;
+  }
+  for (const j of seedJournalists) {
+    if (await db.journalist.findFirst({ where: { firstName: j.firstName, lastName: j.lastName } })) continue;
+    const firstOwner = j.owners[0] ? userIds[j.owners[0]] : null;
+    const verified = j.status === "VERIFIZIERT";
+    const journalist = await db.journalist.create({
+      data: {
+        firstName: j.firstName,
+        lastName: j.lastName,
+        mediaId: mediaIds[j.media],
+        desk: j.desk,
+        topics: j.topics,
+        status: j.status,
+        source: j.status === "VERIFIZIERT" || j.status === "MANUELL" ? "MENSCH" : j.status,
+        firstContactAt: verified ? new Date(now.getTime() - 400 * DAY) : null,
+        verifiedBy: verified ? firstOwner : null,
+        verifiedAt: verified ? new Date(now.getTime() - 300 * DAY) : null,
+        lastActivityAt: new Date(now.getTime() - 30 * DAY),
+        createdBy: firstOwner,
+        updatedBy: firstOwner,
+        ...sample,
+      },
+    });
+    const mail = `${j.firstName}.${j.lastName}@example.org`.toLowerCase();
+    const phone = `+${j.phone.replace(/\D/g, "")}`;
+    await db.contactDetail.createMany({
+      data: [
+        { journalistId: journalist.id, kind: "TELEFON", value: phone, isPrimary: true, ...sample },
+        { journalistId: journalist.id, kind: "MAIL", value: mail, isPrimary: true, ...sample },
+      ],
+    });
+    for (const [i, key] of j.owners.entries()) {
+      await db.contactOwner.create({
+        data: { journalistId: journalist.id, userId: userIds[key], since: new Date(now.getTime() - (300 - i * 30) * DAY), relationQuality: "GUT", ...sample },
+      });
+    }
+    for (const a of j.articles ?? []) {
+      await db.article.create({
+        data: {
+          publishedAt: new Date(now.getTime() - a.daysAgo * DAY),
+          headline: a.headline,
+          teaser: a.teaser,
+          mediaName: j.media,
+          mediaId: mediaIds[j.media],
+          authorName: `${j.firstName} ${j.lastName}`,
+          journalistId: journalist.id,
+          language: "de",
+          ...sample,
+        },
       });
     }
   }

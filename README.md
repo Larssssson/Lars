@@ -2,7 +2,7 @@
 
 Interne Presse- und Content-Plattform von Rud Pedersen Berlin. Die verbindliche Bauanleitung steht in [BRIEFING.md](BRIEFING.md), Entscheidungen zu offenen Punkten in [DECISIONS.md](DECISIONS.md), Änderungen je Phase in [CHANGELOG.md](CHANGELOG.md).
 
-**Stand:** Phase 3 (Kundenprofil, Prüfung, KI-Bausteine). Pressespiegel und Journo Hub sind noch Platzhalter; der Reiter Journalisten im Editor folgt in Phase 4.
+**Stand:** Phase 4 (Journo Hub). Der Pressespiegel ist noch ein Platzhalter und folgt in Phase 5.
 
 ## Start in drei Befehlen
 
@@ -39,9 +39,9 @@ Führt nacheinander aus:
 
 | Befehl | Art | Inhalt |
 |---|---|---|
-| `npm run test:unit` | Vitest, Einheit | Rechtematrix (jede Zeile), Priorität, Werktage und Feiertage, Statusregeln, Adapter (auch Claude ohne Netz), Änderungsverfolgung, Word-Export und -Import, Dateinamen und Ordner, Versionsvergleich, ai-service, Strukturprüfung, Fundstellen, KI-Bausteine im Editor |
-| `npm run test:integration` | Vitest, Integration | Seed, Aufgaben, Priorität-Job, Archivierung, Redaktion-Filter, Dashboard, Warnungen, Nutzer- und Kundenverwaltung, Protokoll, Dienstplan, Leistung bei 500 Aufgaben, Sperre, Freigabe, Selbstfreigabe, Versand, Rückläufer, PDF, SharePoint-Ablage, Kommentare, Versionen, Projekte, Kundenprofil, Onboarding, Aktivierung, Vorschläge, lernendes Profil, Prüfung in beiden Modi, Verwerfungsregeln, KI-Bausteine, „KI erlaubt“ |
-| `npm run test:e2e` | Playwright, Ende zu Ende | Login, Kundenauswahl, Aufgaben, Glocke, Hochstufen, Redaktion, Dashboard, Dienstplan, Verwaltung, Kunden, Suche; der ganze Redaktionsablauf aus Phase 2 (PM schreiben, Freigabe mit Änderungsverfolgung, Kunde, Rückläufer, zweite Freigabe, Medien, Datei im SharePoint-Ordner); Sperre, Mitlesen, Kommentare, Versionsvergleich; Projekte; Live-Hinweise, Prüfung, KI-Baustein mit Sperre der Freigabe, Kundenwissen, Kundenprofil, Onboarding SAFENET, KI aus |
+| `npm run test:unit` | Vitest, Einheit | Rechtematrix (jede Zeile), Priorität, Werktage und Feiertage, Statusregeln, Adapter (auch Claude ohne Netz), Änderungsverfolgung, Word-Export und -Import, Dateinamen und Ordner, Versionsvergleich, ai-service, Strukturprüfung, Fundstellen, KI-Bausteine im Editor, Kontaktdaten verdecken, Telefonnummern, Importformate |
+| `npm run test:integration` | Vitest, Integration | Seed, Aufgaben, Priorität-Job, Archivierung, Redaktion-Filter, Dashboard, Warnungen, Nutzer- und Kundenverwaltung, Protokoll, Dienstplan, Leistung bei 500 Aufgaben, Sperre, Freigabe, Selbstfreigabe, Versand, Rückläufer, PDF, SharePoint-Ablage, Kommentare, Versionen, Projekte, Kundenprofil, Onboarding, Aktivierung, Vorschläge, lernendes Profil, Prüfung in beiden Modi, Verwerfungsregeln, KI-Bausteine, „KI erlaubt“, Journo Hub (Liste, Aufdecken, Verifizieren, Owner, Anfragen, Import, Pflege, Auskunft, Löschen, Journalistenvorschläge, Offboarding, Suche) |
+| `npm run test:e2e` | Playwright, Ende zu Ende | Login, Kundenauswahl, Aufgaben, Glocke, Hochstufen, Redaktion, Dashboard, Dienstplan, Verwaltung, Kunden, Suche; der ganze Redaktionsablauf aus Phase 2 (PM schreiben, Freigabe mit Änderungsverfolgung, Kunde, Rückläufer, zweite Freigabe, Medien, Datei im SharePoint-Ordner); Sperre, Mitlesen, Kommentare, Versionsvergleich; Projekte; Live-Hinweise, Prüfung, KI-Baustein mit Sperre der Freigabe, Kundenwissen, Kundenprofil, Onboarding SAFENET, KI aus; Journo Hub mit Anfrage und Freigabe, Verifizieren, Import, Reiter Journalisten, Pflege, Auskunft, Löschen, Offboarding |
 
 Integrationstests laufen mit fester Uhr (Dienstag, 20.10.2026, 10:00 Uhr), damit jede Priorität aus 13.5 vorkommt.
 
@@ -116,6 +116,16 @@ Die echten Adapter prüfen ihre Zugangsdaten. Der Claude-Adapter ist umgesetzt (
 
 Die KI antwortet lokal mit den Beispielantworten aus `fixtures/ai/` (abgestimmt auf die PM Standortentscheidung und SAFENET). Mit `AI_PROVIDER=anthropic` und `ANTHROPIC_API_KEY` läuft die echte Claude API.
 
+## Was man in Phase 4 ausprobieren kann
+
+- **Journo Hub als Laura:** Liste filtern (z. B. Status „Verifiziert RP“), Telefon und Mail sind verdeckt. Jana Hofmann öffnen: Telefon zeigt nur die letzten 2 Ziffern, Artikel-Historie mit 3 Artikeln. „Kontakt anfragen“ für Covenant.
+- **Als Lukas:** Glocke und Journo Hub → Anfragen: „Freigeben“, „Selbst übernehmen“ oder „Ablehnen“. Danach kann Laura bei gewähltem Kunden Covenant aufdecken (steht im Protokoll) und sich als Owner eintragen.
+- **Tim Neumann** hat keinen Owner: „Wer kennt jemanden bei diesem Medium“ zeigt Miriam Krause (Owner Juliana).
+- **Verifizieren:** bei Stefan Lorenz fehlt das Datum des ersten Kontakts; nach dem Eintragen wird verifiziert und wer verifiziert, wird Owner.
+- **Import:** Journo Hub → Import mit `fixtures/contacts/kontakte_sample.csv`, `.xlsx` oder `.vcf`: Zuordnung, Vorschau mit 3 Dubletten, übernehmen.
+- **Im Editor** (z. B. PM Standortentscheidung): Reiter Journalisten mit Begründungen; „Vormerken“ und beim Versand an Medien als Empfänger übernehmen.
+- **Als Lars (CVD):** Journo Hub → Pflege, auf einem Kontakt „Auskunft als JSON/PDF“ und „Kontakt endgültig löschen“; Verwaltung → Nutzer → „Offboarding starten“.
+
 ## Hintergrundjobs
 
 | Job | Zeitplan (Berlin) | Zweck |
@@ -123,6 +133,8 @@ Die KI antwortet lokal mit den Beispielantworten aus `fixtures/ai/` (abgestimmt 
 | `prioritaet-neu-berechnen` | alle 5 Minuten | Priorität aus der Frist, Push beim Übergang nach Dringend |
 | `archivierung` | täglich 2:30 | Aufgaben 30 Tage nach Erledigt archivieren |
 | `kunden-warnungen` | täglich 7:00 | Profilwarnungen und Leistungsrückstand in die Glocke |
+| `kontaktanfragen-erinnern` | stündlich | Owner einmal erinnern, wenn eine Kontaktanfrage 24 Stunden offen ist |
+| `journo-pflege` | Montag 6:00 | mögliche Dubletten und Kontakte ohne Aktivität den CVDs vorlegen |
 
 Ohne laufenden Worker berechnen die Listen die Priorität trotzdem beim Anzeigen; nur die Benachrichtigungen des Jobs fehlen dann.
 

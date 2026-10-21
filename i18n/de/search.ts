@@ -4,6 +4,6 @@ export const search = {
   tooShort: "Bitte mindestens zwei Zeichen eingeben.",
   tasks: "Aufgaben",
   clients: "Kunden",
+  contacts: "Kontakte",
   none: "Nichts gefunden.",
-  laterHint: "Gesucht wird in Aufgaben, Texten der Dokumente und Kunden. Kontakte kommen mit Phase 4 dazu.",
 } as const;

@@ -1,0 +1,8 @@
+{
+  "suggestions": [
+    { "journalistId": "K1", "reason": "Schreibt regelmäßig über Verteidigung und Industrie, passend zum Standortthema." },
+    { "journalistId": "K2", "reason": "Ressort und Themen passen zur Ansiedlung, Zielmedium des Kunden." },
+    { "journalistId": "K3", "reason": "Fachmedium aus den Zielmedien, berichtet über Rüstungsindustrie." },
+    { "journalistId": "K4", "reason": "Berichtet über Verteidigungspolitik." }
+  ]
+}

@@ -371,3 +371,55 @@ export const seedShiftRotation = {
   cvd: ["lars", "lukas"] as SeedUserKey[],
   pressespiegel: ["laura", "robin", "mika", "juliana", "hannah"] as SeedUserKey[],
 };
+
+/** Medien (BRIEFING 13.2), erfunden. */
+export const seedMedia: { name: string; type: "LEITMEDIUM" | "REGIONAL" | "FACH" | "AGENTUR" | "RUNDFUNK" | "ONLINE"; desks: string[] }[] = [
+  { name: "Tagesblatt Nord", type: "LEITMEDIUM", desks: ["Politik", "Wirtschaft"] },
+  { name: "Hauptstadt Kurier", type: "LEITMEDIUM", desks: ["Politik", "Wirtschaft"] },
+  { name: "Sachsen Rundschau", type: "REGIONAL", desks: ["Lokales", "Wirtschaft"] },
+  { name: "Wehrtechnik Aktuell", type: "FACH", desks: ["Redaktion"] },
+  { name: "Nachrichtendienst Deutschland", type: "AGENTUR", desks: ["Politik"] },
+  { name: "Radio Mitte", type: "RUNDFUNK", desks: ["Nachrichten"] },
+];
+
+export type SeedJournalist = {
+  firstName: string;
+  lastName: string;
+  media: string;
+  desk: string;
+  topics: string[];
+  status: "VERIFIZIERT" | "MANUELL" | "IMPORT" | "PRESSESPIEGEL";
+  owners: SeedUserKey[];
+  /** fiktive Durchwahl aus +49 30 555 0100 bis 0199 */
+  phone: string;
+  articles?: { daysAgo: number; headline: string; teaser: string }[];
+};
+
+/**
+ * Journalisten (BRIEFING 13.2). Mailadressen vorname.nachname@example.org. Tim Neumann ist
+ * absichtlich ohne Owner, damit "Wer kennt jemanden bei diesem Medium" Miriam Krause zeigt (DECISIONS D-093).
+ */
+export const seedJournalists: SeedJournalist[] = [
+  {
+    firstName: "Jana", lastName: "Hofmann", media: "Tagesblatt Nord", desk: "Politik", topics: ["Verteidigung", "Bundeswehr"], status: "VERIFIZIERT", owners: ["lukas", "lars"], phone: "+49 30 5550101",
+    articles: [
+      { daysAgo: 6, headline: "[Beispiel] Bundeswehr plant neue Beschaffungen", teaser: "Das Verteidigungsministerium will Aufträge schneller vergeben." },
+      { daysAgo: 21, headline: "[Beispiel] Verteidigungsetat soll weiter steigen", teaser: "Die Koalition einigt sich auf höhere Ausgaben." },
+      { daysAgo: 45, headline: "[Beispiel] Rüstungsindustrie sucht neue Standorte", teaser: "Mehrere Unternehmen prüfen Ansiedlungen in Ostdeutschland." },
+    ],
+  },
+  {
+    firstName: "Peter", lastName: "Albrecht", media: "Tagesblatt Nord", desk: "Wirtschaft", topics: ["Industrie", "Rüstung"], status: "VERIFIZIERT", owners: ["lukas"], phone: "+49 30 5550102",
+    articles: [
+      { daysAgo: 2, headline: "[Beispiel] Neue Produktionsstätte für Rüstungsgüter in Sachsen geplant", teaser: "Ein US-Unternehmen prüft einen Standort bei Leipzig." },
+      { daysAgo: 14, headline: "[Beispiel] Industrie meldet volle Auftragsbücher", teaser: "Vor allem Zulieferer profitieren." },
+      { daysAgo: 40, headline: "[Beispiel] Arbeitsplätze in der Rüstungsindustrie wachsen", teaser: "Die Branche sucht Fachkräfte." },
+    ],
+  },
+  { firstName: "Miriam", lastName: "Krause", media: "Hauptstadt Kurier", desk: "Wirtschaft", topics: ["Technologie", "Start-ups"], status: "VERIFIZIERT", owners: ["juliana"], phone: "+49 30 5550103" },
+  { firstName: "Stefan", lastName: "Lorenz", media: "Sachsen Rundschau", desk: "Lokales", topics: ["Ansiedlungen", "Arbeitsmarkt"], status: "MANUELL", owners: ["laura"], phone: "+49 30 5550104" },
+  { firstName: "Ole", lastName: "Brandt", media: "Wehrtechnik Aktuell", desk: "Redaktion", topics: ["Luftverteidigung", "Drohnen"], status: "IMPORT", owners: ["robin"], phone: "+49 30 5550105" },
+  { firstName: "Sabine", lastName: "Vogt", media: "Nachrichtendienst Deutschland", desk: "Politik", topics: ["Sicherheitspolitik"], status: "PRESSESPIEGEL", owners: ["mika"], phone: "+49 30 5550106" },
+  { firstName: "Tim", lastName: "Neumann", media: "Hauptstadt Kurier", desk: "Politik", topics: ["Verteidigung"], status: "PRESSESPIEGEL", owners: [], phone: "+49 30 5550107" },
+  { firstName: "Lea", lastName: "Schubert", media: "Radio Mitte", desk: "Nachrichten", topics: ["allgemein"], status: "MANUELL", owners: ["hannah"], phone: "+49 30 5550108" },
+];

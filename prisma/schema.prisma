@@ -789,6 +789,8 @@ model ContactOwner {
   relationQuality RelationQuality?
   /// false nach Austritt des Nutzers
   active          Boolean          @default(true)
+  /// vierter aktiver Owner wartet auf die Zustimmung eines CVD (BRIEFING 6.7)
+  pendingApproval Boolean          @default(false)
   isSampleData    Boolean          @default(false)
   createdAt       DateTime         @default(now())
   createdBy       String?          @db.Uuid

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ActiveToggle, GrantForm, RevokeGrantButton, RoleForm } from "@/components/admin/admin-forms";
 import { MembershipForm, RemoveMembershipButton } from "@/components/clients/client-forms";
@@ -34,7 +35,12 @@ export default async function UserPage({ params }: { params: Promise<{ id: strin
           <h2 className="text-xl font-semibold">{user.name}</h2>
           <p className="text-sm text-muted-foreground">{user.email} · <Badge>{user.active ? t.admin.users.active : t.admin.users.blocked}</Badge></p>
         </div>
-        {manage && !self && <ActiveToggle userId={user.id} active={user.active} />}
+        {manage && !self && (
+          <div className="flex flex-wrap items-center gap-2">
+            {user.active && <Link href={`/verwaltung/nutzer/${user.id}/offboarding`} className="text-sm underline">{t.admin.offboarding.start}</Link>}
+            <ActiveToggle userId={user.id} active={user.active} />
+          </div>
+        )}
       </div>
 
       <div className="grid gap-5 lg:grid-cols-2">

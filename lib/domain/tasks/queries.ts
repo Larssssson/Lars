@@ -66,14 +66,18 @@ export function getTask(db: PrismaClient, id: string) {
   });
 }
 
-/** Suche über Aufgaben, Dokumente (Titel und Text) und Kunden (DECISIONS D-022); Kontakte folgen in Phase 4. */
+/**
+ * Suche über Aufgaben, Dokumente (Titel und Text), Kunden und Kontakte (DECISIONS D-022). Kontakte
+ * nur über Name und Medium, nie über Kontaktdaten.
+ */
 export async function search(db: PrismaClient, query: string) {
   const q = query.trim();
-  if (q.length < 2) return { tasks: [], clients: [] };
+  if (q.length < 2) return { tasks: [], clients: [], contacts: [] };
   const pattern = `%${q.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
   const inDocuments = await db.$queryRaw<{ taskId: string }[]>`
     SELECT "taskId" FROM "Document" WHERE "title" ILIKE ${pattern} OR "content"::text ILIKE ${pattern} LIMIT 100`;
-  const [tasks, clients] = await Promise.all([
+  const words = q.split(/\s+/).filter(Boolean);
+  const [tasks, clients, contacts] = await Promise.all([
     db.task.findMany({
       where: {
         OR: [
@@ -91,6 +95,20 @@ export async function search(db: PrismaClient, query: string) {
       orderBy: { name: "asc" },
       take: 20,
     }),
+    db.journalist.findMany({
+      where: {
+        AND: words.map((w) => ({
+          OR: [
+            { firstName: { contains: w, mode: "insensitive" as const } },
+            { lastName: { contains: w, mode: "insensitive" as const } },
+            { media: { name: { contains: w, mode: "insensitive" as const } } },
+          ],
+        })),
+      },
+      select: { id: true, firstName: true, lastName: true, media: { select: { name: true } } },
+      orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
+      take: 30,
+    }),
   ]);
-  return { tasks, clients };
+  return { tasks, clients, contacts };
 }

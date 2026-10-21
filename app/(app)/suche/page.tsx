@@ -6,7 +6,7 @@ import { search } from "@/lib/domain/tasks/queries";
 import { computePriority } from "@/lib/domain/tasks/rules";
 import { requireUser } from "@/lib/session";
 
-/** Suche über Aufgaben und Kunden (BRIEFING 4, DECISIONS D-022). */
+/** Suche über Aufgaben, Kunden und Kontakte (BRIEFING 4, DECISIONS D-022). */
 export default async function SearchPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   await requireUser();
   const { q = "" } = await searchParams;
@@ -32,10 +32,19 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
             )}
           </section>
           <section className="flex flex-col gap-2">
+            <h2 className="text-lg font-semibold">{s.contacts}</h2>
+            {result.contacts.length === 0 ? <p className="text-sm text-muted-foreground">{s.none}</p> : (
+              <ul className="flex flex-wrap gap-2" data-testid="search-contacts">
+                {result.contacts.map((c) => (
+                  <li key={c.id}><Link href={`/journo-hub/${c.id}`} className="rounded-md border px-3 py-1.5 text-sm hover:bg-accent">{c.firstName} {c.lastName}{c.media ? ` · ${c.media.name}` : ""}</Link></li>
+                ))}
+              </ul>
+            )}
+          </section>
+          <section className="flex flex-col gap-2">
             <h2 className="text-lg font-semibold">{s.tasks}</h2>
             <TaskTable tasks={tasks} now={now} />
           </section>
-          <p className="text-xs text-muted-foreground">{s.laterHint}</p>
         </>
       )}
     </div>

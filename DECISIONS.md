@@ -395,7 +395,7 @@ Frage: Wie bleiben Markierung im Text und Datensatz AiInsertion gleich?
 Entscheidung: Der Datensatz entsteht beim Einfügen, die Markierung trägt seine ID. Beim Speichern gilt ein offener Baustein ohne Markierung als verworfen; Markierungen ohne offenen Datensatz entfernt der Server. KI-Bausteine erzeugen und annehmen darf, wer den Text gerade bearbeiten darf.
 Begründung: Die Sperre der Freigabeanfrage hängt am Datensatz; der Server darf sich nicht auf den Browser verlassen.
 
-**D-076** · 2026-10-21 · **offen, Rückfrage an Lars**
+**D-076** · 2026-10-21 · bestätigt von Lars (21.10.2026)
 Frage: Temperatur 0 und 0,4 (BRIEFING 8.3 Regel 3) mit den Standardmodellen aus 8.1.
 Entscheidung: Die Standardmodelle `claude-sonnet-5-5` und `claude-haiku-5-5` lehnen eigene Temperaturwerte ab (Fehler 400). Der Adapter schickt die Temperatur daher nur an Modelle, die sie annehmen; gespeichert wird die Vorgabe je Funktion trotzdem. Gleichmäßige Ergebnisse sichern Prompts, JSON-Schema und Zod-Prüfung.
 Begründung: Die Regel ist mit den vorgegebenen Modellen technisch nicht umsetzbar; Vorschlag an Lars siehe Bericht.
@@ -439,3 +439,86 @@ Begründung: Der Ersatz-Adapter bleibt Standard; der echte ist nur per `AI_PROVI
 Frage: Wie wird Profilwissen aus dem Reiter Kundenwissen eingefügt?
 Entscheidung: Als normaler Text an der letzten Cursorposition, ohne KI-Markierung; die Änderungsverfolgung greift wie bei jeder Eingabe.
 Begründung: Fakten und Boilerplate sind vom Menschen gepflegtes Profilwissen, kein KI-Text.
+
+## Nachträge Phase 4
+
+**D-085** · 2026-10-21 · **Rückfrage an Lars**
+Frage: Mit welcher Bibliothek werden XLSX-Dateien gelesen?
+Entscheidung: Mit exceljs (MIT) statt SheetJS. Die aktuelle SheetJS-Version gibt es nur über das CDN von SheetJS, das in der Bauumgebung gesperrt ist; die Version im npm-Verzeichnis (0.18.5) hat bekannte Sicherheitslücken beim Lesen fremder Dateien. Das Lesen steckt in einer Funktion (`lib/domain/journo/import.ts`), ein Wechsel betrifft nur sie.
+Begründung: Importdateien kommen von außen; eine Bibliothek mit offenen Lücken wäre das größere Risiko.
+
+**D-086** · 2026-10-21
+Frage: Wer ist Owner eines von Hand angelegten Kontakts?
+Entscheidung: Wer ihn anlegt, wie beim Import.
+Begründung: Jeder Kontakt soll einen bekannten Owner haben (7.5).
+
+**D-087** · 2026-10-21
+Frage: Wer darf vorhandene Telefonnummern und Mailadressen ändern?
+Entscheidung: Fehlende Angaben darf jeder ergänzen; vorhandene ändert nur, wer sie aufdecken darf. Das Formular zeigt nie die gespeicherten Werte, ein leeres Feld lässt sie unverändert.
+Begründung: Sonst ließen sich verdeckte Daten unbemerkt überschreiben oder ohne Protokoll ansehen.
+
+**D-088** · 2026-10-21
+Frage: Welchen Status hat ein Kontakt nach dem Entzug der Verifizierung?
+Entscheidung: Manuell; der Grund steht im Protokoll.
+Begründung: Er ist danach ein von Hand gepflegter, nicht verifizierter Kontakt.
+
+**D-089** · 2026-10-21
+Frage: Welchen Typ bekommen Medien, die beim Import neu entstehen?
+Entscheidung: Online; der Typ lässt sich unter Medien ändern.
+Begründung: Der Typ steht in Kontaktlisten selten; ein Medium ohne Typ erlaubt das Datenmodell nicht.
+
+**D-090** · 2026-10-21
+Frage: Wer entscheidet über Anfragen zu Kontakten ohne aktiven Owner?
+Entscheidung: Die CVDs; sie werden dann benachrichtigt. Ein CVD darf jede Anfrage entscheiden.
+Begründung: Sonst bliebe die Anfrage ohne Empfänger (z. B. Tim Neumann).
+
+**D-091** · 2026-10-21
+Frage: Was bedeutet „zusammenführen“ beim Import?
+Entscheidung: Leere Felder und fehlende Kontaktdaten werden ergänzt, Themen vereinigt, Notizen angehängt; nichts wird überschrieben, Status und Owner bleiben. Vorgabe in der Vorschau: Dubletten zum Bestand zusammenführen, Dubletten innerhalb der Datei überspringen. Die Importdatei liest nur, wer sie hochgeladen hat, und wird nach dem Import gelöscht.
+Begründung: Vorsichtig mit vorhandenen, oft verifizierten Daten; so wenig Daten wie nötig.
+
+**D-092** · 2026-10-21
+Frage: Wie entstehen die Journalistenvorschläge im Editor?
+Entscheidung: impress wählt regelbasiert vor (Themen, Artikel der letzten 60 Tage, Zielmedien) und setzt die Begründung aus den Daten zusammen. Die KI ordnet nur diese Auswahl; sie bekommt Schlüssel (K1, K2 …), Medium, Ressort, Themen und Überschriften, keine Namen und keine Kontaktdaten. Verifizierte stehen immer vorn. Ohne KI bleibt die regelbasierte Reihenfolge.
+Begründung: Die KI kann keine Kontakte erfinden, und die Begründung ist nachprüfbar.
+
+**D-093** · 2026-10-21
+Frage: 13.2 nennt Mika als Owner von Tim Neumann, der Text darunter sagt „ohne Owner“.
+Entscheidung: Tim Neumann ist ohne Owner angelegt.
+Begründung: Der Text nennt den Zweck ausdrücklich („Wer kennt jemanden bei diesem Medium“).
+
+**D-094** · 2026-10-21
+Frage: Welche Frist hat die Aufgabe bei „Selbst übernehmen“?
+Entscheidung: Bei dringender Anfrage zwei Stunden, sonst nächster Werktag 12 Uhr; Kunde und Projekt aus der Anfrage.
+Begründung: Einfache Standardwerte, die der Owner anpassen kann.
+
+**D-095** · 2026-10-21
+Frage: Was zählt als Aktivität für die Pflege, und wie wird die Liste vorgelegt?
+Entscheidung: Anlegen, Bearbeiten, Verifizieren, Anfragen, neue Owner und Artikel im Pressespiegel. Der Job am Montag 6 Uhr meldet den CVDs die Zahlen in der Glocke; die Liste unter Journo Hub → Pflege wird beim Öffnen frisch berechnet.
+Begründung: Keine zweite Kopie der Daten; nichts geschieht automatisch.
+
+**D-096** · 2026-10-21
+Frage: Wann darf sich jemand selbst als Owner eintragen?
+Entscheidung: Nach einer freigegebenen Anfrage oder mit einer Freigabe für den Kontakt; CVDs jederzeit. Wird ein neuer aktiver Owner eingetragen, verschwinden inaktive Owner.
+Begründung: „Nach erfolgreichem Kontakt“ (6.7) und „bleibt sichtbar, bis ein neuer Owner eingetragen ist“ (6.9).
+
+**D-097** · 2026-10-21
+Frage: Was steht in der Push-Nachricht einer Kontaktanfrage?
+Entscheidung: Kunde und Dringlichkeit, nicht der Name des Kontakts; Glocke: Kunde und Medium.
+Begründung: Push-Nachrichten sind auf Sperrbildschirmen lesbar; so wenig Personendaten wie nötig.
+
+**D-098** · 2026-10-21
+Frage: Wie findet die Suche Kontakte?
+Entscheidung: Über Vor- und Nachname und Medium, nie über Telefonnummer oder Mailadresse.
+Begründung: Sonst ließen sich verdeckte Kontaktdaten über die Suche bestätigen.
+
+**D-099** · 2026-10-21
+Frage: Was geschieht beim Abschluss des Offboardings?
+Entscheidung: Der Zugang wird gesperrt (wie „Zugang sperren“), alle noch verbleibenden Kontakte behalten die Person als inaktiven Owner; „Notiz hinterlassen“ hängt die Notiz mit Namen an die Notizen des Kontakts.
+Begründung: BRIEFING 6.9 Schritte 3 bis 5.
+
+**D-100** · 2026-10-21
+Frage: Wie kommt der Projekt-Kontext für Freigaben zustande (D-012)?
+Entscheidung: Wird ein Kontakt aus einer Aufgabe geöffnet (Reiter Journalisten), gelten Kunde und Projekt dieser Aufgabe; sonst der Kunde in der Kopfzeile.
+Begründung: So greift eine Projektfreigabe genau dort, wo am Projekt gearbeitet wird.
+
