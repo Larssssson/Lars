@@ -14,7 +14,7 @@ import { t } from "@/i18n";
 import type { ClientStatus } from "@/lib/generated/prisma/enums";
 
 type Option = { id: string; name: string };
-type ClientValues = { name: string; shortName: string; industry: string; cluster: string; aiAllowed: boolean };
+type ClientValues = { name: string; shortName: string; industry: string; cluster: string; aiAllowed: boolean; checkStrictness: string };
 
 function ClientFields({ values }: { values?: ClientValues }) {
   const f = t.clients.fields;
@@ -26,6 +26,11 @@ function ClientFields({ values }: { values?: ClientValues }) {
       </Field>
       <Field label={f.industry} htmlFor="c-industry"><Input id="c-industry" name="industry" defaultValue={values?.industry} /></Field>
       <Field label={f.cluster} htmlFor="c-cluster"><Input id="c-cluster" name="cluster" defaultValue={values?.cluster} placeholder="Defence" /></Field>
+      <Field label={t.checks.strictness} htmlFor="c-strictness">
+        <Select id="c-strictness" name="checkStrictness" defaultValue={values?.checkStrictness ?? "NORMAL"}>
+          {Object.entries(t.checks.strictnessLevels).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
+        </Select>
+      </Field>
       <Checkbox label={f.aiAllowed} name="aiAllowed" defaultChecked={values?.aiAllowed ?? true} />
     </div>
   );

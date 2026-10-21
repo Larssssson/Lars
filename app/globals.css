@@ -147,3 +147,15 @@
 .ProseMirror-selectednode {
   @apply outline-2 outline-ring;
 }
+/* KI-Baustein (BRIEFING 8.2): hellblau mit Label KI, bis ein Mensch ihn übernimmt */
+.ai-insertion {
+  @apply rounded-sm bg-sky-100 text-sky-950 dark:bg-sky-950 dark:text-sky-100;
+  box-shadow: 0 0 0 1px rgb(14 165 233 / 0.5);
+}
+.ai-insertion::before {
+  content: attr(data-label);
+  @apply mr-1 rounded-sm bg-sky-600 px-1 align-middle text-[10px] font-bold text-white;
+}
+.ai-insertion + .ai-insertion::before {
+  content: none;
+}

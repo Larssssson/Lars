@@ -1,7 +1,7 @@
 import type { PrismaClient } from "@/lib/generated/prisma/client";
 import { t } from "@/i18n";
 import { canSeeClientWarnings, type Actor, type PermissionContext } from "@/lib/domain/permissions";
-import { COMPLIANCE_STALE_DAYS, PROFILE_STALE_DAYS } from "./profile-sections";
+import { COMPLIANCE_STALE_DAYS, PROFILE_SECTIONS, PROFILE_STALE_DAYS } from "./profile-sections";
 import { servicesWithProgress } from "./services";
 
 export type ClientWarning = {
@@ -24,7 +24,8 @@ export async function warningsForClient(
   const warnings: ClientWarning[] = [];
   const link = `/kunden/${client.id}`;
   const base = { clientId: client.id, clientName: client.name, link };
-  const sections = await db.clientProfileSection.findMany({ where: { clientId: client.id } });
+  // nur echte Profilabschnitte; der Onboarding-Stand liegt in einer eigenen Zeile (DECISIONS D-069)
+  const sections = await db.clientProfileSection.findMany({ where: { clientId: client.id, key: { in: PROFILE_SECTIONS.map((s) => s.key) } } });
 
   const stale = sections.filter((s) => !s.confirmedAt || now.getTime() - s.confirmedAt.getTime() > PROFILE_STALE_DAYS * DAY);
   if (stale.length > 0) {

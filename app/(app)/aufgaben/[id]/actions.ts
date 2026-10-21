@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { z } from "zod";
 import { t } from "@/i18n";
 import {
@@ -11,6 +12,9 @@ import {
   requestApproval,
   withdrawApproval,
 } from "@/lib/domain/approvals/service";
+import { learnFromFinalText } from "@/lib/domain/clients/profile";
+import { acceptInsertion, createInsertion, discardInsertion, suggestHeadlines, suggestLead, suggestQuote } from "@/lib/domain/documents/ai-blocks";
+import { dismissFinding, markFindingDone, runCheck } from "@/lib/domain/documents/check";
 import { clientAgreed, dispatchText, recordDispatch } from "@/lib/domain/documents/dispatch";
 import {
   addComment,
@@ -152,12 +156,15 @@ export async function reopenAction(taskId: string, _state: ActionState): Promise
 
 export async function dispatchAction(taskId: string, _state: ActionState, form: FormData): Promise<ActionState> {
   const result = await runAction(async () => {
-    await recordDispatch(serverDeps(), await requireUser(), id.parse(taskId), {
+    const user = await requireUser();
+    const { done } = await recordDispatch(serverDeps(), user, id.parse(taskId), {
       target: (str(form, "target") ?? "") as never,
       recipients: str(form, "recipients") ?? "",
       channel: str(form, "channel") ?? "",
       template: str(form, "template") === "KUNDE" ? "KUNDE" : "RP",
     });
+    // lernendes Profil (BRIEFING 7.7): nach der Antwort, damit der Versand nicht auf die KI wartet
+    if (done) after(() => learnFromFinalText(serverDeps(), id.parse(taskId), user.id));
   });
   revalidatePath("/", "layout");
   return result;
@@ -172,4 +179,64 @@ export async function clientAgreedAction(taskId: string, _state: ActionState): P
 export async function dispatchTextAction(taskId: string): Promise<string> {
   await requireUser();
   return dispatchText(serverDeps(), id.parse(taskId));
+}
+
+// ------------------------------------------------------------- Prüfung (BRIEFING 7.4)
+
+export async function runCheckAction(taskId: string, mode: "SCHNELL" | "VOLL"): Promise<ActionState> {
+  const result = await runAction(async () => {
+    await runCheck(serverDeps(), await requireUser(), id.parse(taskId), mode === "VOLL" ? "VOLL" : "SCHNELL");
+  });
+  refresh(taskId);
+  return result;
+}
+
+export async function findingDoneAction(taskId: string, findingId: string): Promise<ActionState> {
+  const result = await runAction(async () => markFindingDone(serverDeps(), await requireUser(), id.parse(findingId)));
+  refresh(taskId);
+  return result;
+}
+
+export async function dismissFindingAction(taskId: string, findingId: string, input: { reason: string; createRule: boolean }): Promise<ActionState> {
+  const result = await runAction(async () =>
+    dismissFinding(serverDeps(), await requireUser(), id.parse(findingId), { reason: String(input.reason ?? ""), createRule: Boolean(input.createRule) }),
+  );
+  refresh(taskId);
+  return result;
+}
+
+// ------------------------------------------------------------- KI-Bausteine (BRIEFING 8.2)
+
+export type AiSuggestionResult = { error?: string; options?: string[]; model?: string; promptVersion?: string; note?: string };
+
+export async function suggestAiAction(taskId: string, kind: "HEADLINE" | "ZITAT" | "LEAD", speakerId?: string): Promise<AiSuggestionResult> {
+  let out: AiSuggestionResult = {};
+  const result = await runAction(async () => {
+    const deps = serverDeps();
+    const user = await requireUser();
+    const tid = id.parse(taskId);
+    if (kind === "HEADLINE") out = await suggestHeadlines(deps, user, tid);
+    else if (kind === "ZITAT") {
+      const r = await suggestQuote(deps, user, tid, String(speakerId ?? ""));
+      out = { ...r, note: r.quoteNeedsClientApproval ? t.ai.quoteNeedsApproval : undefined };
+    } else out = await suggestLead(deps, user, tid);
+  });
+  return result?.error ? { error: result.error } : out;
+}
+
+export async function createInsertionAction(taskId: string, input: { kind: "HEADLINE" | "ZITAT" | "LEAD"; model: string; promptVersion: string }): Promise<{ error?: string; id?: string }> {
+  let insertionId: string | undefined;
+  const result = await runAction(async () => {
+    insertionId = (await createInsertion(serverDeps(), await requireUser(), id.parse(taskId), input)).id;
+  });
+  return result?.error ? { error: result.error } : { id: insertionId };
+}
+
+export async function decideInsertionAction(taskId: string, insertionId: string, accept: boolean): Promise<ActionState> {
+  const result = await runAction(async () => {
+    const fn = accept ? acceptInsertion : discardInsertion;
+    await fn(serverDeps(), await requireUser(), id.parse(taskId), id.parse(insertionId));
+  });
+  refresh(taskId);
+  return result;
 }

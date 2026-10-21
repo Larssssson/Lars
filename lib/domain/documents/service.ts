@@ -8,7 +8,7 @@ import { assert, canEditDocument, canEditTask, type NamedActor } from "@/lib/dom
 import { loadPermissionContext } from "@/lib/domain/permissions/context";
 import { computePriority } from "@/lib/domain/tasks/rules";
 import { blockTexts, type JSONNode } from "@/lib/editor/content";
-import { baseExtensions } from "@/lib/editor/extensions";
+import { aiInsertionIds, baseExtensions } from "@/lib/editor/extensions";
 import type { Prisma, PrismaClient, TaskStatus, VersionReason } from "@/lib/generated/prisma/client";
 import { parseBlocks } from "./template";
 import { importDocx } from "./word-import";
@@ -147,10 +147,11 @@ export async function saveContent(deps: Deps, actor: NamedActor, taskId: string,
   assert(canEdit);
   const holder = activeLockHolder(document, deps.now());
   if (holder && holder !== actor.id) throw new DomainError(t.documents.errors.lockedByOther);
-  const clean = validateContent(content, blockKeysOf(document.content));
+  const validated = validateContent(content, blockKeysOf(document.content));
   const now = deps.now();
   let updatedAt = now;
   await deps.db.$transaction(async (tx) => {
+    const clean = await reconcileAiInsertions(tx, document.id, validated, actor.id);
     const updated = await tx.document.update({
       where: { id: document.id },
       data: { content: clean as Prisma.InputJsonValue, lockedBy: actor.id, lockedAt: now, updatedBy: actor.id },
@@ -161,6 +162,30 @@ export async function saveContent(deps: Deps, actor: NamedActor, taskId: string,
     }
   });
   return { savedAt: updatedAt };
+}
+
+/**
+ * KI-Bausteine abgleichen (BRIEFING 8.2): ein offener Baustein, dessen Markierung aus dem Text
+ * verschwunden ist, gilt als verworfen; Markierungen ohne offenen Baustein werden entfernt.
+ */
+async function reconcileAiInsertions(db: Db, documentId: string, content: JSONNode, actorId: string): Promise<JSONNode> {
+  const open = await db.aiInsertion.findMany({ where: { documentId, status: "OFFEN" }, select: { id: true } });
+  const present = aiInsertionIds(content);
+  const gone = open.filter((i) => !present.has(i.id)).map((i) => i.id);
+  if (gone.length) await db.aiInsertion.updateMany({ where: { id: { in: gone } }, data: { status: "VERWORFEN", updatedBy: actorId } });
+  const keep = new Set(open.map((i) => i.id).filter((id) => present.has(id)));
+  return stripAiMarks(content, keep);
+}
+
+export function stripAiMarks(node: JSONNode, keep: Set<string>): JSONNode {
+  const copy: JSONNode = { ...node };
+  if (node.marks) {
+    const marks = node.marks.filter((m) => m.type !== "aiInsertion" || keep.has(String(m.attrs?.id ?? "")));
+    if (marks.length) copy.marks = marks;
+    else delete copy.marks;
+  }
+  if (node.content) copy.content = node.content.map((c) => stripAiMarks(c, keep));
+  return copy;
 }
 
 /** Sperre lösen, beim Schließen oder auf Anfrage (BRIEFING 7.3). */

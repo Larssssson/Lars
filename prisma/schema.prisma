@@ -110,6 +110,8 @@ model Client {
   cluster              String?
   status               ClientStatus @default(ONBOARDING)
   aiAllowed            Boolean      @default(true)
+  /// Strenge der Prüfung (BRIEFING 7.4), pro Kunde eingestellt
+  checkStrictness      Strictness   @default(NORMAL)
   logoFileId           String?      @unique @db.Uuid
   templateSettings     Json         @default("{}")
   sharePointFolderPath String?
@@ -191,6 +193,10 @@ model ProfileSuggestion {
   status           SuggestionStatus @default(OFFEN)
   decidedBy        String?          @db.Uuid
   decidedAt        DateTime?
+  /// Herkunft: KI (mit Modell und Promptversion) oder Mensch (BRIEFING 2.8)
+  source           String           @default("MENSCH")
+  model            String?
+  promptVersion    String?
   isSampleData     Boolean          @default(false)
   createdAt        DateTime         @default(now())
   createdBy        String?          @db.Uuid
@@ -445,6 +451,7 @@ enum VersionReason {
   STATUSWECHSEL
   MANUELL
   IMPORT
+  PRUEFUNG
 }
 
 model DocumentVersion {
@@ -618,6 +625,8 @@ model Finding {
   reason        String
   status        FindingStatus @default(OFFEN)
   dismissReason String?
+  /// angebotener KI-Baustein, z. B. bei "Zitat fehlt" (BRIEFING 7.4)
+  suggestion    AiInsertionKind?
   isSampleData  Boolean       @default(false)
   createdAt     DateTime      @default(now())
   createdBy     String?       @db.Uuid
@@ -1079,6 +1088,8 @@ model File {
   clientId     String?  @db.Uuid
   /// Anhang einer Aufgabe (BRIEFING 6.1, DECISIONS D-045)
   taskId       String?  @db.Uuid
+  /// Unterlage im Kundenprofil: Abschnitt, zu dem sie gehört (BRIEFING 7.7, 9)
+  profileSection String?
   uploadedBy   String   @db.Uuid
   isSampleData Boolean  @default(false)
   createdAt    DateTime @default(now())

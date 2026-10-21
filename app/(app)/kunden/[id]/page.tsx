@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Warnings } from "@/components/dashboard/blocks";
 import { EditClientForm, LogoForm, MembershipForm, RemoveMembershipButton, StatusActions } from "@/components/clients/client-forms";
@@ -58,7 +59,7 @@ export default async function ClientPage({ params }: { params: Promise<{ id: str
               <CardTitle className="mb-4">{c.masterData}</CardTitle>
               <EditClientForm
                 clientId={client.id}
-                values={{ name: client.name, shortName: client.shortName, industry: client.industry ?? "", cluster: client.cluster ?? "", aiAllowed: client.aiAllowed }}
+                values={{ name: client.name, shortName: client.shortName, industry: client.industry ?? "", cluster: client.cluster ?? "", aiAllowed: client.aiAllowed, checkStrictness: client.checkStrictness }}
               />
               <div className="mt-5 border-t pt-4">
                 {!client.logoFileId && <p className="mb-2 text-sm text-muted-foreground">{c.noLogo}</p>}
@@ -109,7 +110,11 @@ export default async function ClientPage({ params }: { params: Promise<{ id: str
               </ul>
             )}
           </Card>
-          <p className="text-sm text-muted-foreground">{c.profileLater}</p>
+          <Card className="flex flex-col gap-2">
+            <CardTitle>{t.profile.title}</CardTitle>
+            <Link href={`/kunden/${client.id}/profil`} className="text-sm underline">{c.openProfile}</Link>
+            {client.status === "ONBOARDING" && <Link href={`/kunden/${client.id}/onboarding`} className="text-sm font-medium underline">{t.profile.onboarding.open}</Link>}
+          </Card>
         </div>
       </div>
 

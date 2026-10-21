@@ -17,6 +17,7 @@ function clientInput(form: FormData) {
     industry: str(form, "industry"),
     cluster: str(form, "cluster"),
     aiAllowed: bool(form, "aiAllowed"),
+    checkStrictness: (["STRENG", "LOCKER"].includes(str(form, "checkStrictness") ?? "") ? str(form, "checkStrictness") : "NORMAL") as "STRENG" | "NORMAL" | "LOCKER",
   };
 }
 

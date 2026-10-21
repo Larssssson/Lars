@@ -39,5 +39,5 @@ export const jobs: JobDefinition[] = [
 ];
 
 export function jobDeps(): Deps {
-  return { db: prisma, push: adapters.push(), files: adapters.fileStorage(), documents: adapters.documentStore(), now: () => new Date() };
+  return { db: prisma, push: adapters.push(), files: adapters.fileStorage(), documents: adapters.documentStore(), ai: adapters.ai(), now: () => new Date() };
 }

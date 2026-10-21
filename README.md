@@ -2,7 +2,7 @@
 
 Interne Presse- und Content-Plattform von Rud Pedersen Berlin. Die verbindliche Bauanleitung steht in [BRIEFING.md](BRIEFING.md), Entscheidungen zu offenen Punkten in [DECISIONS.md](DECISIONS.md), Änderungen je Phase in [CHANGELOG.md](CHANGELOG.md).
 
-**Stand:** Phase 2 (Redaktion, Freigabe, Versand). Pressespiegel und Journo Hub sind noch Platzhalter; Prüfung, Kundenwissen und Journalisten im Editor folgen in Phase 3 und 4.
+**Stand:** Phase 3 (Kundenprofil, Prüfung, KI-Bausteine). Pressespiegel und Journo Hub sind noch Platzhalter; der Reiter Journalisten im Editor folgt in Phase 4.
 
 ## Start in drei Befehlen
 
@@ -39,9 +39,9 @@ Führt nacheinander aus:
 
 | Befehl | Art | Inhalt |
 |---|---|---|
-| `npm run test:unit` | Vitest, Einheit | Rechtematrix (jede Zeile), Priorität, Werktage und Feiertage, Statusregeln, Adapter, Änderungsverfolgung, Word-Export und -Import, Dateinamen und Ordner, Versionsvergleich |
-| `npm run test:integration` | Vitest, Integration | Seed, Aufgaben, Priorität-Job, Archivierung, Redaktion-Filter, Dashboard, Warnungen, Nutzer- und Kundenverwaltung, Protokoll, Dienstplan, Leistung bei 500 Aufgaben, Sperre, Freigabe, Selbstfreigabe, Versand, Rückläufer, PDF, SharePoint-Ablage, Kommentare, Versionen, Projekte |
-| `npm run test:e2e` | Playwright, Ende zu Ende | Login, Kundenauswahl, Aufgaben, Glocke, Hochstufen, Redaktion, Dashboard, Dienstplan, Verwaltung, Kunden, Suche; der ganze Redaktionsablauf aus Phase 2 (PM schreiben, Freigabe mit Änderungsverfolgung, Kunde, Rückläufer, zweite Freigabe, Medien, Datei im SharePoint-Ordner); Sperre, Mitlesen, Kommentare, Versionsvergleich; Projekte |
+| `npm run test:unit` | Vitest, Einheit | Rechtematrix (jede Zeile), Priorität, Werktage und Feiertage, Statusregeln, Adapter (auch Claude ohne Netz), Änderungsverfolgung, Word-Export und -Import, Dateinamen und Ordner, Versionsvergleich, ai-service, Strukturprüfung, Fundstellen, KI-Bausteine im Editor |
+| `npm run test:integration` | Vitest, Integration | Seed, Aufgaben, Priorität-Job, Archivierung, Redaktion-Filter, Dashboard, Warnungen, Nutzer- und Kundenverwaltung, Protokoll, Dienstplan, Leistung bei 500 Aufgaben, Sperre, Freigabe, Selbstfreigabe, Versand, Rückläufer, PDF, SharePoint-Ablage, Kommentare, Versionen, Projekte, Kundenprofil, Onboarding, Aktivierung, Vorschläge, lernendes Profil, Prüfung in beiden Modi, Verwerfungsregeln, KI-Bausteine, „KI erlaubt“ |
+| `npm run test:e2e` | Playwright, Ende zu Ende | Login, Kundenauswahl, Aufgaben, Glocke, Hochstufen, Redaktion, Dashboard, Dienstplan, Verwaltung, Kunden, Suche; der ganze Redaktionsablauf aus Phase 2 (PM schreiben, Freigabe mit Änderungsverfolgung, Kunde, Rückläufer, zweite Freigabe, Medien, Datei im SharePoint-Ordner); Sperre, Mitlesen, Kommentare, Versionsvergleich; Projekte; Live-Hinweise, Prüfung, KI-Baustein mit Sperre der Freigabe, Kundenwissen, Kundenprofil, Onboarding SAFENET, KI aus |
 
 Integrationstests laufen mit fester Uhr (Dienstag, 20.10.2026, 10:00 Uhr), damit jede Priorität aus 13.5 vorkommt.
 
@@ -73,7 +73,7 @@ Jeder externe Dienst läuft über einen Adapter mit Ersatz für lokal und Tests,
 | `PUSH_PROVIDER` | `mock`: Konsolenausgabe | `webpush`: Web Push mit VAPID |
 | `MONITORING_SOURCE` | `sample`: Beispieldatei aus `fixtures/monitoring/` (ab Phase 5) | `file`: hochgeladener Meltwater-Export (Standard) |
 
-Die echten Adapter prüfen bereits ihre Zugangsdaten; ihre Umsetzung folgt in Phase 6. Der Entwickler-Login ist bei `NODE_ENV=production` gesperrt.
+Die echten Adapter prüfen ihre Zugangsdaten. Der Claude-Adapter ist umgesetzt (Modelle über `AI_MODEL_QUALITY` und `AI_MODEL_FAST`); die übrigen folgen in Phase 6. Der Entwickler-Login ist bei `NODE_ENV=production` gesperrt.
 
 ## Projektstruktur
 
@@ -105,6 +105,16 @@ Die echten Adapter prüfen bereits ihre Zugangsdaten; ihre Umsetzung folgt in Ph
 - **Wieder als Laura:** „Versenden“, Word oder PDF herunterladen (RP- oder Kundenvorlage), Empfänger und Kanal eintragen. Beim Kunden kann sie einen Rückläufer hochladen. Nach dem Versand an Medien liegt die Word-Datei unter `storage/sharepoint-mock/impress/Kunden/<Kunde>/…`.
 - Öffnen zwei Personen denselben Text, sieht die zweite „… bearbeitet gerade“ und kann die Bearbeitung anfordern.
 - Redaktion → „Projekte“ (mit gewähltem Kunden), Verwaltung → „Darstellungsformen“.
+
+## Was man in Phase 3 ausprobieren kann
+
+- **Kunden → Ground A → Kundenprofil öffnen:** alle Abschnitte mit „bestätigt am“, Compliance rot (13 Monate alt). Als Laura nur „Änderung vorschlagen“, als Lars bearbeiten, bestätigen, Vorschläge annehmen.
+- **Als Valentin Abel: Kunden → SAFENET → Onboarding fortsetzen.** `fixtures/clients/safenet/unternehmensbeschreibung.pdf` hochladen, Vorschläge je Abschnitt annehmen, „Fragen erzeugen“, Antworten geben, später weitermachen. Als Lars „Auf Aktiv setzen“: geht erst, wenn alle Pflichtabschnitte bestätigt sind.
+- **Als Lukas: PM Standortentscheidung → Reiter Prüfung → Vollanalyse.** Werte, Hinweise nach Prüfschritt, Klick auf „600 neue Arbeitsplätze“ springt zur Stelle, Verwerfen mit „Für diesen Kunden nicht mehr anzeigen“ (danach im Profil unter Verwerfungsregeln).
+- **Als Laura eine neue PM schreiben:** Live-Hinweise unter dem Editor, „Headline-Vorschläge“ → eine von drei wählen → hellblauer Baustein mit KI-Label; „Freigabe anfragen“ ist gesperrt, bis er übernommen ist. Reiter Kundenwissen: Fakt einfügen.
+- **KI erlaubt aus** (Stammdaten eines Kunden): kein KI-Menü, Prüfung nur regelbasiert, keine Vorschläge aus Unterlagen.
+
+Die KI antwortet lokal mit den Beispielantworten aus `fixtures/ai/` (abgestimmt auf die PM Standortentscheidung und SAFENET). Mit `AI_PROVIDER=anthropic` und `ANTHROPIC_API_KEY` läuft die echte Claude API.
 
 ## Hintergrundjobs
 

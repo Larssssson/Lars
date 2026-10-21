@@ -12,7 +12,7 @@ export type JSONNode = {
   text?: string;
 };
 
-const TRACKING_MARKS = new Set(["insertion", "deletion", "comment"]);
+const TRACKING_MARKS = new Set(["insertion", "deletion", "comment", "aiInsertion"]);
 
 export function cleanContent(node: JSONNode): JSONNode {
   const copy: JSONNode = { ...node };

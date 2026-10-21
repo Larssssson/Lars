@@ -7,6 +7,7 @@ import { notify } from "@/lib/domain/notifications";
 import { assert, canManageClients, canManageUsers, type Actor } from "@/lib/domain/permissions";
 import type { Client, ClientStatus, MemberKind } from "@/lib/generated/prisma/client";
 import { ensureClientFolders } from "@/lib/domain/documents/filing";
+import { missingForActivation, touchSection } from "./profile";
 import { warningsForClient } from "./warnings";
 
 export const clientSchema = z.object({
@@ -20,6 +21,8 @@ export const clientSchema = z.object({
   industry: z.string().trim().max(120).nullish().transform((v) => v || null),
   cluster: z.string().trim().max(60).nullish().transform((v) => v || null),
   aiAllowed: z.boolean().default(true),
+  /** Strenge der Prüfung, pro Kunde eingestellt (BRIEFING 7.4) */
+  checkStrictness: z.enum(["STRENG", "NORMAL", "LOCKER"]).default("NORMAL"),
 });
 
 export type ClientInput = z.input<typeof clientSchema>;
@@ -60,6 +63,8 @@ export async function updateClient(deps: Deps, actor: Actor, clientId: string, r
   const input = clientSchema.parse(raw);
   await ensureUniqueShortName(deps, input.shortName, clientId);
   const client = await deps.db.client.update({ where: { id: clientId }, data: { ...input, updatedBy: actor.id } });
+  // Speichern der Stammdaten bestätigt den Abschnitt (DECISIONS D-067)
+  await touchSection(deps.db, clientId, "stammdaten", actor.id, deps.now());
   await writeAudit(deps.db, {
     actorId: actor.id,
     action: AuditAction.CLIENT_UPDATED,
@@ -72,8 +77,8 @@ export async function updateClient(deps: Deps, actor: Actor, clientId: string, r
 }
 
 /**
- * Status setzen: archivieren, wiederherstellen (zurück ins Onboarding) und Onboarding → Aktiv.
- * Die Prüfung der Pflichtabschnitte vor Aktiv kommt mit dem Kundenprofil in Phase 3 (DECISIONS D-046).
+ * Status setzen: archivieren, wiederherstellen (zurück ins Onboarding) und Onboarding → Aktiv,
+ * Letzteres nur mit allen Pflichtabschnitten (DECISIONS D-046, D-068).
  */
 export async function setClientStatus(deps: Deps, actor: Actor, clientId: string, status: ClientStatus): Promise<Client> {
   assert(canManageClients(actor));
@@ -84,6 +89,11 @@ export async function setClientStatus(deps: Deps, actor: Actor, clientId: string
     ARCHIVIERT: ["ONBOARDING"],
   };
   if (!allowed[before.status].includes(status)) throw new DomainError(t.clients.errors.statusInvalid);
+  // Onboarding zu Aktiv nur mit allen Pflichtabschnitten (BRIEFING 6.8, 7.7, DECISIONS D-068)
+  if (before.status === "ONBOARDING" && status === "AKTIV") {
+    const missing = await missingForActivation(deps.db, clientId);
+    if (missing.length) throw new DomainError(t.profile.errors.activationMissing(missing.map((k) => t.profile.sections[k] ?? k).join(", ")));
+  }
   const client = await deps.db.$transaction(async (tx) => {
     const updated = await tx.client.update({ where: { id: clientId }, data: { status, updatedBy: actor.id } });
     // archivierte Kunden verschwinden aus der Kundenauswahl

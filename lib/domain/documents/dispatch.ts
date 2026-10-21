@@ -101,6 +101,7 @@ export async function recordDispatch(deps: Deps, actor: NamedActor, taskId: stri
     sharePointFileUrl = (await deps.documents.putFile(folder, name, data, "application/vnd.openxmlformats-officedocument.wordprocessingml.document")).url;
   }
 
+  const done = input.target !== "KUNDE_ABSTIMMUNG";
   await deps.db.$transaction(async (tx) => {
     await tx.document.update({ where: { id: document.id }, data: { templateChoice: input.template } });
     await tx.dispatch.create({
@@ -116,7 +117,6 @@ export async function recordDispatch(deps: Deps, actor: NamedActor, taskId: stri
         createdBy: actor.id,
       },
     });
-    const done = input.target !== "KUNDE_ABSTIMMUNG";
     await changeDocumentStatus(tx, {
       taskId,
       documentId: document.id,
@@ -126,7 +126,7 @@ export async function recordDispatch(deps: Deps, actor: NamedActor, taskId: stri
       completedAt: done ? now : undefined,
     });
   });
-  return { sharePointFileUrl };
+  return { sharePointFileUrl, done };
 }
 
 /** Kunde ist einverstanden: die Freigabe bleibt gültig, der Text geht zurück auf Freigegeben (BRIEFING 6.5). */

@@ -10,6 +10,7 @@ import {
   createMonitoringSource,
   createPushSender,
 } from "@/lib/adapters";
+import { AnthropicAiProvider, acceptsTemperature } from "@/lib/adapters/ai/anthropic";
 import { AdapterConfigError } from "@/lib/adapters/errors";
 import { readEnv } from "@/lib/env";
 
@@ -95,7 +96,7 @@ describe("Ersatz-Adapter", () => {
     const request = { functionKey: "headlines", model: "m", temperature: 0.4, system: "", prompt: "" };
     const valid = JSON.parse((await ai.complete(request)).text) as { headlines: string[] };
     expect(valid.headlines).toHaveLength(3);
-    const invalid = await ai.complete({ ...request, fixtureVariant: "invalid" });
+    const invalid = await ai.complete({ ...request, functionKey: "lead", fixtureVariant: "invalid" });
     expect(() => JSON.parse(invalid.text)).toThrow();
   });
 
@@ -111,5 +112,30 @@ describe("Ersatz-Adapter", () => {
     const { columns, rows } = await source.readRows({ fileName: "export.csv", data: new TextEncoder().encode(csv) });
     expect(columns).toEqual(["Date", "Headline", "Source"]);
     expect(rows[0]?.Headline).toBe("Testmeldung");
+  });
+});
+
+describe("Claude-Adapter (echt, ohne Netz geprüft)", () => {
+  function fakeFetch(bodies: Record<string, unknown>[]) {
+    return (async (_url: unknown, init?: { body?: unknown }) => {
+      bodies.push(JSON.parse(String(init?.body)));
+      return new Response(
+        JSON.stringify({ id: "msg_1", type: "message", role: "assistant", model: "claude-sonnet-5-5", stop_reason: "end_turn", stop_sequence: null, content: [{ type: "text", text: '{"lead":"x"}' }], usage: { input_tokens: 1, output_tokens: 1 } }),
+        { status: 200, headers: { "content-type": "application/json" } },
+      );
+    }) as typeof fetch;
+  }
+
+  it("schickt System, Prompt und Temperatur nur an Modelle, die sie annehmen", async () => {
+    const bodies: Record<string, unknown>[] = [];
+    const provider = new AnthropicAiProvider({ apiKey: "test-schluessel", fetch: fakeFetch(bodies) });
+    const base = { functionKey: "lead", temperature: 0.4, system: "S", prompt: "P" };
+    const out = await provider.complete({ ...base, model: "claude-sonnet-5-5" });
+    expect(out).toEqual({ text: '{"lead":"x"}', model: "claude-sonnet-5-5" });
+    expect(bodies[0]).toMatchObject({ model: "claude-sonnet-5-5", system: "S", messages: [{ role: "user", content: "P" }] });
+    expect(bodies[0]).not.toHaveProperty("temperature");
+    await provider.complete({ ...base, model: "claude-sonnet-4-6" });
+    expect(bodies[1]).toMatchObject({ temperature: 0.4 });
+    expect(acceptsTemperature("claude-haiku-5-5")).toBe(false);
   });
 });

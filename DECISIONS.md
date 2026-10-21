@@ -347,3 +347,95 @@ Begründung: Vorgabe aus BRIEFING 10.1.
 Frage: Darstellungsformen in der Verwaltung ändern.
 Entscheidung: Die 13 eingebauten Formen sind fest. Eigene Formen legen CVDs an; ihre Bausteine lassen sich ändern, bis das erste Dokument sie nutzt.
 Begründung: Vorlage, Strukturprüfung und Word-Rückläufer hängen an stabilen Bausteinen.
+
+## Nachträge Phase 3
+
+**D-067** · 2026-10-21
+Frage: Wann gilt ein Profilabschnitt als bestätigt?
+Entscheidung: Mit „Bestätigen“ und mit jedem Speichern des Abschnitts (auch Sprecher, Leistungen, KPIs, Stammdaten). Annehmen eines Vorschlags bestätigt nicht.
+Begründung: Wer einen Abschnitt bearbeitet, hat ihn gerade geprüft; ein angenommener Einzelvorschlag sagt nichts über den Rest.
+
+**D-068** · 2026-10-21
+Frage: Was heißt „alle Pflichtabschnitte“ für den Statuswechsel Onboarding → Aktiv?
+Entscheidung: Jeder Pflichtabschnitt ist bestätigt; zusätzlich mindestens eine Kernbotschaft, ein Sprecher und ein Thema. Stammdaten und vereinbarte Leistungen genügen bestätigt (SAFENET hat laut 13.1 noch keine Leistungen).
+Begründung: Ohne diese drei Inhalte laufen Prüfung, Zitatvorschlag und Monitoring ins Leere.
+
+**D-069** · 2026-10-21
+Frage: Wo steht der Stand des Onboarding-Interviews?
+Entscheidung: In einer eigenen Zeile von ClientProfileSection mit dem Schlüssel `onboarding` (Fragen, Antworten, letzter Schritt). Sie zählt nicht als Profilabschnitt und erzeugt keine Warnung.
+Begründung: Unterbrechbar ohne neue Tabelle.
+
+**D-070** · 2026-10-21
+Frage: Was bewirkt die Strenge (streng, normal, locker)?
+Entscheidung: Sie geht an die KI-Prüfung. In der regelbasierten Strukturprüfung blendet „locker“ Hinweise der Stufe „Hinweis“ aus; „streng“ ändert die Regeln nicht. Eingestellt wird sie vom CVD in den Stammdaten.
+Begründung: „Hinweise statt Sperren, Strenge pro Kunde“ (BRIEFING 15.1), ohne erfundene Zusatzregeln.
+
+**D-071** · 2026-10-21
+Frage: Wie entstehen die Werte?
+Entscheidung: Konformität ist der Wert der KI minus Abzüge für Strukturhinweise (kritisch 25, wichtig 10, Hinweis 3); ohne KI 100 minus Abzüge. Medienresonanz nur in der Vollanalyse mit KI, sonst leer.
+Begründung: Strukturfehler sind regelbasiert sicher und sollen den Wert senken; die KI sieht sie nicht.
+
+**D-072** · 2026-10-21
+Frage: Woran erkennt eine Verwerfungsregel „gleichartige“ Hinweise?
+Entscheidung: Gleiche Kategorie und gleiche Meldung nach Normalisierung (klein, ohne Satzzeichen, Zahlen gleichgesetzt). Die Regeln gehen zusätzlich als Text an die KI.
+Begründung: Einfach, nachvollziehbar und im Kundenprofil lesbar; die KI fängt umformulierte Fälle ab.
+
+**D-073** · 2026-10-21
+Frage: Was passiert mit KI-Hinweisen, deren Fundstelle nicht im Text steht?
+Entscheidung: Steht das Zitat in einem anderen Baustein, wird der Baustein korrigiert; steht es nirgends, entfällt der Hinweis.
+Begründung: BRIEFING 8.3 Regel 6; ein Hinweis ohne Fundstelle ist nicht prüfbar.
+
+**D-074** · 2026-10-21
+Frage: Wo landet ein KI-Baustein?
+Entscheidung: Anstelle einer Markierung oder an der Cursorposition. Eine Headline ersetzt den Inhalt des Bausteins Headline, wenn der Cursor nicht darin steht; „Lead straffen“ ohne Markierung ersetzt den Lead; ein Zitat ohne Cursor im Text kommt in den Baustein Zitat. Schreibt jemand anderes als der Owner, bleibt der ersetzte Text als Löschung sichtbar.
+Begründung: Eine Headline mitten im Lead ergibt keinen Sinn; sonst gilt die Cursorregel aus 8.2.
+
+**D-075** · 2026-10-21
+Frage: Wie bleiben Markierung im Text und Datensatz AiInsertion gleich?
+Entscheidung: Der Datensatz entsteht beim Einfügen, die Markierung trägt seine ID. Beim Speichern gilt ein offener Baustein ohne Markierung als verworfen; Markierungen ohne offenen Datensatz entfernt der Server. KI-Bausteine erzeugen und annehmen darf, wer den Text gerade bearbeiten darf.
+Begründung: Die Sperre der Freigabeanfrage hängt am Datensatz; der Server darf sich nicht auf den Browser verlassen.
+
+**D-076** · 2026-10-21 · **offen, Rückfrage an Lars**
+Frage: Temperatur 0 und 0,4 (BRIEFING 8.3 Regel 3) mit den Standardmodellen aus 8.1.
+Entscheidung: Die Standardmodelle `claude-sonnet-5-5` und `claude-haiku-5-5` lehnen eigene Temperaturwerte ab (Fehler 400). Der Adapter schickt die Temperatur daher nur an Modelle, die sie annehmen; gespeichert wird die Vorgabe je Funktion trotzdem. Gleichmäßige Ergebnisse sichern Prompts, JSON-Schema und Zod-Prüfung.
+Begründung: Die Regel ist mit den vorgegebenen Modellen technisch nicht umsetzbar; Vorschlag an Lars siehe Bericht.
+
+**D-077** · 2026-10-21
+Frage: Welche Fassung prüft die Prüfung?
+Entscheidung: Eine feste Version: die letzte, wenn der Text gleich ist, sonst eine neue Version mit Grund „Prüfung“.
+Begründung: CheckRun verweist auf eine Version (Datenmodell 5); Fundstellen bleiben nachvollziehbar.
+
+**D-078** · 2026-10-21
+Frage: Wann lernt das Profil aus einem finalen Text?
+Entscheidung: Direkt nach dem Versand an Medien oder einer anderen Erledigung, im Server nach der Antwort (`after` aus Next.js), nicht als Job. Fehler oder fehlende KI haben keine Wirkung auf den Versand.
+Begründung: Kein Warteschlangen-Aufbau nötig; der Nutzer wartet nicht auf die KI.
+
+**D-079** · 2026-10-21
+Frage: Wie prüft die regelbasierte Struktur „Lead beantwortet Wer, Was, Wann, Wo“?
+Entscheidung: Ohne KI nur Wann (Datum, Wochentag, Zeitwort) und Wo (Ort der Ortsmarke oder „in/bei/aus“ mit Ortsname), als Hinweis mit Sicherheit niedrig. Wer und Was beurteilt die KI über die Strukturregeln der Darstellungsform.
+Begründung: Mehr lässt sich ohne Sprachverständnis nicht verlässlich erkennen.
+
+**D-080** · 2026-10-21
+Frage: Welche früheren finalen Texte bekommt die Faktentreue?
+Entscheidung: Headline und Lead der letzten drei erledigten Texte des Kunden, gekürzt.
+Begründung: So wenig wie nötig an die KI (8.3 Regel 4).
+
+**D-081** · 2026-10-21
+Frage: Welche Unterlagen liest die KI im Onboarding?
+Entscheidung: PDF, Word (.docx) und Text bis 20 MB; gelesen werden höchstens 40.000 Zeichen. Der gelesene Text wird nicht gespeichert, die Datei liegt im Dateispeicher und im SharePoint unter 01_Kundenprofil.
+Begründung: Grundsatz 9 (keine fremden Volltexte auf Dauer) und Ablage nach Abschnitt 9.
+
+**D-082** · 2026-10-21
+Frage: Wer darf prüfen, Hinweise erledigen und verwerfen?
+Entscheidung: Jeder aktive Nutzer, der den Text öffnet (Owner, Freigeber, Kolleginnen). Verwerfungsregeln anlegen ebenso; löschen nur Kunden-Lead und CVD im Kundenprofil.
+Begründung: Die Prüfung gibt nur Hinweise und ändert nichts; das Löschen von Regeln betrifft den ganzen Kunden.
+
+**D-083** · 2026-10-21
+Frage: Kommt der echte Claude-Adapter erst in Phase 6?
+Entscheidung: Nein, er ist mit Phase 3 gebaut (Anthropic SDK), weil Phase 3 die KI-Funktionen abnimmt. Eine Ablehnung durch das Modell gilt als „KI nicht erreichbar“. Ein Test gegen die echte API fehlt mangels Zugangsdaten.
+Begründung: Der Ersatz-Adapter bleibt Standard; der echte ist nur per `AI_PROVIDER=anthropic` aktiv.
+
+**D-084** · 2026-10-21
+Frage: Wie wird Profilwissen aus dem Reiter Kundenwissen eingefügt?
+Entscheidung: Als normaler Text an der letzten Cursorposition, ohne KI-Markierung; die Änderungsverfolgung greift wie bei jeder Eingabe.
+Begründung: Fakten und Boilerplate sind vom Menschen gepflegtes Profilwissen, kein KI-Text.

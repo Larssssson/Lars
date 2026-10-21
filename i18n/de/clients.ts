@@ -29,7 +29,7 @@ export const clients = {
   behind: "im Rückstand",
   warnings: "Warnungen",
   openTasks: "Offene Aufgaben",
-  profileLater: "Kundenprofil, Onboarding und Dokumente folgen in Phase 3.",
+  openProfile: "Kundenprofil öffnen",
   actions: {
     archive: "Archivieren",
     restore: "Wiederherstellen",

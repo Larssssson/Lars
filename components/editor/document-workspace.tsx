@@ -13,6 +13,8 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import {
   addCommentAction,
   claimAction,
+  createInsertionAction,
+  decideInsertionAction,
   openDocumentAction,
   releaseLockAction,
   requestLockAction,
@@ -23,10 +25,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/form";
 import { t } from "@/i18n";
-import { charCount, commentThreadIds, lineCount, type JSONNode } from "@/lib/editor/content";
-import { decideAll, decideChange, listChanges, type TrackedChange } from "@/lib/editor/track-changes";
+import { structureFindings, type FormatRules, type Strictness } from "@/lib/domain/documents/structure-check";
+import { blockTexts, charCount, commentThreadIds, lineCount, type JSONNode } from "@/lib/editor/content";
+import { aiRanges, findBlock, findInBlock, insertionTarget, listAiInsertions, type AiBlockView } from "@/lib/editor/positions";
+import { decideAll, decideChange, listChanges, SKIP_TRACKING, type TrackedChange } from "@/lib/editor/track-changes";
 import { cn } from "@/lib/utils";
+import { AiMenu, type AiKind } from "./ai-menu";
+import { CheckPanel, type CheckView, type FindingView } from "./check-panel";
 import { clientExtensions } from "./extensions";
+import { KnowledgePanel, type KnowledgeView } from "./knowledge-panel";
 import { Toolbar } from "./toolbar";
 
 export type CommentView = {
@@ -51,6 +58,12 @@ type Props = {
   autoClaim: boolean;
   comments: CommentView[];
   banner?: ReactNode;
+  /** Schalter "KI erlaubt" des Kunden (BRIEFING 7.7) */
+  aiAllowed: boolean;
+  knowledge: KnowledgeView;
+  check: CheckView | null;
+  strictness: Strictness;
+  formatRules: FormatRules;
 };
 
 const AUTOSAVE_MS = 5_000;
@@ -77,6 +90,9 @@ export function DocumentWorkspace(props: Props) {
   const [tab, setTab] = useState<"kommentare" | "aenderungen" | "pruefung" | "journalisten" | "kundenwissen">("kommentare");
   const [trackOn, setTrackOn] = useState(props.trackChangesOn);
   const [pendingAnchor, setPendingAnchor] = useState<{ from: number; to: number; quote: string } | null>(null);
+  const [aiRequest, setAiRequest] = useState<{ kind: AiKind; nonce: number } | null>(null);
+  /** letzte Cursorposition im Text; Klicks in Seitenleiste oder KI-Menü nehmen dem Editor den Fokus */
+  const lastSelection = useRef<{ from: number; to: number; empty: boolean; focused: boolean }>({ from: 0, to: 0, empty: true, focused: false });
 
   const isOwner = props.me.id === props.ownerId;
   const editingRef = useRef(false);
@@ -115,6 +131,11 @@ export function DocumentWorkspace(props: Props) {
     editable: false,
     immediatelyRender: false,
     editorProps: { attributes: { class: "document-editor", "aria-label": t.documents.editor } },
+    onSelectionUpdate: ({ editor: e }) => {
+      if (!e.isFocused) return;
+      const { from, to, empty } = e.state.selection;
+      lastSelection.current = { from, to, empty, focused: true };
+    },
     onUpdate: ({ transaction }) => {
       if (!editingRef.current || transaction.getMeta("remote")) return;
       dirtyRef.current = true;
@@ -131,9 +152,17 @@ export function DocumentWorkspace(props: Props) {
   const view = useEditorState({
     editor,
     selector: ({ editor: e }) => {
-      if (!e) return { chars: 0, changes: [] as TrackedChange[], hasSelection: false, threads: new Set<string>() };
+      if (!e) return { chars: 0, changes: [] as TrackedChange[], hasSelection: false, threads: new Set<string>(), aiBlocks: [] as AiBlockView[], live: [] as ReturnType<typeof structureFindings> };
       const json = e.getJSON() as JSONNode;
-      return { chars: charCount(json), changes: listChanges(e.state.doc), hasSelection: !e.state.selection.empty, threads: commentThreadIds(json) };
+      return {
+        chars: charCount(json),
+        changes: listChanges(e.state.doc),
+        hasSelection: !e.state.selection.empty,
+        threads: commentThreadIds(json),
+        aiBlocks: listAiInsertions(e.state.doc),
+        // regelbasierte Live-Hinweise ohne KI (BRIEFING 7.4)
+        live: structureFindings({ blocks: blockTexts(json), rules: props.formatRules, speakers: props.knowledge.speakers.map((sp) => sp.name), strictness: props.strictness }),
+      };
     },
   });
 
@@ -288,6 +317,61 @@ export function DocumentWorkspace(props: Props) {
     return null;
   };
 
+  /** Fundstelle anspringen und markieren (BRIEFING 7.4). */
+  const jumpTo = (anchor: FindingView["anchor"]) => {
+    if (!editor || "wholeText" in anchor) return;
+    const block = findBlock(editor.state.doc, anchor.blockKey);
+    if (!block) return;
+    const range = (anchor.quote && findInBlock(editor.state.doc, anchor.blockKey, anchor.quote)) || { from: block.contentFrom + 1, to: block.contentFrom + 1 };
+    editor.chain().focus().setTextSelection(range).scrollIntoView().run();
+    const dom = editor.view.nodeDOM(block.pos);
+    if (dom instanceof HTMLElement && !anchor.quote) dom.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
+
+  /** KI-Baustein einfügen: erst der Datensatz, dann die Markierung im Text (BRIEFING 8.2). */
+  const insertAi = async (input: { kind: AiKind; text: string; model: string; promptVersion: string }): Promise<string | null> => {
+    if (!editor || !editingRef.current) return t.ai.needsEditing;
+    const created = await createInsertionAction(props.taskId, input);
+    if (created.error || !created.id) return created.error ?? t.errors.unexpected;
+    const target = insertionTarget(editor.state.doc, lastSelection.current, input.kind);
+    editor
+      .chain()
+      .insertContentAt(target, { type: "text", text: input.text, marks: [{ type: "aiInsertion", attrs: { id: created.id, kind: input.kind } }] })
+      .run();
+    const end = editor.state.selection.to;
+    lastSelection.current = { from: end, to: end, empty: true, focused: true };
+    return (await flush()) ? null : t.documents.saveFailed;
+  };
+
+  /** Übernehmen entfernt nur die Markierung, Verwerfen den Text (BRIEFING 8.2); beides ohne Änderungsverfolgung. */
+  const decideAi = async (block: AiBlockView, accept: boolean) => {
+    if (!editor || !editingRef.current) return;
+    await flush();
+    const result = await decideInsertionAction(props.taskId, block.id, accept);
+    if (result?.error) {
+      setNotice(result.error);
+      return;
+    }
+    const tr = editor.state.tr.setMeta(SKIP_TRACKING, true);
+    const ranges = aiRanges(editor.state.doc, block.id);
+    if (accept) ranges.forEach((r) => tr.removeMark(r.from, r.to, editor.schema.marks.aiInsertion));
+    else [...ranges].reverse().forEach((r) => tr.delete(r.from, r.to));
+    editor.view.dispatch(tr);
+    await flush();
+    router.refresh();
+  };
+
+  /** Fakten und Boilerplate aus dem Kundenwissen an der Cursorposition einfügen, ohne KI-Markierung. */
+  const insertKnowledge = (text: string) => {
+    if (!editor || !editingRef.current) return;
+    const lines = text.split(/\n+/).filter(Boolean);
+    const { from, to } = lastSelection.current;
+    const content = lines.length > 1 ? lines.map((line) => ({ type: "paragraph", content: [{ type: "text", text: line }] })) : { type: "text", text };
+    editor.chain().focus().insertContentAt({ from: Math.max(1, from), to: Math.max(1, to) }, content).run();
+    const end = editor.state.selection.to;
+    lastSelection.current = { from: end, to: end, empty: true, focused: true };
+  };
+
   const highlight = (threadId: string) => {
     document.querySelectorAll(".comment-active").forEach((el) => el.classList.remove("comment-active"));
     const marks = document.querySelectorAll(`[data-comment="${threadId}"]`);
@@ -298,6 +382,7 @@ export function DocumentWorkspace(props: Props) {
   const d = t.documents;
   const editing = mode === "editing";
   const forcedTracking = !isOwner;
+  const openFindings = props.check?.findings.filter((f) => f.status === "OFFEN").length ?? 0;
 
   return (
     <div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
@@ -347,6 +432,27 @@ export function DocumentWorkspace(props: Props) {
 
         <div className={cn("overflow-hidden rounded-lg border bg-card", !editing && "bg-muted/30")}>
           {editor && <Toolbar editor={editor} enabled={editing} canComment={editing ? true : false} onComment={beginComment} />}
+          {editing && props.aiAllowed && (
+            <AiMenu taskId={props.taskId} speakers={props.knowledge.speakers} request={aiRequest} onInsert={insertAi} />
+          )}
+          {(view?.aiBlocks.length ?? 0) > 0 && (
+            <div className="flex flex-col gap-1 border-b bg-sky-50/50 px-3 py-2 text-xs dark:bg-sky-950/30" data-testid="ai-blocks">
+              <p className="font-medium">{t.ai.openBlocks(view!.aiBlocks.length)}</p>
+              {view!.aiBlocks.map((block) => (
+                <div key={block.id} className="flex flex-wrap items-center gap-2">
+                  <span className="rounded-sm bg-sky-600 px-1 text-[10px] font-bold text-white">{t.ai.label}</span>
+                  <span className="font-medium">{t.ai.kinds[block.kind as keyof typeof t.ai.kinds] ?? block.kind}</span>
+                  <span className="min-w-0 flex-1 truncate text-muted-foreground">{block.text}</span>
+                  {editing && (
+                    <>
+                      <Button size="sm" variant="outline" className="h-6 px-2 text-xs" onClick={() => void decideAi(block, true)}>{t.ai.accept}</Button>
+                      <Button size="sm" variant="ghost" className="h-6 px-2 text-xs" onClick={() => void decideAi(block, false)}>{t.ai.discard}</Button>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
           <EditorContent editor={editor} />
           <div className="flex flex-wrap items-center justify-between gap-2 border-t px-3 py-1.5 text-xs text-muted-foreground">
             <span data-testid="counter">{d.chars(view?.chars ?? 0)} · {d.lines(lineCount(view?.chars ?? 0))}</span>
@@ -369,6 +475,22 @@ export function DocumentWorkspace(props: Props) {
             </span>
           </div>
         </div>
+        {editing && (
+          <div className="rounded-md border border-dashed px-3 py-2 text-xs" data-testid="live-hints" aria-live="polite">
+            <p className="font-medium text-muted-foreground">{t.checks.live}</p>
+            {!view?.live.length ? <p className="text-muted-foreground">{t.checks.liveNone}</p> : (
+              <ul className="mt-1 flex flex-col gap-0.5">
+                {view.live.map((hint, i) => (
+                  <li key={i}>
+                    <button type="button" className="text-left hover:underline" onClick={() => jumpTo(hint.anchor)}>
+                      <span className={hint.severity === "HINWEIS" ? "text-muted-foreground" : "text-orange-700 dark:text-orange-300"}>●</span> {hint.message}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
       </div>
 
       <aside className="flex min-w-0 flex-col gap-3">
@@ -378,6 +500,7 @@ export function DocumentWorkspace(props: Props) {
               className={cn("rounded px-2 py-1 text-xs", tab === key ? "bg-primary text-primary-foreground" : "hover:bg-accent")}>
               {d.tabs[key]}
               {key === "aenderungen" && view?.changes.length ? ` (${view.changes.length})` : ""}
+              {key === "pruefung" && openFindings ? ` (${openFindings})` : ""}
             </button>
           ))}
         </div>
@@ -431,9 +554,20 @@ export function DocumentWorkspace(props: Props) {
               )}
             </div>
           )}
-          {tab === "pruefung" && <p className="text-muted-foreground">{d.laterTab(3)}</p>}
+          {tab === "pruefung" && (
+            <CheckPanel
+              taskId={props.taskId}
+              check={props.check}
+              strictness={props.strictness}
+              aiAllowed={props.aiAllowed}
+              canOfferAi={editing && props.aiAllowed}
+              onJump={jumpTo}
+              onOfferAi={(kind) => setAiRequest({ kind, nonce: Date.now() })}
+              onDone={() => router.refresh()}
+            />
+          )}
           {tab === "journalisten" && <p className="text-muted-foreground">{d.laterTab(4)}</p>}
-          {tab === "kundenwissen" && <p className="text-muted-foreground">{d.laterTab(3)}</p>}
+          {tab === "kundenwissen" && <KnowledgePanel knowledge={props.knowledge} canInsert={editing} onInsert={insertKnowledge} />}
         </div>
       </aside>
     </div>

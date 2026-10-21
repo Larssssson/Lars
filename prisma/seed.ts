@@ -3,13 +3,14 @@ import type { DocumentStore, FileStorage } from "../lib/adapters";
 import { ensureClientFolders } from "../lib/domain/documents/filing";
 import { buildFilledContent, buildTemplateContent, parseBlocks } from "../lib/domain/documents/template";
 import { computePriority } from "../lib/domain/tasks/rules";
-import type { PrismaClient, TaskStatus } from "../lib/generated/prisma/client";
+import type { Prisma, PrismaClient, TaskStatus } from "../lib/generated/prisma/client";
 import { addDays, addWorkdays, atTime, berlinParts, dateKey, isWorkday, mondayOf } from "../lib/time";
 import {
   seedClients,
   seededProfileSections,
   seedFormats,
   seedProfileAges,
+  seedProfiles,
   seedServices,
   seedShiftRotation,
   seedShiftTypes,
@@ -157,11 +158,20 @@ async function seedPhase1(db: PrismaClient, now: Date, userIds: Record<SeedUserK
     if (!client) continue;
     for (const key of seededProfileSections) {
       const age = ages.overrides?.[key] ?? ages.default;
-      await db.clientProfileSection.upsert({
-        where: { clientId_key: { clientId: client.id, key } },
-        update: {},
-        create: { clientId: client.id, key, confirmedAt: new Date(now.getTime() - age * DAY), confirmedBy: userIds.lars, ...sample },
-      });
+      const content = (seedProfiles[clientName]?.sections[key] ?? {}) as Prisma.InputJsonValue;
+      const existing = await db.clientProfileSection.findUnique({ where: { clientId_key: { clientId: client.id, key } } });
+      if (!existing) {
+        await db.clientProfileSection.create({
+          data: { clientId: client.id, key, content, confirmedAt: new Date(now.getTime() - age * DAY), confirmedBy: userIds.lars, ...sample },
+        });
+      } else if (existing.isSampleData && Object.keys((existing.content ?? {}) as object).length === 0) {
+        // Seed aus Phase 1/2 ohne Inhalte: Inhalte nachtragen, Bestätigungsdatum bleibt
+        await db.clientProfileSection.update({ where: { id: existing.id }, data: { content } });
+      }
+    }
+    for (const speaker of seedProfiles[clientName]?.speakers ?? []) {
+      if (await db.speaker.findFirst({ where: { clientId: client.id, name: speaker.name } })) continue;
+      await db.speaker.create({ data: { clientId: client.id, ...speaker, ...sample } });
     }
   }
 

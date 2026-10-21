@@ -37,7 +37,7 @@ test("CVD legt eine Dokument-Aufgabe für eine Redakteurin an, sie sieht sie in 
   await page.getByLabel("Owner").selectOption({ label: "Mika" });
   await page.getByRole("button", { name: "Aufgabe anlegen" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("E2E PM Messeauftritt");
-  await expect(page.getByText("Ortsmarke und Datum")).toBeVisible();
+  await expect(page.locator(".template-block-label").getByText("Ortsmarke und Datum")).toBeVisible();
 
   await page.locator("summary", { hasText: "Lars Scholtyssyk" }).click();
   await page.getByRole("button", { name: "Abmelden" }).click();

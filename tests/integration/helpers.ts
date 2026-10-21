@@ -1,6 +1,7 @@
 import { mkdtemp } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { MockAiProvider } from "@/lib/adapters/ai/mock";
 import { MockDocumentStore } from "@/lib/adapters/document-store/mock";
 import { LocalFileStorage } from "@/lib/adapters/file-storage/local";
 import { MockPushSender } from "@/lib/adapters/push/mock";
@@ -30,6 +31,7 @@ export async function testDeps(db: PrismaClient, now: Date = FIXED_NOW): Promise
     push: new MockPushSender(),
     files: new LocalFileStorage(path.join(dir, "files")),
     documents: new MockDocumentStore(path.join(dir, "sharepoint-mock"), "impress/Kunden"),
+    ai: new MockAiProvider(path.resolve("fixtures/ai")),
     now: () => clock.now,
     clock,
     storageDir: dir,

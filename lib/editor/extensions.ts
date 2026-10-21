@@ -1,6 +1,7 @@
 import { Mark, mergeAttributes, Node, type AnyExtension } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import { TableKit } from "@tiptap/extension-table";
+import { t } from "@/i18n";
 
 /**
  * Gemeinsame Editor-Erweiterungen für Browser und Server (BRIEFING 7.3).
@@ -110,10 +111,42 @@ export const CommentAnchor = Mark.create({
   },
 });
 
+/**
+ * KI-Baustein im Text (BRIEFING 8.2): hellblau mit Label KI, bleibt markiert, auch wenn darin
+ * geändert wird, bis ein Mensch ihn übernimmt. id verweist auf den Datensatz AiInsertion.
+ */
+export const AiInsertionMark = Mark.create({
+  name: "aiInsertion",
+  inclusive: true,
+  excludes: "",
+  addAttributes() {
+    return { id: { default: "", rendered: false }, kind: { default: "SONSTIGES", rendered: false } };
+  },
+  parseHTML() {
+    return [{ tag: "span[data-ai-insertion]", getAttrs: (el) => ({ id: (el as HTMLElement).getAttribute("data-ai-insertion"), kind: (el as HTMLElement).getAttribute("data-kind") }) }];
+  },
+  renderHTML({ mark, HTMLAttributes }) {
+    return ["span", mergeAttributes(HTMLAttributes, { "data-ai-insertion": mark.attrs.id, "data-kind": mark.attrs.kind, "data-label": t.ai.label, class: "ai-insertion" }), 0];
+  },
+});
+
+/** IDs der KI-Bausteine, die im Inhalt noch markiert sind. */
+export function aiInsertionIds(node: { marks?: { type: string; attrs?: Record<string, unknown> }[]; content?: unknown[] }): Set<string> {
+  const ids = new Set<string>();
+  const walk = (n: { marks?: { type: string; attrs?: Record<string, unknown> }[]; content?: unknown[] }) => {
+    n.marks?.forEach((m) => m.type === "aiInsertion" && m.attrs?.id && ids.add(String(m.attrs.id)));
+    (n.content as (typeof n)[] | undefined)?.forEach(walk);
+  };
+  walk(node);
+  return ids;
+}
+
 export function baseExtensions(): AnyExtension[] {
   return [
     TemplateDocument,
     TemplateBlock,
+    // vor den übrigen Markierungen, damit ein Baustein außen liegt und als ein Bereich erscheint
+    AiInsertionMark,
     StarterKit.configure({
       document: false,
       code: false,

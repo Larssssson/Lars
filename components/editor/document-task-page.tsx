@@ -6,7 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardTitle } from "@/components/ui/card";
 import { t } from "@/i18n";
 import { prisma } from "@/lib/db";
+import { finalTextsFor } from "@/lib/domain/clients/profile";
+import type { Fact, SectionContent } from "@/lib/domain/clients/profile-sections";
+import { checkLabel, latestCheck } from "@/lib/domain/documents/check";
 import { loadDocument } from "@/lib/domain/documents/service";
+import type { FormatRules } from "@/lib/domain/documents/structure-check";
 import {
   canApproveText,
   canCreateTaskForOthers,
@@ -22,6 +26,7 @@ import { approversForClient } from "@/lib/domain/permissions/queries";
 import { computePriority } from "@/lib/domain/tasks/rules";
 import type { JSONNode } from "@/lib/editor/content";
 import { formatDateTime, formatRelative, formatWaiting, toLocalInput } from "@/lib/time";
+import type { FindingView } from "./check-panel";
 import { DocumentWorkspace, type CommentView } from "./document-workspace";
 import { SaveVersionButton } from "./version-button";
 import {
@@ -46,14 +51,45 @@ export async function DocumentTaskPage({ taskId, user }: { taskId: string; user:
   const mayEdit = canEditDocument(user, ctx, { ...task, claimedBy: openApproval?.claimedBy ?? null });
   const autoClaim = inReview && decision.allowed && !isOwner;
 
-  const [versions, approvals, dispatches, comments, approvers, users] = await Promise.all([
+  const [versions, approvals, dispatches, comments, approvers, users, check, insertions, profileRows, speakers, finalTexts] = await Promise.all([
     prisma.documentVersion.findMany({ where: { documentId: document.id }, orderBy: { number: "desc" } }),
     prisma.approval.findMany({ where: { documentId: document.id }, orderBy: { requestedAt: "desc" }, include: { version: { select: { number: true } } } }),
     prisma.dispatch.findMany({ where: { documentId: document.id }, orderBy: { sentAt: "desc" } }),
     prisma.comment.findMany({ where: { documentId: document.id }, orderBy: { createdAt: "asc" } }),
     approversForClient(prisma, task.clientId),
     prisma.user.findMany({ select: { id: true, name: true } }),
+    latestCheck(prisma, document.id),
+    prisma.aiInsertion.findMany({ where: { documentId: document.id, status: "ANGENOMMEN" } }),
+    prisma.clientProfileSection.findMany({ where: { clientId: task.clientId, key: { in: ["ziele_kernbotschaften", "factsheet", "qa"] } } }),
+    prisma.speaker.findMany({ where: { clientId: task.clientId }, orderBy: { name: "asc" } }),
+    finalTextsFor(prisma, task.clientId, 6),
   ]);
+  const section = (key: string) => (profileRows.find((r) => r.key === key)?.content ?? {}) as SectionContent;
+  const asList = (v: unknown) => (Array.isArray(v) ? v.map((x) => (typeof x === "string" ? x : String((x as Fact).text))) : []);
+  const knowledge = {
+    clientId: task.clientId,
+    coreMessages: asList(section("ziele_kernbotschaften").kernbotschaften),
+    speakers: speakers.map((sp) => ({ id: sp.id, name: sp.name, function: sp.function, quoteNeedsClientApproval: sp.quoteNeedsClientApproval })),
+    facts: (Array.isArray(section("factsheet").fakten) ? section("factsheet").fakten : []) as Fact[],
+    boilerplate: String(section("factsheet").boilerplate ?? ""),
+    qa: String(section("qa").inhalt ?? ""),
+    finalTexts: finalTexts.filter((f) => f.id !== task.id).slice(0, 5).map((f) => ({ taskId: f.id, title: f.title, format: f.document?.documentFormat.name ?? "" })),
+  };
+  const checkView = check && {
+    mode: check.mode,
+    createdAt: check.createdAt.toISOString(),
+    label: checkLabel(check),
+    outdated: JSON.stringify(check.version.content) !== JSON.stringify(document.content),
+    conformity: check.scores.conformity,
+    resonance: check.scores.resonance,
+    warnings: check.scores.warnings ?? [],
+    aiNotice: check.scores.aiNotice ?? null,
+    findings: check.findings.map((f) => ({
+      id: f.id, category: f.category, severity: f.severity, confidence: f.confidence,
+      anchor: f.anchor as FindingView["anchor"], message: f.message, reason: f.reason, status: f.status, suggestion: f.suggestion,
+    })),
+  };
+  const openFindings = checkView?.findings.filter((f) => f.status === "OFFEN").length ?? 0;
   const name = (id: string | null | undefined) => users.find((u) => u.id === id)?.name ?? "";
   const eligibleApprovers = approvers.filter((a) => a.id !== task.ownerId);
   const preselected = task.preferredApproverId && eligibleApprovers.some((a) => a.id === task.preferredApproverId)
@@ -85,6 +121,7 @@ export async function DocumentTaskPage({ taskId, user }: { taskId: string; user:
       marker: a.isSelfApproval ? t.documents.info.selfApproval : undefined,
     })),
     ...approvals.filter((a) => a.decision === "AENDERUNGEN").map((a) => ({ at: a.decidedAt ?? a.requestedAt, text: `${t.approvals.changesRequestedBy(name(a.decidedBy))}: ${a.note ?? ""}` })),
+    ...insertions.map((i) => ({ at: i.acceptedAt ?? i.updatedAt, text: t.ai.acceptedHistory(t.ai.kinds[i.kind], name(i.acceptedBy)) })),
     ...dispatches.map((d) => ({ at: d.sentAt, text: t.dispatch.sentBy(name(d.sentBy), t.dispatch.targets[d.target], formatDateTime(d.sentAt)) })),
   ].sort((a, b) => b.at.getTime() - a.at.getTime());
 
@@ -144,7 +181,7 @@ export async function DocumentTaskPage({ taskId, user }: { taskId: string; user:
             {inReview && openApproval && (
               <div className="flex flex-col gap-2 text-sm">
                 <p>{t.approvals.waitingSince(formatWaiting(openApproval.requestedAt, now))}</p>
-                <p className="text-muted-foreground">{openApproval.checkRunId ? t.approvals.checked(0) : t.approvals.notChecked}</p>
+                <p className="text-muted-foreground">{openApproval.checkRunId ? t.approvals.checked(openFindings) : t.approvals.notChecked}</p>
                 {openApproval.note && <p className="rounded-md bg-muted p-2">{t.approvals.requestedNote(name(openApproval.requestedBy))}: {openApproval.note}</p>}
                 {openApproval.claimedBy && <p>{openApproval.claimedBy === user.id ? t.approvals.youReview : t.approvals.claimedBy(name(openApproval.claimedBy))}</p>}
                 {isOwner && <WithdrawButton taskId={task.id} />}
@@ -248,6 +285,11 @@ export async function DocumentTaskPage({ taskId, user }: { taskId: string; user:
           mayEdit={mayEdit}
           autoClaim={autoClaim}
           comments={commentViews}
+          aiAllowed={task.client.aiAllowed}
+          knowledge={knowledge}
+          check={checkView}
+          strictness={task.client.checkStrictness}
+          formatRules={document.documentFormat.rules as FormatRules}
           banner={lockedApproved ? <p role="status" className="rounded-md border border-emerald-300 bg-emerald-50 px-3 py-2 text-sm text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-100">{t.documents.lockedApproved}</p> : undefined}
         />
       </div>

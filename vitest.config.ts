@@ -12,6 +12,8 @@ export default defineConfig({
           name: "unit",
           include: ["tests/unit/**/*.test.ts"],
           environment: "node",
+          // Platzhalter für die Konfiguration; Einheitstests greifen nie auf die Datenbank zu
+          env: { DATABASE_URL: "postgresql://einheitstest-ohne-datenbank" },
         },
       },
       {

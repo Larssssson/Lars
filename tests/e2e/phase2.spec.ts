@@ -45,7 +45,7 @@ test("Redaktionsablauf: schreiben, Freigabe mit Änderungsverfolgung, Kunde, Rü
   await page.getByLabel("Titel").fill(TITLE);
   await page.getByRole("button", { name: "Aufgabe anlegen" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(TITLE);
-  await expect(page.getByText("Ortsmarke und Datum")).toBeVisible();
+  await expect(page.locator(".template-block-label").getByText("Ortsmarke und Datum")).toBeVisible();
   await typeInto(page, "headline", "Covenant eröffnet Werk in Leipzig");
   await typeInto(page, "lead", "Covenant hat heute sein Werk eröffnet.");
   await waitSaved(page);

@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## Phase 3: Kundenprofil, Prüfung, KI-Bausteine · 2026-10-21
+
+- Kundenprofil mit allen 16 Abschnitten aus 7.7: „bestätigt am“ mit Person, Warnung nach 90 Tagen, Compliance nach 365 Tagen rot. Kunden-Lead und CVD bearbeiten (Kommunikationsziele, KPIs, Leistungen, Stammdaten nur CVD), Redakteure schlagen vor.
+- Vereinbarte Leistungen und KPIs pflegen, Sprecher mit Zitatfreigabe, Strenge der Prüfung in den Stammdaten.
+- Onboarding-Assistent: Unterlagen hochladen (PDF, Word, Text; Ablage im SharePoint unter 01_Kundenprofil), KI-Vorschläge je Abschnitt, Fragen zu Lücken, Antworten landen im Abschnitt; unterbrechbar. Onboarding → Aktiv nur mit allen Pflichtabschnitten.
+- Lernendes Profil: Vorschläge aus Unterlagen und erledigten Texten, Annahme oder Ablehnung durch Kunden-Lead oder CVD.
+- Prüfung im Editor: Schnellprüfung und Vollanalyse, Strukturprüfung regelbasiert, übrige Schritte mit KI; Konformität und Medienresonanz, Profilwarnungen, Hinweise nach Prüfschritt mit Fundstelle (Klick springt hin), Erledigt, Verwerfen, Verwerfungsregeln pro Kunde (im Profil einsehbar und löschbar). Offene Hinweise im Freigabebereich.
+- Live-Hinweise beim Schreiben ohne KI unter dem Editor.
+- KI-Bausteine: Headline (eine von drei wählen), Zitat mit Sprecher, Lead straffen; hellblau mit Label KI bis zur Übernahme, Freigabeanfrage gesperrt, Übernahme im Verlauf. Angebot aus Prüfhinweisen.
+- Reiter Kundenwissen: Kernbotschaften, Sprecher, Factsheet, Boilerplate, Q&A, letzte fünf finale Texte; Fakten und Boilerplate einfügen.
+- ai-service mit elf versionierten Prompts, Zod-Prüfung, einem zweiten Versuch, Entfernen von Mailadressen und Telefonnummern, Sperre bei „KI erlaubt“ aus; Beispielantworten in `fixtures/ai/`. Echter Claude-Adapter (Anthropic SDK).
+- Seed 13.1: Beispielprofile für Covenant, Ground A und Rafael, zwei SAFENET-Unterlagen als PDF.
+- Migrationen `phase3_profile_checks` und `phase3_check_version`; deutsche Seite „Nicht gefunden“.
+
 ## Phase 2: Redaktion, Freigabe, Versand · 2026-10-20
 
 - Editor auf TipTap/ProseMirror (nur Open Source) mit allen 13 Darstellungsformen: Bausteine aus der Vorlage mit Beschriftung und Pflichtangabe, Fett, Kursiv, Listen, Links, Zwischenüberschriften, einfache Tabellen, Zeichen- und Normzeilenzähler, automatische Speicherung 5 Sekunden nach der letzten Eingabe. Die Bausteine lassen sich nicht löschen oder verschieben.

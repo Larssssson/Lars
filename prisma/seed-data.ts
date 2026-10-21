@@ -193,10 +193,126 @@ export const seedProfileAges: Record<string, { default: number; overrides?: Reco
 };
 export const seededProfileSections = [
   "stammdaten", "ziele_kernbotschaften", "vereinbarte_leistungen", "sprecher", "themen_suchbegriffe", "compliance", "factsheet",
+  "styleguide", "tone_of_voice", "zielmedien",
 ];
 
 /** Erfundene Factsheet-Zahl für Covenant; die PM Standortentscheidung widerspricht ihr absichtlich (BRIEFING 13.5). */
 export const covenantFacts = { jobs: 450, contradictingJobs: 600 };
+
+type SeedFact = { text: string; source?: string; date?: string };
+export type SeedProfile = {
+  sections: Record<string, Record<string, string | string[] | SeedFact[]>>;
+  speakers: { name: string; function: string; topics: string[]; quoteNeedsClientApproval: boolean }[];
+};
+
+/**
+ * Profilinhalte (BRIEFING 13.1): kurze, offensichtlich erfundene Platzhalter mit "[Beispiel]".
+ * Die Covenant-Angaben passen zu den KI-Beispielantworten in fixtures/ai/check.valid.json.
+ */
+export const seedProfiles: Record<string, SeedProfile> = {
+  Covenant: {
+    sections: {
+      ziele_kernbotschaften: {
+        kommunikationsziele: "[Beispiel] Covenant als verlässlichen Arbeitgeber und Partner in Sachsen bekannt machen.",
+        kernbotschaften: [
+          "[Beispiel] Covenant schafft in Sachsen dauerhafte Industriearbeitsplätze.",
+          "[Beispiel] Der Standort stärkt die europäische Verteidigungsfähigkeit.",
+          "[Beispiel] Covenant arbeitet eng mit Zulieferern aus der Region zusammen.",
+        ],
+      },
+      themen_suchbegriffe: {
+        themen: ["[Beispiel] Standort", "[Beispiel] Arbeitsplätze", "[Beispiel] Zusammenarbeit mit der Bundeswehr"],
+        technologien: ["[Beispiel] Munitionsfertigung"],
+        suchbegriffe: ["Covenant", "Covenant Deutschland", "Standort Leipzig"],
+        regulierung: ["[Beispiel] Kriegswaffenkontrollgesetz"],
+      },
+      compliance: {
+        regeln: [
+          "[Beispiel] Aussagen zu öffentlichen Auftraggebern, insbesondere der Bundeswehr, vorab vom Kunden freigeben lassen.",
+          "[Beispiel] Keine Angaben zu Stückzahlen oder Lieferterminen.",
+        ],
+        stand: "[Beispiel] 01.09.2026",
+        quelle: "[Beispiel] Compliance-Richtlinie Covenant Deutschland",
+      },
+      factsheet: {
+        fakten: [
+          { text: `[Beispiel] ${covenantFacts.jobs} Arbeitsplätze am Standort Leipzig`, source: "[Beispiel] Factsheet Covenant", date: "2026-09-01" },
+          { text: "[Beispiel] Investition von 120 Mio. Euro", source: "[Beispiel] Factsheet Covenant", date: "2026-09-01" },
+          { text: "[Beispiel] Produktionsbeginn 2028", source: "[Beispiel] Factsheet Covenant", date: "2026-09-01" },
+          { text: "[Beispiel] Grundstück von 35 Hektar", source: "[Beispiel] Factsheet Covenant", date: "2026-09-01" },
+        ],
+        boilerplate: "[Beispiel] Covenant Deutschland GmbH ist die deutsche Tochter eines US-amerikanischen Unternehmens der Verteidigungsindustrie. Am Standort Leipzig entsteht eine Fertigung für Komponenten.",
+      },
+      styleguide: {
+        firmenname: "[Beispiel] Erstnennung „Covenant Deutschland GmbH“, danach „Covenant“",
+        produktnamen: [],
+        schreibregeln: ["[Beispiel] Zahlen bis zwölf ausschreiben."],
+      },
+      tone_of_voice: { beschreibung: "[Beispiel] Sachlich, konkret, ohne Superlative.", referenztexte: "" },
+      zielmedien: { medien: ["Sachsen Rundschau (Lokales)", "Wehrtechnik Aktuell (Redaktion)", "Tagesblatt Nord (Wirtschaft)"] },
+    },
+    speakers: [{ name: "[Beispiel] Dr. Anna Weber", function: "Geschäftsführerin Deutschland", topics: ["Standort", "Arbeitsplätze"], quoteNeedsClientApproval: true }],
+  },
+  "Ground A": {
+    sections: {
+      ziele_kernbotschaften: {
+        kommunikationsziele: "[Beispiel] Ground A als führenden Anbieter von Lasertechnik positionieren.",
+        kernbotschaften: [
+          "[Beispiel] Ground A entwickelt Lasertechnik in Deutschland.",
+          "[Beispiel] Forschung und Fertigung sitzen an einem Ort.",
+          "[Beispiel] Ground A bildet Fachkräfte selbst aus.",
+        ],
+      },
+      themen_suchbegriffe: {
+        themen: ["[Beispiel] Lasertechnik", "[Beispiel] Forschungsförderung"],
+        technologien: ["[Beispiel] Hochleistungslaser"],
+        suchbegriffe: ["Ground A", "Lasertechnik"],
+        regulierung: ["[Beispiel] Exportkontrolle"],
+      },
+      compliance: {
+        regeln: ["[Beispiel] Keine Aussagen zu militärischen Anwendungen ohne Freigabe."],
+        stand: "[Beispiel] 15.09.2025",
+        quelle: "[Beispiel] Kommunikationsrichtlinie Ground A",
+      },
+      factsheet: {
+        fakten: [
+          { text: "[Beispiel] 230 Mitarbeitende", source: "[Beispiel] Factsheet Ground A", date: "2026-06-30" },
+          { text: "[Beispiel] Gegründet 2011", source: "[Beispiel] Factsheet Ground A", date: "2026-06-30" },
+          { text: "[Beispiel] 14 Patente", source: "[Beispiel] Factsheet Ground A", date: "2026-06-30" },
+        ],
+        boilerplate: "[Beispiel] Ground A ist ein Technologieunternehmen mit Sitz in Berlin und entwickelt Lasersysteme für Industrie und Forschung.",
+      },
+      styleguide: { firmenname: "[Beispiel] Ground A (mit Leerzeichen)", produktnamen: [], schreibregeln: [] },
+      tone_of_voice: { beschreibung: "[Beispiel] Technisch genau, verständlich für Nichtfachleute.", referenztexte: "" },
+      zielmedien: { medien: ["Hauptstadt Kurier (Wirtschaft)", "Tagesblatt Nord (Wirtschaft)"] },
+    },
+    speakers: [{ name: "[Beispiel] Tobias Klein", function: "Pressesprecher", topics: ["Unternehmen", "Förderung"], quoteNeedsClientApproval: false }],
+  },
+  Rafael: {
+    sections: {
+      ziele_kernbotschaften: {
+        kommunikationsziele: "[Beispiel] Rafael als Partner für Luftverteidigung in Deutschland sichtbar machen.",
+        kernbotschaften: [
+          "[Beispiel] Rafael liefert erprobte Systeme zur Luftverteidigung.",
+          "[Beispiel] Rafael ist ein verlässlicher Partner der Bundeswehr.",
+          "[Beispiel] Rafael setzt auf Zusammenarbeit mit deutschen Unternehmen.",
+        ],
+      },
+      themen_suchbegriffe: {
+        themen: ["[Beispiel] Luftverteidigung", "[Beispiel] Beschaffung"],
+        technologien: ["[Beispiel] Abwehrsysteme"],
+        suchbegriffe: ["Rafael", "Luftverteidigung"],
+        regulierung: [],
+      },
+      compliance: { regeln: ["[Beispiel] Keine Aussagen zu laufenden Vergabeverfahren."], stand: "[Beispiel] 01.07.2026", quelle: "[Beispiel] Richtlinie Rafael" },
+      factsheet: { fakten: [], boilerplate: "[Beispiel] Rafael ist ein Rüstungsunternehmen mit Schwerpunkt Luftverteidigung." },
+      styleguide: { firmenname: "[Beispiel] Rafael", produktnamen: [], schreibregeln: [] },
+      tone_of_voice: { beschreibung: "[Beispiel] Zurückhaltend und faktenorientiert.", referenztexte: "" },
+      zielmedien: { medien: ["Wehrtechnik Aktuell (Redaktion)", "Hauptstadt Kurier (Politik)"] },
+    },
+    speakers: [{ name: "[Beispiel] Daniel Roth", function: "Head of Communications", topics: ["Luftverteidigung"], quoteNeedsClientApproval: false }],
+  },
+};
 
 /** Fristangaben aus BRIEFING 13.5, relativ zum Seed-Zeitpunkt. */
 export type SeedDue =
