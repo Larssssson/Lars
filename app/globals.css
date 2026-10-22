@@ -1,0 +1,161 @@
+@import "tailwindcss";
+
+/* Farbwerte nach shadcn/ui; Akzent = RP_LIGHT_BLUE (Platzhalter #5BB5E5, BRIEFING 7.3).
+   Hell- und Dunkelmodus folgen der Systemeinstellung (BRIEFING 10.6). */
+:root {
+  --rp-light-blue: #5bb5e5;
+  --background: oklch(0.99 0 0);
+  --foreground: oklch(0.2 0.01 250);
+  --muted: oklch(0.96 0.005 250);
+  --muted-foreground: oklch(0.45 0.01 250);
+  --card: oklch(1 0 0);
+  --card-foreground: var(--foreground);
+  --border: oklch(0.9 0.005 250);
+  --input: oklch(0.88 0.005 250);
+  --primary: oklch(0.38 0.09 240);
+  --primary-foreground: oklch(0.99 0 0);
+  --accent: oklch(0.94 0.03 230);
+  --accent-foreground: oklch(0.3 0.08 240);
+  --destructive: oklch(0.55 0.2 27);
+  --destructive-foreground: oklch(0.99 0 0);
+  --ring: oklch(0.55 0.13 240);
+  --sidebar: oklch(0.97 0.006 250);
+  --radius: 0.5rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: oklch(0.17 0.01 250);
+    --foreground: oklch(0.95 0.005 250);
+    --muted: oklch(0.24 0.01 250);
+    --muted-foreground: oklch(0.72 0.01 250);
+    --card: oklch(0.2 0.01 250);
+    --border: oklch(0.32 0.01 250);
+    --input: oklch(0.36 0.01 250);
+    --primary: oklch(0.75 0.11 230);
+    --primary-foreground: oklch(0.17 0.01 250);
+    --accent: oklch(0.3 0.04 240);
+    --accent-foreground: oklch(0.92 0.03 230);
+    --destructive: oklch(0.65 0.2 27);
+    --ring: oklch(0.75 0.11 230);
+    --sidebar: oklch(0.2 0.01 250);
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-rp-light-blue: var(--rp-light-blue);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 4px);
+  --font-sans: Arial, "Helvetica Neue", Helvetica, sans-serif;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+  /* sichtbarer Fokus für Tastaturbedienung (BRIEFING 10.6) */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
+}
+
+/* Editor (BRIEFING 7.3): Bausteine, Änderungsverfolgung, Kommentaranker */
+.document-editor {
+  @apply flex min-h-[28rem] flex-col gap-3 px-4 py-4 outline-none sm:px-6;
+}
+.template-block {
+  @apply rounded-md border border-dashed border-transparent px-2 py-1;
+}
+.document-editor:focus-within .template-block:focus-within,
+.template-block:hover {
+  @apply border-border;
+}
+.template-block-label {
+  @apply mb-0.5 flex items-center gap-2 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase select-none;
+}
+.template-block-required {
+  @apply rounded bg-muted px-1 text-[10px] font-normal tracking-normal normal-case;
+}
+.template-block[data-block="headline"] .template-block-content p,
+.template-block[data-block="titel"] .template-block-content p,
+.template-block[data-block="betreff"] .template-block-content p {
+  @apply text-2xl leading-tight font-bold;
+}
+.template-block[data-block="lead"] .template-block-content p {
+  @apply font-semibold;
+}
+.template-block-content p {
+  @apply min-h-6 leading-relaxed;
+}
+.template-block-content h3 {
+  @apply mt-2 text-base font-semibold;
+}
+.template-block-content ul {
+  @apply list-disc pl-6;
+}
+.template-block-content ol {
+  @apply list-decimal pl-6;
+}
+.template-block-content a {
+  @apply text-primary underline;
+}
+.template-block-content table {
+  @apply my-2 w-full border-collapse text-sm;
+}
+.template-block-content th,
+.template-block-content td {
+  @apply border border-border px-2 py-1 align-top;
+}
+.template-block-content th {
+  @apply bg-muted font-semibold;
+}
+.change-insertion {
+  @apply rounded-sm bg-emerald-100 text-emerald-900 no-underline dark:bg-emerald-950 dark:text-emerald-200;
+  text-decoration: underline;
+  text-decoration-color: rgb(16 185 129);
+}
+.change-deletion {
+  @apply rounded-sm bg-red-100 text-red-900 dark:bg-red-950 dark:text-red-200;
+  text-decoration: line-through;
+}
+.comment-anchor {
+  @apply rounded-sm bg-amber-100 dark:bg-amber-900/50;
+}
+.comment-anchor.comment-active {
+  @apply bg-amber-300 dark:bg-amber-700;
+}
+.ProseMirror-selectednode {
+  @apply outline-2 outline-ring;
+}
+/* KI-Baustein (BRIEFING 8.2): hellblau mit Label KI, bis ein Mensch ihn übernimmt */
+.ai-insertion {
+  @apply rounded-sm bg-sky-100 text-sky-950 dark:bg-sky-950 dark:text-sky-100;
+  box-shadow: 0 0 0 1px rgb(14 165 233 / 0.5);
+}
+.ai-insertion::before {
+  content: attr(data-label);
+  @apply mr-1 rounded-sm bg-sky-600 px-1 align-middle text-[10px] font-bold text-white;
+}
+.ai-insertion + .ai-insertion::before {
+  content: none;
+}

@@ -1,0 +1,53 @@
+# Lokaler Start ohne Zugangsdaten: alle Adapter auf Ersatz, Entwickler-Login.
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: impress
+      POSTGRES_PASSWORD: impress
+      POSTGRES_DB: impress
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U impress"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://impress:impress@db:5432/impress
+    # Migrationen und Seed bei jedem Start; der Seed ist idempotent.
+    command: sh -c "npm run setup && npm run dev -- -H 0.0.0.0"
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      db:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://impress:impress@db:5432/impress
+    command: sh -c "npx prisma generate && npm run worker"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db-data:

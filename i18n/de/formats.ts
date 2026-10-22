@@ -1,0 +1,20 @@
+export const formats = {
+  title: "Darstellungsformen",
+  builtIn: "eingebaut",
+  name: "Name",
+  blocks: "Bausteine",
+  blocksHint: "Ein Baustein pro Zeile, Pflichtbausteine mit * am Ende.",
+  rulesText: "Strukturregeln (Text für die KI)",
+  folder: "SharePoint-Ordner",
+  add: "Darstellungsform anlegen",
+  save: "Speichern",
+  inUse: (n: number) => (n === 1 ? "1 Dokument" : `${n} Dokumente`),
+  errors: {
+    nameRequired: "Bitte einen Namen eingeben.",
+    blocksRequired: "Bitte mindestens einen Baustein eingeben.",
+    blocksInvalid: "Bausteine brauchen eindeutige Namen.",
+    nameTaken: "Diesen Namen gibt es schon.",
+    builtIn: "Eingebaute Darstellungsformen lassen sich nicht ändern.",
+    inUse: "Die Bausteine sind schon in Dokumenten verwendet und lassen sich nicht mehr ändern.",
+  },
+} as const;

@@ -1,0 +1,13 @@
+{
+  "suggestions": [
+    { "sectionKey": "ziele_kernbotschaften", "field": "kernbotschaften", "value": "[Beispiel] SAFENET schützt kritische Infrastruktur in Deutschland.", "note": "Unternehmensbeschreibung, Absatz 1" },
+    { "sectionKey": "ziele_kernbotschaften", "field": "kernbotschaften", "value": "[Beispiel] Sicherheit entsteht durch geprüfte Technik aus Europa.", "note": "Unternehmensbeschreibung, Absatz 2" },
+    { "sectionKey": "themen_suchbegriffe", "field": "themen", "value": "[Beispiel] Netzwerksicherheit", "note": "Unternehmensbeschreibung" },
+    { "sectionKey": "themen_suchbegriffe", "field": "themen", "value": "[Beispiel] Kritische Infrastruktur", "note": "Unternehmensbeschreibung" },
+    { "sectionKey": "themen_suchbegriffe", "field": "suchbegriffe", "value": "SAFENET", "note": "Unternehmensbeschreibung" },
+    { "sectionKey": "sprecher", "field": "sprecher", "value": { "name": "[Beispiel] Dr. Mara Lindner", "function": "Geschäftsführerin", "topics": ["IT-Sicherheit", "Kritische Infrastruktur"] }, "note": "Unternehmensbeschreibung, Abschnitt Führung" },
+    { "sectionKey": "styleguide", "field": "firmenname", "value": "SAFENET, immer in Großbuchstaben", "note": "Styleguide, Abschnitt 1" },
+    { "sectionKey": "styleguide", "field": "schreibregeln", "value": "[Beispiel] Keine Anglizismen, wo es ein deutsches Wort gibt.", "note": "Styleguide, Abschnitt 3" },
+    { "sectionKey": "factsheet", "field": "fakten", "value": { "text": "[Beispiel] 120 Mitarbeitende", "source": "Unternehmensbeschreibung", "date": "2026" }, "note": "Unternehmensbeschreibung, Kennzahlen" }
+  ]
+}

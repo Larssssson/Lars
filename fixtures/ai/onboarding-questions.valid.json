@@ -1,0 +1,9 @@
+{
+  "questions": [
+    { "sectionKey": "sprecher", "question": "Wer darf für den Kunden zitiert werden?" },
+    { "sectionKey": "zielmedien", "question": "Welche Medien sind in diesem Jahr am wichtigsten?" },
+    { "sectionKey": "tabuthemen", "question": "Gibt es Themen, zu denen der Kunde sich nicht äußert?" },
+    { "sectionKey": "compliance", "question": "Welche Aussagen muss der Kunde vor der Veröffentlichung freigeben?" },
+    { "sectionKey": "ziele_kernbotschaften", "question": "Was soll in zwölf Monaten über den Kunden berichtet werden?" }
+  ]
+}

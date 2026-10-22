@@ -1,0 +1,104 @@
+BEGIN:VCARD
+VERSION:3.0
+PRODID:-//Apple Inc.//iPhone OS 18.0//EN
+N:Fischer;Greta;;;
+FN:Greta Fischer
+ORG:Tagesblatt Nord;
+TITLE:Redakteurin Politik
+EMAIL;type=INTERNET;type=WORK;type=pref:greta.fischer@example.org
+TEL;type=CELL;type=VOICE;type=pref:0151 5550131
+TEL;type=WORK;type=VOICE:030 5550132
+NOTE:zwei Nummern
+END:VCARD
+BEGIN:VCARD
+VERSION:3.0
+PRODID:-//Apple Inc.//iPhone OS 18.0//EN
+N:Bauer;Moritz;;;
+FN:Moritz Bauer
+ORG:Hauptstadt Kurier;
+TITLE:Wirtschaftsredakteur
+EMAIL;type=INTERNET;type=WORK;type=pref:moritz.bauer@example.org
+TEL;type=WORK;type=VOICE;type=pref:030 5550133
+END:VCARD
+BEGIN:VCARD
+VERSION:3.0
+PRODID:-//Apple Inc.//iPhone OS 18.0//EN
+N:Vogel;Ida;;;
+FN:Ida Vogel
+ORG:Sachsen Rundschau;
+TITLE:Lokalredakteurin
+EMAIL;type=INTERNET;type=WORK;type=pref:ida.vogel@example.org
+TEL;type=WORK;type=VOICE;type=pref:030 5550134
+END:VCARD
+BEGIN:VCARD
+VERSION:3.0
+PRODID:-//Apple Inc.//iPhone OS 18.0//EN
+N:Jung;Anton;;;
+FN:Anton Jung
+ORG:Wehrtechnik Aktuell;
+TITLE:Chefredakteur
+EMAIL;type=INTERNET;type=WORK;type=pref:anton.jung@example.org
+TEL;type=WORK;type=VOICE;type=pref:030 5550135
+NOTE:kennt Ole Brandt\, gut
+END:VCARD
+BEGIN:VCARD
+VERSION:3.0
+PRODID:-//Apple Inc.//iPhone OS 18.0//EN
+N:Roth;Paula;;;
+FN:Paula Roth
+ORG:Radio Mitte;
+TITLE:Moderatorin
+EMAIL;type=INTERNET;type=WORK;type=pref:paula.roth@example.org
+TEL;type=WORK;type=VOICE;type=pref:030 5550136
+END:VCARD
+BEGIN:VCARD
+VERSION:3.0
+PRODID:-//Apple Inc.//iPhone OS 18.0//EN
+N:Frank;Emil;;;
+FN:Emil Frank
+ORG:Nachrichtendienst Deutschland;
+TITLE:Korrespondent
+EMAIL;type=INTERNET;type=WORK;type=pref:emil.frank@example.org
+TEL;type=WORK;type=VOICE;type=pref:030 5550137
+END:VCARD
+BEGIN:VCARD
+VERSION:3.0
+PRODID:-//Apple Inc.//iPhone OS 18.0//EN
+N:Sommer;Luisa;;;
+FN:Luisa Sommer
+ORG:Tagesblatt Nord;
+TITLE:Wirtschaftsredakteurin
+EMAIL;type=INTERNET;type=WORK;type=pref:luisa.sommer@example.org
+TEL;type=WORK;type=VOICE;type=pref:030 5550138
+END:VCARD
+BEGIN:VCARD
+VERSION:3.0
+PRODID:-//Apple Inc.//iPhone OS 18.0//EN
+N:Haas;Oskar;;;
+FN:Oskar Haas
+ORG:Hauptstadt Kurier;
+TITLE:Politikredakteur
+EMAIL;type=INTERNET;type=WORK;type=pref:oskar.haas@example.org
+TEL;type=WORK;type=VOICE;type=pref:030 5550139
+END:VCARD
+BEGIN:VCARD
+VERSION:3.0
+PRODID:-//Apple Inc.//iPhone OS 18.0//EN
+N:Graf;Frieda;;;
+FN:Frieda Graf
+ORG:Sachsen Rundschau;
+TITLE:Redakteurin
+EMAIL;type=INTERNET;type=WORK;type=pref:frieda.graf@example.org
+TEL;type=WORK;type=VOICE;type=pref:030 5550140
+END:VCARD
+BEGIN:VCARD
+VERSION:3.0
+PRODID:-//Apple Inc.//iPhone OS 18.0//EN
+N:Albrecht;Peter;;;
+FN:Peter Albrecht
+ORG:Tagesblatt Nord;
+TITLE:Wirtschaftsredakteur
+EMAIL;type=INTERNET;type=WORK;type=pref:peter.albrecht@example.org
+TEL;type=WORK;type=VOICE;type=pref:030 5550102
+NOTE:Dublette zum Seed
+END:VCARD

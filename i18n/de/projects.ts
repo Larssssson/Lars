@@ -1,0 +1,20 @@
+export const projects = {
+  title: "Projekte",
+  newProject: "Neues Projekt",
+  none: "Keine Projekte.",
+  fields: { title: "Titel", kind: "Art", status: "Status", start: "Beginn", end: "Ende", service: "Vereinbarte Leistung", tasks: "Aufgaben", client: "Kunde" },
+  kinds: { PRESSE_EVENT: "Presse-Event", ROUNDTABLE: "Roundtable", KAMPAGNE: "Kampagne", SONSTIGES: "Sonstiges" } as const,
+  statuses: { GEPLANT: "Geplant", LAUFEND: "Laufend", ABGESCHLOSSEN: "Abgeschlossen", ABGEBROCHEN: "Abgebrochen" } as const,
+  statusActions: { LAUFEND: "Starten", ABGESCHLOSSEN: "Abschließen", ABGEBROCHEN: "Abbrechen", GEPLANT: "Wieder planen" } as const,
+  suggestions: "Typische Aufgaben übernehmen",
+  suggestionsHint: "Für Roundtable und Presse-Event. Owner bist du; andere Owner danach in der Aufgabe ändern.",
+  taskDue: "Frist der Aufgaben",
+  create: "Projekt anlegen",
+  chooseClient: "Bitte oben in der Kopfzeile einen Kunden wählen, um Projekte zu sehen und anzulegen.",
+  counts: "zählt für",
+  errors: {
+    titleRequired: "Bitte einen Titel eingeben.",
+    periodInvalid: "Das Ende liegt vor dem Beginn.",
+    statusInvalid: "Dieser Statuswechsel ist nicht möglich.",
+  },
+} as const;

@@ -1,0 +1,68 @@
+{
+  "scores": { "conformity": 58, "resonance": 66 },
+  "findings": [
+    {
+      "category": "FAKTENTREUE",
+      "severity": "KRITISCH",
+      "confidence": "HOCH",
+      "anchor": { "blockKey": "lead", "quote": "600 neue Arbeitsplätze" },
+      "message": "Die Zahl der Arbeitsplätze widerspricht dem Factsheet.",
+      "reason": "Das Factsheet nennt 450 Arbeitsplätze am Standort.",
+      "suggestion": null
+    },
+    {
+      "category": "COMPLIANCE",
+      "severity": "WICHTIG",
+      "confidence": "MITTEL",
+      "anchor": { "blockKey": "lead", "quote": "eng mit der Bundeswehr zusammenarbeiten" },
+      "message": "Aussagen zur Zusammenarbeit mit der Bundeswehr braucht der Kunde vorab zur Freigabe.",
+      "reason": "Die Compliance-Regeln verlangen eine Freigabe für Aussagen zu öffentlichen Auftraggebern.",
+      "suggestion": null
+    },
+    {
+      "category": "STYLEGUIDE",
+      "severity": "HINWEIS",
+      "confidence": "MITTEL",
+      "anchor": { "blockKey": "boilerplate", "quote": "Covenant ist ein US-amerikanisches Unternehmen" },
+      "message": "Bei der ersten Nennung den vollen Firmennamen verwenden.",
+      "reason": "Der Styleguide schreibt bei der Erstnennung „Covenant Deutschland GmbH“ vor.",
+      "suggestion": null
+    },
+    {
+      "category": "TONE",
+      "severity": "HINWEIS",
+      "confidence": "NIEDRIG",
+      "anchor": { "wholeText": true },
+      "message": "Der Ton ist sachlich und passt zum Profil; das Zitat könnte konkreter werden.",
+      "reason": "Der Tone of Voice verlangt konkrete Aussagen statt allgemeiner Zustimmung.",
+      "suggestion": "ZITAT"
+    },
+    {
+      "category": "RESONANZ",
+      "severity": "WICHTIG",
+      "confidence": "MITTEL",
+      "anchor": { "blockKey": "headline", "quote": "Covenant entscheidet sich für Standort in Sachsen" },
+      "message": "Die Headline nennt den Ort, aber nicht den Nutzen für die Region.",
+      "reason": "Regionale Medien greifen Arbeitsplätze und Investitionen eher auf als die Standortwahl.",
+      "suggestion": "HEADLINE"
+    },
+    {
+      "category": "ERWEITERUNG",
+      "severity": "HINWEIS",
+      "confidence": "MITTEL",
+      "anchor": { "wholeText": true },
+      "message": "Die Investitionssumme aus dem Factsheet fehlt.",
+      "reason": "Das Factsheet nennt eine Investition von 120 Mio. Euro.",
+      "suggestion": null
+    },
+    {
+      "category": "DISTRIBUTION",
+      "severity": "HINWEIS",
+      "confidence": "MITTEL",
+      "anchor": { "wholeText": true },
+      "message": "Passend für Sachsen Rundschau (Lokales) und Wehrtechnik Aktuell (Redaktion).",
+      "reason": "Beide stehen in den Zielmedien und berichten über Ansiedlungen und Rüstung.",
+      "suggestion": null
+    }
+  ]
+}
