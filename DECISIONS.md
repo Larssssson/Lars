@@ -630,6 +630,6 @@ Begründung: Login nur über Entra ID und nur für angelegte Nutzer (BRIEFING 3.
 
 **D-121** · 2026-10-22
 Frage: Wie kann das Team impress ohne Docker und Git auf dem eigenen Rechner ausprobieren?
-Entscheidung: Über GitHub Codespaces mit einer Konfiguration in `.devcontainer/` (Node 22 und PostgreSQL 16, Ersatz-Adapter, Seed beim Einrichten, `npm run dev` beim Öffnen); in Codespaces erlaubt Next.js Server Actions und den Entwicklungsserver zusätzlich von `*.app.github.dev`.
+Entscheidung: Über GitHub Codespaces mit einer Konfiguration in `.devcontainer/` (Node 22 und PostgreSQL 16, Ersatz-Adapter, Seed beim Einrichten, `npm run dev` beim Öffnen); hinter der Weiterleitung erlaubt Next.js Server Actions von den Adressen in `ALLOWED_FORWARDED_HOSTS` (Codespaces: `*.app.github.dev`), und `AUTH_URL` zeigt auf die öffentliche Adresse, damit der Login nicht auf `localhost` zurückleitet; `scripts/codespace-start.sh` setzt beides und startet impress. Der Port 3000 wird für Tests auf „Public“ gestellt (nur Beispieldaten).
 Begründung: Läuft vollständig im Browser, braucht nur das GitHub-Konto und nutzt dieselben Befehle wie die lokale Einrichtung.
 

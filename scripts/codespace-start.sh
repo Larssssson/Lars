@@ -7,6 +7,10 @@ LOG=/tmp/impress-dev.log
 LOCAL=http://localhost:3000
 if [ -n "${CODESPACE_NAME:-}" ]; then
   PUBLIC="https://${CODESPACE_NAME}-3000.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN:-app.github.dev}"
+  # Server Actions von der weitergeleiteten Adresse erlauben (next.config.ts),
+  # Login leitet auf die öffentliche Adresse statt auf localhost zurück (Auth.js)
+  export ALLOWED_FORWARDED_HOSTS="${ALLOWED_FORWARDED_HOSTS:-*.app.github.dev}"
+  export AUTH_URL="$PUBLIC"
 else
   PUBLIC=$LOCAL
 fi
@@ -29,6 +33,10 @@ if ! npm run setup >> "$LOG" 2>&1; then
   exit 1
 fi
 
+if [ -n "${CODESPACE_NAME:-}" ]; then
+  # in Codespaces immer frisch starten, damit die Einstellungen oben gelten
+  pkill -f "next dev" 2>/dev/null && sleep 2
+fi
 if curl -s -m 5 -o /dev/null "$LOCAL/api/health"; then
   echo "impress: läuft bereits."
 else

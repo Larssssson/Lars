@@ -1,7 +1,13 @@
 import type { NextConfig } from "next";
 
-/** In GitHub Codespaces läuft impress hinter einer weitergeleiteten Adresse (*.app.github.dev). */
-const forwardedHosts = process.env.CODESPACES === "true" ? ["*.app.github.dev"] : [];
+/**
+ * Hinter einer Weiterleitung (GitHub Codespaces: *.app.github.dev) kommt die Anfrage mit anderem Host an,
+ * als der Browser zeigt; diese Adressen dürfen Server Actions auslösen (DECISIONS D-121).
+ */
+const forwardedHosts = (process.env.ALLOWED_FORWARDED_HOSTS ?? (process.env.CODESPACES === "true" ? "*.app.github.dev" : ""))
+  .split(",")
+  .map((h) => h.trim())
+  .filter(Boolean);
 
 const nextConfig: NextConfig = {
   allowedDevOrigins: forwardedHosts,

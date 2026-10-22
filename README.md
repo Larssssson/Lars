@@ -7,7 +7,7 @@ Interne Presse- und Content-Plattform von Rud Pedersen Berlin. Die verbindliche 
 ## Im Browser ausprobieren, ohne Installation (GitHub Codespaces)
 
 1. Auf GitHub im Repository auf **Code** → Reiter **Codespaces** → **Create codespace on main** klicken (oder direkt: https://codespaces.new/Larssssson/Lars).
-2. Warten, bis die Einrichtung durch ist (beim ersten Mal etwa 5 bis 10 Minuten: Pakete, Datenbank, Beispieldaten). Danach startet impress von selbst und lädt die erste Seite vor; im Terminal unten steht am Ende „impress ist bereit: <Link>“. Den Link mit Strg/Cmd + Klick öffnen. Steht dort eine Fehlermeldung, zeigt sie die letzten Zeilen des Protokolls. Von Hand starten: `bash scripts/codespace-start.sh`.
+2. Warten, bis die Einrichtung durch ist (beim ersten Mal etwa 5 bis 10 Minuten: Pakete, Datenbank, Beispieldaten). Danach startet impress von selbst und lädt die erste Seite vor; im Terminal unten steht am Ende „impress ist bereit: <Link>“. Vorher unten im Reiter **Ports** mit rechter Maustaste auf 3000 → **Port Visibility → Public** stellen (sonst meldet GitHub „401“), dann den Link mit Strg/Cmd + Klick öffnen. Steht dort eine Fehlermeldung, zeigt sie die letzten Zeilen des Protokolls. Von Hand (neu) starten: `bash scripts/codespace-start.sh`.
 3. Auf der Anmeldeseite einen Seed-Nutzer wählen, etwa „Lars Scholtyssyk“ (CVD, Admin) oder „Laura“ (Redakteurin).
 
 Alles läuft mit Ersatz-Adaptern und Beispieldaten, ohne Zugangsdaten. Die Adresse ist nur für das eigene GitHub-Konto erreichbar. Ein Codespace hält an, wenn niemand ihn nutzt, und lässt sich unter https://github.com/codespaces wieder starten oder löschen. Für GitHub-Konten ist ein Kontingent an Stunden pro Monat frei.
