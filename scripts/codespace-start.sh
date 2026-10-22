@@ -41,7 +41,8 @@ if curl -s -m 5 -o /dev/null "$LOCAL/api/health"; then
   echo "impress: läuft bereits."
 else
   echo "impress: starte …"
-  nohup npm run dev -- -H 0.0.0.0 >> "$LOG" 2>&1 &
+  # eigene Prozessgruppe: der Server läuft weiter, wenn Terminal oder Codespaces-Startbefehl enden
+  setsid nohup npm run dev -- -H 0.0.0.0 >> "$LOG" 2>&1 < /dev/null &
 fi
 
 echo "impress: lade die erste Seite vor (beim ersten Mal 1 bis 3 Minuten) …"
