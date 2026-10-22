@@ -5,20 +5,15 @@ services:
     command: sleep infinity
     volumes:
       - ../..:/workspaces:cached
+    # App im Netz der Datenbank: nur so greift "forwardPorts" aus devcontainer.json (Vorlage von Microsoft)
+    network_mode: service:db
     environment:
-      DATABASE_URL: postgresql://impress:impress@db:5432/impress
-    depends_on:
-      db:
-        condition: service_healthy
+      DATABASE_URL: postgresql://impress:impress@localhost:5432/impress
 
   db:
     image: postgres:16-alpine
+    restart: unless-stopped
     environment:
       POSTGRES_USER: impress
       POSTGRES_PASSWORD: impress
       POSTGRES_DB: impress
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U impress"]
-      interval: 3s
-      timeout: 3s
-      retries: 20
