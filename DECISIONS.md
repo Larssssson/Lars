@@ -571,57 +571,57 @@ Begründung: Grundsatz 9: keine fremden Volltexte auf Dauer.
 
 ## Phase 6: Push, Livegang-Reife, Übergabe
 
-**D-110** · 2026-10-21
+**D-110** · 2026-10-21 **[bestätigt 2026-10-22]**
 Frage: Mit welchen Zugangsdaten spricht impress mit SharePoint?
 Entscheidung: Mit derselben App-Registrierung wie der Login (`ENTRA_TENANT_ID`, `ENTRA_CLIENT_ID`, `ENTRA_CLIENT_SECRET`) über Client Credentials und Microsoft Graph; Ordner werden Segment für Segment angelegt, Dateien per einfachem Upload ersetzt.
 Begründung: BRIEFING 16 nennt eine App-Registrierung „Login und Berechtigung für die SharePoint-Site“; 10.4 sieht keine eigenen SharePoint-Zugangsdaten vor.
 
-**D-111** · 2026-10-21
+**D-111** · 2026-10-21 **[bestätigt 2026-10-22]**
 Frage: Welche Angaben liest impress beim Login aus Entra ID?
 Entscheidung: Nur Name und Mailadresse aus dem ID-Token (Scopes `openid profile email`), ohne Profilbild; fehlt das Mail-Attribut, gilt der Anmeldename (UPN). Nur der RP-Mandant ist als Aussteller zugelassen.
 Begründung: Grundsatz 9; die Zuordnung zum Nutzer läuft ohnehin über die Mailadresse (BRIEFING 3.4).
 
-**D-112** · 2026-10-21
+**D-112** · 2026-10-21 **[bestätigt 2026-10-22]**
 Frage: Wann meldet `/api/health` einen Fehler?
 Entscheidung: HTTP 503 nur ohne Datenbank; ist ein externer Dienst gestört, antwortet er mit 200 und `status: "degraded"`. Jede Prüfung bricht nach 5 Sekunden ab, der Endpunkt braucht keine Anmeldung und nennt nie Werte von Variablen.
 Begründung: Ohne Datenbank geht nichts, ohne KI oder SharePoint läuft impress eingeschränkt weiter; ein Neustart würde daran nichts ändern.
 
-**D-113** · 2026-10-21
+**D-113** · 2026-10-21 **[bestätigt 2026-10-22]**
 Frage: Wie werden Geräte für Push verwaltet?
 Entscheidung: Ein Abonnement je Browser, höchstens 10 Geräte je Person, Endpunkt nur über HTTPS; meldet sich auf demselben Browser jemand anderes an, wandert das Abonnement zu ihm. Geräte, die der Push-Dienst mit 404 oder 410 ablehnt, werden entfernt. Die Testnachricht steht auch in der Glocke und zählt als Push. Ohne VAPID-Schlüssel (Ersatz) lässt sich ein Ersatz-Gerät registrieren.
 Begründung: BRIEFING 10.3 (mehrere Geräte, einzeln entfernen) und 7.9 (jede Push-Nachricht wird gezählt); so bleibt der Ablauf auch lokal ohne Zugangsdaten prüfbar.
 
-**D-114** · 2026-10-21
+**D-114** · 2026-10-21 **[bestätigt 2026-10-22]**
 Frage: Wie werden die echten Adapter ohne Zugang zu den RP-Diensten getestet?
 Entscheidung: Azure Blob gegen Azurite (offizieller Emulator, als Entwicklungsabhängigkeit), Microsoft Graph, Entra ID, Claude API und ein Push-Dienst (HTTPS, die Nachricht wird im Test wie auf einem Gerät entschlüsselt) gegen lokale Mock-Server im Testprojekt `adapters` (`npm run test:adapters`).
 Begründung: Abnahmekriterium „getestet gegen eine Testumgebung oder per Mock-Server“; die Tests laufen ohne Internet und ohne Zugangsdaten.
 
-**D-115** · 2026-10-21
+**D-115** · 2026-10-21 **[bestätigt 2026-10-22]**
 Frage: Wie sind die Kennzahlen der Verwaltung definiert?
 Entscheidung: Aktive Nutzer = Personen mit mindestens einem angemeldeten Seitenaufruf in der Woche (Montag bis Sonntag, letzte 8 Wochen; je Person und Tag ein Eintrag in `UserActivity`, ohne Uhrzeit und Inhalt). Freigabezeit = Mittel von Anfrage bis Entscheidung (Freigabe oder Änderungen) der letzten 30 Tage. Push pro Person und Tag der letzten 14 Tage. Verifizierte Kontakte am Ende der letzten 6 Monate nach Verifizierungsdatum. Pressespiegel-Dienste der letzten 30 Tage, erledigt, wenn ihre Aufgabe erledigt oder archiviert ist (`Shift.taskId`). Kennzahlen sehen nur Admins.
 Begründung: BRIEFING 7.10 und 3.1; so wenig Daten wie nötig (Grundsatz 9).
 
-**D-116** · 2026-10-21
+**D-116** · 2026-10-21 **[bestätigt 2026-10-22]**
 Frage: Wer ändert welche Einstellungen, und wo steht die Pressespiegel-Frist?
 Entscheidung: Eskalationszeiten (Standard 30 und 60 Minuten), Relevanzschwelle (50), Anzahl Top-Artikel (10) und RP-Vorlage (Farbe, Schriftname, Logo) ändern CVDs und Admins, jede Änderung im Protokoll; Modellwahl, Integrationen und Kennzahlen nur Admins. Die Pressespiegel-Frist bleibt am Diensttyp (D-108). Die Schrift ist ein Name für Word und PDF; eine Schriftdatei bindet impress nicht ein.
 Begründung: BRIEFING 7.10 und 3.1; die Frist gehört zum Dienst, der die Aufgabe anlegt. Ergänzt D-052.
 
-**D-117** · 2026-10-21
+**D-117** · 2026-10-21 **[bestätigt 2026-10-22]**
 Frage: Wie ist das Betriebs-Image aufgebaut?
 Entscheidung: Ein Image für App (`npm start`), Worker (`npm run worker`) und Migration (`npm run db:deploy`) mit Chromium für den PDF-Export; `prisma`, `tsx` und `dotenv` sind dafür Laufzeitabhängigkeiten. Der Build braucht keine Zugangsdaten: die Auth.js-Konfiguration entsteht erst bei der ersten Anfrage (`getAuthProvider`). Bekannte `npm audit`-Meldungen (uuid über exceljs, sprintf-js über mammoth) betreffen nicht genutzte Funktionen.
 Begründung: BRIEFING 16 (Dockerfile, Migration als eigener Schritt); ein Image ist einfacher zu betreiben als drei.
 
-**D-118** · 2026-10-21
+**D-118** · 2026-10-21 **[bestätigt 2026-10-22]**
 Frage: Wie genau eskalieren dringende Freigaben (BRIEFING 6.4)?
 Entscheidung: Der Job `freigaben-eskalieren` prüft jede Minute offene Freigaben, deren Aufgabe in diesem Moment dringend ist. Erste Stufe: Push an alle Freigabeberechtigten des Kunden außer dem Owner; zweite Stufe: an den CVD vom Dienst, ohne Eintrag an alle CVDs. Die Stufe steht an der Freigabe (`escalationLevel`), jede kommt höchstens einmal; mit Entscheidung oder Zurückziehen endet die Eskalation.
 Begründung: BRIEFING 6.4 und 7.9; ohne gespeicherte Stufe käme jede Minute eine neue Push-Nachricht.
 
-**D-119** · 2026-10-21
+**D-119** · 2026-10-21 **[bestätigt 2026-10-22]**
 Frage: Was speichert der Service Worker?
 Entscheidung: Nichts. Er zeigt Push-Nachrichten an und öffnet beim Antippen den Link, nur innerhalb von impress; es gibt keinen Offline-Cache. Manifest und Icons (Platzhalter bis zum RP-Logo) machen impress installierbar.
 Begründung: Vertrauliche Inhalte sollen nicht auf Geräten liegen (BRIEFING 11); 10.3 verlangt Installation und Push, kein Offline-Arbeiten.
 
-**D-120** · 2026-10-21
+**D-120** · 2026-10-21 **[bestätigt 2026-10-22]**
 Frage: Wie kommt der erste echte Nutzer ins System, wenn die Seed-Nutzer Beispieladressen haben?
 Entscheidung: `npm run user:bootstrap -- "Name" mail@…` legt einen CVD mit Admin-Recht an oder hebt einen vorhandenen Nutzer an (protokolliert, ohne handelnde Person); alle weiteren legt der CVD in der Verwaltung an.
 Begründung: Login nur über Entra ID und nur für angelegte Nutzer (BRIEFING 3.4, 11); ohne diesen Schritt könnte sich niemand anmelden.
