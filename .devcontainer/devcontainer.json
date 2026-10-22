@@ -1,0 +1,13 @@
+{
+  "name": "impress",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "forwardPorts": [3000],
+  "portsAttributes": {
+    "3000": { "label": "impress", "onAutoForward": "openBrowser" }
+  },
+  "hostRequirements": { "cpus": 2, "memory": "8gb" },
+  "postCreateCommand": "cp -n .env.example .env; npm ci && npm run setup && npx playwright install --with-deps chromium",
+  "postAttachCommand": "npm run dev -- -H 0.0.0.0"
+}

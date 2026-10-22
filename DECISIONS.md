@@ -625,3 +625,11 @@ Begründung: Vertrauliche Inhalte sollen nicht auf Geräten liegen (BRIEFING 11)
 Frage: Wie kommt der erste echte Nutzer ins System, wenn die Seed-Nutzer Beispieladressen haben?
 Entscheidung: `npm run user:bootstrap -- "Name" mail@…` legt einen CVD mit Admin-Recht an oder hebt einen vorhandenen Nutzer an (protokolliert, ohne handelnde Person); alle weiteren legt der CVD in der Verwaltung an.
 Begründung: Login nur über Entra ID und nur für angelegte Nutzer (BRIEFING 3.4, 11); ohne diesen Schritt könnte sich niemand anmelden.
+
+## Nach Phase 6
+
+**D-121** · 2026-10-22
+Frage: Wie kann das Team impress ohne Docker und Git auf dem eigenen Rechner ausprobieren?
+Entscheidung: Über GitHub Codespaces mit einer Konfiguration in `.devcontainer/` (Node 22 und PostgreSQL 16, Ersatz-Adapter, Seed beim Einrichten, `npm run dev` beim Öffnen); in Codespaces erlaubt Next.js Server Actions und den Entwicklungsserver zusätzlich von `*.app.github.dev`.
+Begründung: Läuft vollständig im Browser, braucht nur das GitHub-Konto und nutzt dieselben Befehle wie die lokale Einrichtung.
+

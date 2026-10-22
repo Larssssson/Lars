@@ -1,0 +1,24 @@
+# GitHub Codespaces: impress im Browser ausprobieren, ohne lokale Installation (README).
+services:
+  app:
+    image: mcr.microsoft.com/devcontainers/javascript-node:1-22-bookworm
+    command: sleep infinity
+    volumes:
+      - ../..:/workspaces:cached
+    environment:
+      DATABASE_URL: postgresql://impress:impress@db:5432/impress
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: impress
+      POSTGRES_PASSWORD: impress
+      POSTGRES_DB: impress
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U impress"]
+      interval: 3s
+      timeout: 3s
+      retries: 20

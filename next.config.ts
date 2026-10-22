@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
+/** In GitHub Codespaces läuft impress hinter einer weitergeleiteten Adresse (*.app.github.dev). */
+const forwardedHosts = process.env.CODESPACES === "true" ? ["*.app.github.dev"] : [];
+
 const nextConfig: NextConfig = {
+  allowedDevOrigins: forwardedHosts,
+  experimental: { serverActions: { allowedOrigins: forwardedHosts } },
   // eigener Build-Ordner für Ende-zu-Ende-Tests (playwright.config.ts)
   distDir: process.env.NEXT_DIST_DIR ?? ".next",
   // Prisma-Client und Treiber bleiben serverseitig ungebündelt.

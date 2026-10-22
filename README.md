@@ -4,6 +4,14 @@ Interne Presse- und Content-Plattform von Rud Pedersen Berlin. Die verbindliche 
 
 **Stand:** Phase 6 (Push, Livegang-Reife, Übergabe). Alle Bauphasen aus BRIEFING 12 sind umgesetzt.
 
+## Im Browser ausprobieren, ohne Installation (GitHub Codespaces)
+
+1. Auf GitHub im Repository auf **Code** → Reiter **Codespaces** → **Create codespace on main** klicken (oder direkt: https://codespaces.new/Larssssson/Lars).
+2. Warten, bis die Einrichtung durch ist (beim ersten Mal etwa 5 bis 10 Minuten: Pakete, Datenbank, Beispieldaten). impress startet danach von selbst; der Browser öffnet die Adresse, sonst unten im Reiter **Ports** bei „impress (3000)“ auf das Globus-Symbol klicken.
+3. Auf der Anmeldeseite einen Seed-Nutzer wählen, etwa „Lars Scholtyssyk“ (CVD, Admin) oder „Laura“ (Redakteurin).
+
+Alles läuft mit Ersatz-Adaptern und Beispieldaten, ohne Zugangsdaten. Die Adresse ist nur für das eigene GitHub-Konto erreichbar. Ein Codespace hält an, wenn niemand ihn nutzt, und lässt sich unter https://github.com/codespaces wieder starten oder löschen. Für GitHub-Konten ist ein Kontingent an Stunden pro Monat frei.
+
 ## Start in drei Befehlen
 
 Voraussetzung: Docker mit Docker Compose. Es werden keine Zugangsdaten gebraucht.
