@@ -75,6 +75,7 @@ Vorlage mit lokalen Standardwerten: [.env.example](.env.example). Geheimnisse (m
 | `STORAGE_DIR` | nein | nur für die Ersatz-Adapter, im Image `/app/storage` |
 | `PLAYWRIGHT_CHROMIUM_PATH` | nein | anderer Chromium für den PDF-Export; Standard ist der im Image |
 | `PORT` | nein | Port der App, Standard 3000 |
+| `DEMO_MODE`, `DEMO_PASSWORD` 🔒 | nein, nie im Betrieb | nur Demo-Server mit Beispieldaten (docs/demo-server.md): Entwickler-Login hinter einem gemeinsamen Passwort |
 
 Microsoft Entra ID: Redirect-URI `https://<APP_BASE_URL>/api/auth/callback/microsoft-entra-id`, Scopes `openid profile email`. Für SharePoint braucht dieselbe App-Registrierung die Anwendungsberechtigung `Sites.Selected` (oder `Sites.ReadWrite.All`) mit Schreibrecht auf die impress-Site. Ein Mitarbeiter kann sich nur anmelden, wenn ein CVD ihn vorher mit seiner Mailadresse angelegt hat.
 

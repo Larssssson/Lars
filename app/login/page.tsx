@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { t } from "@/i18n";
 import { prisma } from "@/lib/db";
+import { env } from "@/lib/env";
 import { getCurrentUser } from "@/lib/session";
 import { devLoginAction, entraLoginAction } from "./actions";
 
@@ -34,8 +35,8 @@ export default async function LoginPage() {
         </Card>
       ) : (
         <Card>
-          <h1 className="text-base font-semibold">{t.auth.devLoginTitle}</h1>
-          <p className="mt-2 mb-4 text-sm text-muted-foreground">{t.auth.devLoginIntro}</p>
+          <h1 className="text-base font-semibold">{env().DEMO_MODE === "true" ? t.auth.demoLoginTitle : t.auth.devLoginTitle}</h1>
+          <p className="mt-2 mb-4 text-sm text-muted-foreground">{env().DEMO_MODE === "true" ? t.auth.demoLoginIntro : t.auth.devLoginIntro}</p>
           <ul className="flex flex-col gap-2">
             {devUsers.map((user) => (
               <li key={user.id}>

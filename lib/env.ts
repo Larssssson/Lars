@@ -30,9 +30,14 @@ const schema = z.object({
   MONITORING_SOURCE: z.enum(["file", "sample"]).default("file"),
   APP_BASE_URL: z.string().default("http://localhost:3000"),
   STORAGE_DIR: z.string().default("./storage"),
+  /** Demo-Server mit Beispieldaten (DECISIONS D-122): Entwickler-Login hinter einem gemeinsamen Passwort */
+  DEMO_MODE: z.enum(["true", "false"]).default("false"),
+  DEMO_PASSWORD: z.string().optional(),
 });
 
 export type Env = z.infer<typeof schema>;
+
+export const MIN_DEMO_PASSWORD = 10;
 
 /** Leere Strings aus .env gelten als nicht gesetzt. */
 function clean(source: NodeJS.ProcessEnv): Record<string, string> {
@@ -43,9 +48,12 @@ function clean(source: NodeJS.ProcessEnv): Record<string, string> {
 
 export function readEnv(source: NodeJS.ProcessEnv = process.env): Env {
   const env = schema.parse(clean(source));
-  if (env.NODE_ENV === "production" && env.AUTH_PROVIDER === "dev") {
-    // DECISIONS D-028: Entwickler-Login ist im Betrieb ausgeschlossen.
+  if (env.NODE_ENV === "production" && env.AUTH_PROVIDER === "dev" && env.DEMO_MODE !== "true") {
+    // DECISIONS D-028: Entwickler-Login ist im Betrieb ausgeschlossen, außer auf dem Demo-Server (D-122).
     throw new Error("AUTH_PROVIDER=dev ist bei NODE_ENV=production nicht erlaubt.");
+  }
+  if (env.DEMO_MODE === "true" && (env.DEMO_PASSWORD ?? "").length < MIN_DEMO_PASSWORD) {
+    throw new Error(`DEMO_MODE=true verlangt ein DEMO_PASSWORD mit mindestens ${MIN_DEMO_PASSWORD} Zeichen.`);
   }
   return env;
 }

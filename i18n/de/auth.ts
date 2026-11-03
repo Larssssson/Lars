@@ -4,6 +4,10 @@ export const auth = {
   loginWithMicrosoft: "Mit Microsoft anmelden",
   devLoginTitle: "Entwickler-Login",
   devLoginIntro: "Nur lokal: Wähle einen Seed-Nutzer. Im Betrieb ist diese Anmeldung abgeschaltet.",
+  demoLoginTitle: "Demo-Anmeldung",
+  demoLoginIntro: "Wähle eine Beispielperson. Alle Kunden, Texte und Kontakte sind erfunden.",
+  demoBanner: "Demo mit erfundenen Beispieldaten. Bitte keine echten Kunden- oder Kontaktdaten eingeben.",
+  demoPasswordRealm: "impress Demo",
   devLoginAs: (name: string) => `Als ${name} anmelden`,
   noAccessTitle: "Kein Zugang",
   noAccessText:

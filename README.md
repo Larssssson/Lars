@@ -4,6 +4,10 @@ Interne Presse- und Content-Plattform von Rud Pedersen Berlin. Die verbindliche 
 
 **Stand:** Phase 6 (Push, Livegang-Reife, Übergabe). Alle Bauphasen aus BRIEFING 12 sind umgesetzt.
 
+## Demo-Server für das Team
+
+Ein fester Link mit Beispieldaten hinter einem gemeinsamen Passwort, eingerichtet bei Render aus `render.yaml`: Anleitung in [docs/demo-server.md](docs/demo-server.md).
+
 ## Im Browser ausprobieren, ohne Installation (GitHub Codespaces)
 
 1. Auf GitHub im Repository auf **Code** → Reiter **Codespaces** → **Create codespace on main** klicken (oder direkt: https://codespaces.new/Larssssson/Lars).
