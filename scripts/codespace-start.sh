@@ -11,6 +11,9 @@ if [ -n "${CODESPACE_NAME:-}" ]; then
   # Login leitet auf die öffentliche Adresse statt auf localhost zurück (Auth.js)
   export ALLOWED_FORWARDED_HOSTS="${ALLOWED_FORWARDED_HOSTS:-*.app.github.dev}"
   export AUTH_URL="$PUBLIC"
+  # auch in .env, damit es gilt, egal wer impress startet
+  touch .env
+  grep -v '^AUTH_URL=' .env > .env.tmp; echo "AUTH_URL=$PUBLIC" >> .env.tmp; mv .env.tmp .env
 else
   PUBLIC=$LOCAL
 fi
@@ -35,7 +38,10 @@ fi
 
 if [ -n "${CODESPACE_NAME:-}" ]; then
   # in Codespaces immer frisch starten, damit die Einstellungen oben gelten
-  pkill -f "next dev" 2>/dev/null && sleep 2
+  # auch übrig gebliebene Serverprozesse beenden, sonst hält ein alter Server Port 3000
+  pkill -f "next dev" 2>/dev/null
+  pkill -f "next-server" 2>/dev/null
+  for _ in $(seq 1 10); do curl -s -m 2 -o /dev/null "$LOCAL/" || break; sleep 1; done
 fi
 if curl -s -m 5 -o /dev/null "$LOCAL/api/health"; then
   echo "impress: läuft bereits."
