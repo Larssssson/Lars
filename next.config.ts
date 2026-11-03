@@ -1,11 +1,14 @@
 import type { NextConfig } from "next";
 
 /**
- * Hinter einer Weiterleitung (GitHub Codespaces: *.app.github.dev) kommt die Anfrage mit anderem Host an,
- * als der Browser zeigt; diese Adressen dürfen Server Actions auslösen (DECISIONS D-121).
+ * Hinter einer Weiterleitung kommt die Anfrage mit anderen Adressen an, als der Browser zeigt. GitHub Codespaces
+ * meldet die öffentliche Adresse (*.app.github.dev) als x-forwarded-host und schreibt den Origin auf
+ * localhost:3000 um. Im Entwicklungsmodus sind beide erlaubt, im Betrieb nur ALLOWED_FORWARDED_HOSTS (DECISIONS D-121).
  */
-const forwardedHosts = (process.env.ALLOWED_FORWARDED_HOSTS ?? (process.env.NODE_ENV === "production" ? "" : "*.app.github.dev"))
-  .split(",")
+const forwardedHosts = [
+  ...(process.env.ALLOWED_FORWARDED_HOSTS ?? "").split(","),
+  ...(process.env.NODE_ENV === "production" ? [] : ["*.app.github.dev", `localhost:${process.env.PORT ?? 3000}`]),
+]
   .map((h) => h.trim())
   .filter(Boolean);
 
