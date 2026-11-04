@@ -11,6 +11,8 @@ WORKDIR /app
 # die echte Adresse kommt erst zur Laufzeit; die Laufzeit-Stufe erbt diesen Wert nicht
 ENV NEXT_TELEMETRY_DISABLED=1 \
     DATABASE_URL=postgresql://build:build@localhost:5432/build
+# openssl wie zur Laufzeit, damit Prisma beim Installieren die passenden Engines lädt
+RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 COPY package.json package-lock.json prisma.config.ts ./
 COPY prisma ./prisma
 RUN npm ci
@@ -29,8 +31,9 @@ ENV NODE_ENV=production \
     PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
     STORAGE_DIR=/app/storage
 COPY --from=build /app/node_modules ./node_modules
-# Chromium für den PDF-Export (BRIEFING 10.1) samt Systembibliotheken
-RUN npx playwright install --with-deps chromium && rm -rf /var/lib/apt/lists/* /tmp/*
+# openssl für Prisma (wie in der Build-Stufe), Chromium samt Systembibliotheken für den PDF-Export
+RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates \
+ && npx playwright install --with-deps chromium && rm -rf /var/lib/apt/lists/* /tmp/*
 COPY --from=build /app/package.json /app/package-lock.json /app/prisma.config.ts /app/next.config.ts /app/tsconfig.json ./
 COPY --from=build /app/.next ./.next
 COPY --from=build /app/public ./public
@@ -41,8 +44,9 @@ COPY --from=build /app/i18n ./i18n
 COPY --from=build /app/prompts ./prompts
 COPY --from=build /app/fixtures ./fixtures
 COPY --from=build /app/scripts ./scripts
-# die App schreibt Zwischenstände nach .next/cache, Dateien der Ersatz-Adapter nach storage
-RUN mkdir -p /app/storage /app/.next/cache && chown -R node:node /app/storage /app/.next
+# die App schreibt nach .next/cache und storage; Prisma darf fehlende Engines nachladen (läuft als node)
+RUN mkdir -p /app/storage /app/.next/cache \
+ && chown -R node:node /app/storage /app/.next /app/node_modules/@prisma/engines /app/node_modules/prisma
 USER node
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
