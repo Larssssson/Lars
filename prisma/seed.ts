@@ -119,16 +119,18 @@ async function seedPhase2(db: PrismaClient, userIds: Record<SeedUserKey, string>
       if (!client.sharePointFolderPath) await db.client.update({ where: { id: client.id }, data: { sharePointFolderPath: folder } });
     }
     const logoPath = SEED_LOGOS[client.name];
-    if (!stores.files || !logoPath || client.logoFileId) continue;
+    if (!stores.files || !logoPath) continue;
     const data = new Uint8Array(await readFile(logoPath));
     const storageKey = `clients/${client.id}/logo-seed`;
+    // Datei immer neu schreiben: der Speicher kann nach einem neuen Deploy leer sein
     await stores.files.put(storageKey, data, "image/png");
     const file = await db.file.upsert({
       where: { storageKey },
       update: {},
       create: { storageKey, name: "logo_placeholder.png", mimeType: "image/png", size: data.byteLength, clientId: client.id, uploadedBy: userIds.lars, isSampleData: true },
     });
-    await db.client.update({ where: { id: client.id }, data: { logoFileId: file.id } });
+    // ein eigenes Logo des Kunden nie ersetzen
+    if (!client.logoFileId) await db.client.update({ where: { id: client.id }, data: { logoFileId: file.id } });
   }
 }
 

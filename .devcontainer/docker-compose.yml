@@ -1,0 +1,21 @@
+# GitHub Codespaces: impress im Browser ausprobieren, ohne lokale Installation (README).
+services:
+  app:
+    image: mcr.microsoft.com/devcontainers/javascript-node:1-22-bookworm
+    command: sleep infinity
+    volumes:
+      - ../..:/workspaces:cached
+    # App im Netz der Datenbank: nur so greift "forwardPorts" aus devcontainer.json (Vorlage von Microsoft)
+    network_mode: service:db
+    environment:
+      DATABASE_URL: postgresql://impress:impress@localhost:5432/impress
+      # weitergeleitete Codespaces-Adressen für Server Actions (next.config.ts)
+      ALLOWED_FORWARDED_HOSTS: "*.app.github.dev"
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: impress
+      POSTGRES_PASSWORD: impress
+      POSTGRES_DB: impress

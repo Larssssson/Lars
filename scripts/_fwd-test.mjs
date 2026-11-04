@@ -1,0 +1,10 @@
+import { chromium } from "playwright";
+const port = process.argv[2];
+const b = await chromium.launch();
+const p = await b.newPage();
+await p.setExtraHTTPHeaders({ "x-forwarded-host": `localhost:${port}` });
+await p.goto(`http://127.0.0.1:${port}/login`);
+await p.getByRole("button", { name: /Als Laura anmelden/ }).click();
+await p.waitForTimeout(8000);
+console.log("URL nach Login:", p.url(), (await p.locator("h1").first().textContent({ timeout: 5000 }).catch(() => "?"))?.trim());
+await b.close();

@@ -4,6 +4,7 @@ import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
 import { t } from "@/i18n";
 import { prisma } from "@/lib/db";
+import { env } from "@/lib/env";
 import { listSelectableClients } from "@/lib/domain/clients/selection";
 import { canOpenAdministration } from "@/lib/domain/permissions";
 import { requireUser } from "@/lib/session";
@@ -29,6 +30,11 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         <Sidebar showAdministration={canOpenAdministration(user)} />
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
+        {env().DEMO_MODE === "true" && (
+          <p role="note" className="bg-amber-100 px-4 py-1.5 text-center text-xs font-medium text-amber-950 dark:bg-amber-900 dark:text-amber-50" data-testid="demo-banner">
+            {t.auth.demoBanner}
+          </p>
+        )}
         <Header
           user={user}
           clients={clients}

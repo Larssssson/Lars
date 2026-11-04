@@ -625,3 +625,16 @@ Begründung: Vertrauliche Inhalte sollen nicht auf Geräten liegen (BRIEFING 11)
 Frage: Wie kommt der erste echte Nutzer ins System, wenn die Seed-Nutzer Beispieladressen haben?
 Entscheidung: `npm run user:bootstrap -- "Name" mail@…` legt einen CVD mit Admin-Recht an oder hebt einen vorhandenen Nutzer an (protokolliert, ohne handelnde Person); alle weiteren legt der CVD in der Verwaltung an.
 Begründung: Login nur über Entra ID und nur für angelegte Nutzer (BRIEFING 3.4, 11); ohne diesen Schritt könnte sich niemand anmelden.
+
+## Nach Phase 6
+
+**D-121** · 2026-10-22
+Frage: Wie kann das Team impress ohne Docker und Git auf dem eigenen Rechner ausprobieren?
+Entscheidung: Über GitHub Codespaces mit einer Konfiguration in `.devcontainer/` (Node 22 und PostgreSQL 16, Ersatz-Adapter, Seed beim Einrichten, `npm run dev` beim Öffnen); hinter der Weiterleitung erlaubt der Entwicklungsserver Server Actions von `*.app.github.dev` und `localhost:3000` (Codespaces meldet die öffentliche Adresse als x-forwarded-host und schreibt den Origin auf localhost um; im Betrieb gilt nur, was `ALLOWED_FORWARDED_HOSTS` nennt), und `AUTH_URL` in `.env` zeigt auf die öffentliche Adresse, damit der Login nicht auf `localhost` zurückleitet; `scripts/codespace-start.sh` trägt die Adresse ein, beendet alte Serverprozesse und startet impress neu. Der Port 3000 wird für Tests auf „Public“ gestellt (nur Beispieldaten).
+Begründung: Läuft vollständig im Browser, braucht nur das GitHub-Konto und nutzt dieselben Befehle wie die lokale Einrichtung.
+
+**D-122** · 2026-11-03 **[bestätigt 2026-11-03]**
+Frage: Wie testet das Team impress dauerhaft unter einem Link, bevor die Azure-Testumgebung mit Microsoft-Login steht?
+Entscheidung: Ein Demo-Server bei Render (Frankfurt) aus `render.yaml`: ein Dienst mit App und Worker (`scripts/demo-start.sh`: Migrationen, Seed, Worker, `next start`) und eine PostgreSQL. Mit `DEMO_MODE=true` erlaubt impress den Entwickler-Login auch im Betrieb, aber nur mit `DEMO_PASSWORD` (mindestens 10 Zeichen), das die ganze Seite per HTTP Basic Auth schützt (`proxy.ts`, nur `/api/health` bleibt offen); ein Balken weist auf erfundene Beispieldaten hin. Alle externen Dienste laufen über die Ersatz-Adapter. Ausnahme von D-028, nur für Beispieldaten.
+Begründung: Lars wählte den schnellen Weg ohne IT; Passwort und Hinweis verhindern, dass die Demo als echtes System genutzt wird.
+

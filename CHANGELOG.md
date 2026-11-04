@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## Nach Phase 6 · 2026-10-22 bis 2026-11-03
+
+- Demo-Server bei Render: `render.yaml`, `scripts/demo-start.sh`, Demo-Modus mit gemeinsamem Passwort und Hinweisbalken, Anleitung `docs/demo-server.md` (D-122).
+- Codespaces: Start, Portweiterleitung und Anmeldung hinter der Weiterleitung korrigiert (D-121).
+
+- GitHub Codespaces: `.devcontainer/` mit App und PostgreSQL, impress lässt sich ohne lokale Installation im Browser ausprobieren (README).
+
 ## Phase 6: Push, Livegang-Reife, Übergabe · 2026-10-21
 
 - PWA: Web App Manifest, App-Icons, Service Worker für Push (ohne Offline-Cache), Sicherheits-Header; installierbar auf Desktop, Android und iOS ab 16.4.

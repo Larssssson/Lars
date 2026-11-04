@@ -38,6 +38,7 @@ COPY --from=build /app/jobs ./jobs
 COPY --from=build /app/i18n ./i18n
 COPY --from=build /app/prompts ./prompts
 COPY --from=build /app/fixtures ./fixtures
+COPY --from=build /app/scripts ./scripts
 RUN mkdir -p /app/storage && chown -R node:node /app/storage
 USER node
 EXPOSE 3000
