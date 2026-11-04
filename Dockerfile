@@ -7,14 +7,16 @@
 
 FROM node:22-bookworm-slim AS build
 WORKDIR /app
-ENV NEXT_TELEMETRY_DISABLED=1
+# Platzhalter nur für den Build (prisma.config.ts verlangt die Variable): es wird keine Verbindung aufgebaut,
+# die echte Adresse kommt erst zur Laufzeit; die Laufzeit-Stufe erbt diesen Wert nicht
+ENV NEXT_TELEMETRY_DISABLED=1 \
+    DATABASE_URL=postgresql://build:build@localhost:5432/build
 COPY package.json package-lock.json prisma.config.ts ./
 COPY prisma ./prisma
 RUN npm ci
 COPY . .
-# Platzhalter nur für den Build: es wird keine Verbindung aufgebaut, Zugangsdaten kommen erst zur Laufzeit
-RUN DATABASE_URL=postgresql://build:build@localhost:5432/build npx prisma generate \
- && DATABASE_URL=postgresql://build:build@localhost:5432/build npm run build \
+RUN npx prisma generate \
+ && npm run build \
  && npm prune --omit=dev --ignore-scripts
 
 FROM node:22-bookworm-slim AS runtime
@@ -39,7 +41,8 @@ COPY --from=build /app/i18n ./i18n
 COPY --from=build /app/prompts ./prompts
 COPY --from=build /app/fixtures ./fixtures
 COPY --from=build /app/scripts ./scripts
-RUN mkdir -p /app/storage && chown -R node:node /app/storage
+# die App schreibt Zwischenstände nach .next/cache, Dateien der Ersatz-Adapter nach storage
+RUN mkdir -p /app/storage /app/.next/cache && chown -R node:node /app/storage /app/.next
 USER node
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \

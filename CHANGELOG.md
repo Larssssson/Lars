@@ -2,6 +2,7 @@
 
 ## Nach Phase 6 · 2026-10-22 bis 2026-11-03
 
+- Dockerfile: Platzhalter für `DATABASE_URL` in der ganzen Build-Stufe (sonst bricht `npm ci` bei `prisma generate` ab), Schreibrechte für `.next/cache`.
 - Demo-Server bei Render: `render.yaml`, `scripts/demo-start.sh`, Demo-Modus mit gemeinsamem Passwort und Hinweisbalken, Anleitung `docs/demo-server.md` (D-122).
 - Codespaces: Start, Portweiterleitung und Anmeldung hinter der Weiterleitung korrigiert (D-121).
 
