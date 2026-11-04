@@ -643,3 +643,8 @@ Begründung: Lars wählte den schnellen Weg ohne IT; Passwort und Hinweis verhin
 Frage: Welche Gestaltung bekommt impress, damit es weniger beliebig wirkt und trotzdem ruhig und leicht zu bedienen bleibt?
 Entscheidung: Gestaltung „Redaktion“ (von Lars aus fünf Entwürfen gewählt): warmes Papierweiß mit Tintenschwarz und einem Blau als einziger Akzentfarbe, Hell- und Dunkelmodus nach System; Überschriften, Titel und Zahlen in der Serifenschrift Newsreader, Bedienung in Inter (beide als Pakete eingebunden, kein Abruf von Google); Abschnitte mit Kapitälchen-Zeile („kicker“) und feinen Linien statt Kästen; das Dashboard beginnt mit Datumszeile und Dienst, Begrüßung und einem Satz zur Lage des Tages, Aufgaben als Liste nach Gruppen (leere Gruppen ausgeblendet), daneben Freigaben, Pressespiegel, Warnungen und Redaktion; Personen erscheinen im Dashboard und in der Kopfzeile nur mit Vornamen (`lib/names.ts`). Die Farben liegen als Tokens in `app/globals.css`, die Bausteine aus shadcn/ui bleiben.
 Begründung: Eine Zeitungsanmutung passt zu einer Presseplattform und gibt Orientierung über Typografie statt über Farbe und Rahmen.
+
+**D-124** · 2026-11-04
+Frage: Lars erscheint als einziger Seed-Nutzer mit vollem Namen, alle anderen nur mit Vornamen.
+Entscheidung: Auf Wunsch von Lars heißt der Seed-Nutzer nur „Lars“ (Abweichung von 3.4 und D-037); der Seed gleicht beim erneuten Einspielen den Namen der Seed-Nutzer an, damit bestehende Datenbanken wie die Demo ihn übernehmen. Der Demo-Hinweis lautet nur noch „Demo mit erfundenen Beispieldaten.“
+Begründung: Einheitliche Anzeige; der volle Name kann vor dem Livegang in der Verwaltung eingetragen werden.

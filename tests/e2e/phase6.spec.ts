@@ -54,7 +54,7 @@ test("Push einrichten: mehrere Geräte, einzeln entfernen, Testnachricht in der 
 
 test("Verwaltung: Einstellungen, Integrationen, Kennzahlen, Protokoll", async ({ page }) => {
   test.setTimeout(90_000);
-  await loginAs(page, "Lars Scholtyssyk");
+  await loginAs(page, "Lars");
   await page.goto("/verwaltung/einstellungen");
   await page.getByLabel("Eskalation an alle Freigabeberechtigten nach (Minuten)").fill("20");
   await page.getByLabel("Eskalation an den CVD vom Dienst nach (Minuten)").fill("50");

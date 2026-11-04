@@ -22,7 +22,7 @@ describe("Seed (BRIEFING 3.4, 13.1)", () => {
     const users = await db.user.findMany({ orderBy: { email: "asc" } });
     expect(users).toHaveLength(8);
     const cvds = users.filter((u) => u.role === "CVD").map((u) => u.name);
-    expect(cvds.sort()).toEqual(["Lars Scholtyssyk", "Lukas"]);
+    expect(cvds.sort()).toEqual(["Lars", "Lukas"]);
     expect(users.every((u) => u.email.endsWith("@example.com"))).toBe(true);
   });
 
@@ -34,7 +34,7 @@ describe("Seed (BRIEFING 3.4, 13.1)", () => {
     expect(byName.Covenant?.status).toBe("AKTIV");
     const lead = (name: string) => byName[name]?.members.find((m) => m.kind === "LEAD");
     expect(lead("Covenant")?.user.name).toBe("Lukas");
-    expect(lead("Rafael")?.user.name).toBe("Lars Scholtyssyk");
+    expect(lead("Rafael")?.user.name).toBe("Lars");
     expect(lead("SAFENET")?.user.name).toBe("Valentin Abel");
     expect(lead("SAFENET")?.canApprove).toBe(true);
     expect(clients.every((c) => c.isSampleData)).toBe(true);

@@ -35,7 +35,7 @@ test("Kundenauswahl gilt für alle Bereiche und bleibt gespeichert", async ({ pa
 });
 
 test("CVD sieht die Verwaltung, Redakteure nicht", async ({ page }) => {
-  await loginAs(page, "Lars Scholtyssyk");
+  await loginAs(page, "Lars");
   const nav = page.getByRole("navigation", { name: "Hauptnavigation" }).first();
   await nav.getByRole("link", { name: "Verwaltung" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Verwaltung");

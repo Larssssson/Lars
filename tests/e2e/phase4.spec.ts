@@ -113,7 +113,7 @@ test("Reiter Journalisten im Editor, Vormerken und Empfängervorschlag beim Vers
 test("CVD: Pflege, Auskunft, Löschen, Offboarding", async ({ page }) => {
   test.setTimeout(120_000);
   page.on("dialog", (dialog) => dialog.accept());
-  await loginAs(page, "Lars Scholtyssyk");
+  await loginAs(page, "Lars");
   await page.goto("/journo-hub/pflege");
   await expect(page.getByRole("heading", { name: "Mögliche Dubletten" })).toBeVisible();
 

@@ -19,7 +19,7 @@ Render legt aus der Datei `render.yaml` im Repository alles selbst an: den Diens
 5. **Passwort eintragen:** Render zeigt die Dienste aus der Vorlage (`impress-demo`, `impress-demo-db`) und fragt nach **`DEMO_PASSWORD`**. Dort dein Demo-Passwort eintragen.
 6. **Anlegen:** Auf **„Deploy Blueprint“** (oder „Apply“) klicken und, falls gefragt, die Zahlungsdaten hinterlegen.
 7. **Warten:** Der erste Aufbau dauert 10 bis 20 Minuten. Unter **„impress-demo“ → „Events“** steht am Ende **„Deploy live“**.
-8. **Öffnen:** Oben auf der Seite von `impress-demo` steht der Link, etwa `https://impress-demo.onrender.com`. Öffnen, im Passwort-Fenster einen beliebigen Namen und das Demo-Passwort eingeben, dann eine Beispielperson wählen (z. B. „Lars Scholtyssyk“).
+8. **Öffnen:** Oben auf der Seite von `impress-demo` steht der Link, etwa `https://impress-demo.onrender.com`. Öffnen, im Passwort-Fenster einen beliebigen Namen und das Demo-Passwort eingeben, dann eine Beispielperson wählen (z. B. „Lars“).
 
 Den Link und das Passwort kannst du ans Team geben.
 

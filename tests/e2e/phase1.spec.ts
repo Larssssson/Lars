@@ -27,7 +27,7 @@ test("Redakteurin legt eine einfache Aufgabe an und erledigt sie", async ({ page
 });
 
 test("CVD legt eine Dokument-Aufgabe für eine Redakteurin an, sie sieht sie in der Glocke", async ({ page }) => {
-  await loginAs(page, "Lars Scholtyssyk");
+  await loginAs(page, "Lars");
   await page.goto("/aufgaben/neu");
   await page.getByLabel("Kunde", { exact: true }).selectOption({ label: "Ground A" });
   await expect(page).toHaveURL(/kunde=/);
@@ -100,7 +100,7 @@ test("Dashboard: Blöcke für Redakteure, Team-Ansicht nur für CVDs", async ({ 
 });
 
 test("Dienstplan: CVD trägt ein und kopiert die Woche, Redakteure sehen nur", async ({ page }) => {
-  await loginAs(page, "Lars Scholtyssyk");
+  await loginAs(page, "Lars");
   await nav(page).getByRole("link", { name: "Dienstplan" }).click();
   const saturday = page.getByLabel(/^Wochenenddienst, Sa\./);
   await saturday.selectOption({ label: "Hannah" });
@@ -120,14 +120,14 @@ test("Dienstplan: CVD trägt ein und kopiert die Woche, Redakteure sehen nur", a
 });
 
 test("Verwaltung: Zusatzrecht vergeben erscheint im Protokoll", async ({ page }) => {
-  await loginAs(page, "Lars Scholtyssyk");
+  await loginAs(page, "Lars");
   await page.goto("/verwaltung/nutzer");
   await page.getByRole("link", { name: "Laura" }).click();
   await page.getByLabel("Recht", { exact: true }).selectOption({ label: "Freigaberecht" });
   await page.getByLabel("Kunde", { exact: true }).selectOption({ label: "Covenant" });
   await page.getByRole("button", { name: "Recht vergeben" }).click();
   await expect(page.getByText(/Freigaberecht · Covenant/)).toBeVisible();
-  await expect(page.getByText(/vergeben von Lars Scholtyssyk/)).toBeVisible();
+  await expect(page.getByText(/vergeben von Lars/)).toBeVisible();
   await page.getByRole("link", { name: "Protokoll" }).click();
   await expect(page.getByRole("cell", { name: "Zusatzrecht vergeben" }).first()).toBeVisible();
 });

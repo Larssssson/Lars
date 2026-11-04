@@ -168,7 +168,7 @@ test("Onboarding SAFENET: Unterlage, KI-Vorschläge, Fragen, Aktivierung erst mi
 test("CVD kann SAFENET nicht aktivieren, solange Pflichtabschnitte fehlen; KI aus sperrt KI-Funktionen", async ({ page }) => {
   test.setTimeout(120_000);
   page.on("dialog", (dialog) => dialog.accept());
-  await loginAs(page, "Lars Scholtyssyk");
+  await loginAs(page, "Lars");
   await openClient(page, "SAFENET");
   await page.getByRole("button", { name: "Auf Aktiv setzen" }).click();
   await expect(page.getByText(/Für den Status Aktiv fehlen noch: Stammdaten/)).toBeVisible();

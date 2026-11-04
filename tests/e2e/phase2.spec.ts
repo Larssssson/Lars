@@ -112,7 +112,7 @@ test("Redaktionsablauf: schreiben, Freigabe mit Änderungsverfolgung, Kunde, Rü
   await page.getByRole("button", { name: "Anfrage senden" }).click();
   await expect(page.getByText("Status: Freigabe angefragt")).toBeVisible();
   await logout(page, "Laura");
-  await loginAs(page, "Lars Scholtyssyk");
+  await loginAs(page, "Lars");
   await openTask(page, TITLE);
   await expect(page.getByText("Du prüfst diesen Text.")).toBeVisible();
   await page.getByRole("button", { name: "Freigeben", exact: true }).click();

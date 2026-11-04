@@ -113,7 +113,7 @@ describe("Dienstplan (BRIEFING 7.8, 13.6)", () => {
   it("Seed: CVD vom Dienst abwechselnd, Pressespiegel rotierend, zwei Wochen", async () => {
     const week = await weekView(db, "2026-10-20");
     const cvdRow = week.rows.find((r) => r.type.key === "CVD_VOM_DIENST")!;
-    expect(cvdRow.cells.slice(0, 5).map((c) => c.entries[0]?.userName)).toEqual(["Lars Scholtyssyk", "Lukas", "Lars Scholtyssyk", "Lukas", "Lars Scholtyssyk"]);
+    expect(cvdRow.cells.slice(0, 5).map((c) => c.entries[0]?.userName)).toEqual(["Lars", "Lukas", "Lars", "Lukas", "Lars"]);
     const ps = week.rows.find((r) => r.type.key === "PRESSESPIEGEL")!;
     expect(ps.cells.slice(0, 5).map((c) => c.entries[0]?.userName)).toEqual(["Laura", "Robin", "Mika", "Juliana", "Hannah"]);
     expect(cvdRow.cells[5]?.allowed).toBe(false);
@@ -217,7 +217,7 @@ describe("Protokoll durchsuchen und filtern (BRIEFING 7.10)", () => {
     expect(granted.every((e) => e.action === "PERMISSION_GRANTED")).toBe(true);
     expect((await listAudit(deps, { q: "Einstellung" })).every((e) => e.action === "SETTINGS_CHANGED")).toBe(true);
     expect((await listAudit(deps, { q: "laura" })).some((e) => e.action === "PERMISSION_GRANTED" && e.entityId === laura.id)).toBe(true);
-    expect((await listAudit(deps, { q: "Lars Scholtyssyk" })).every((e) => e.actorId === lars.id || e.entityId === lars.id)).toBe(true);
+    expect((await listAudit(deps, { q: "Lars" })).every((e) => e.actorId === lars.id || e.entityId === lars.id)).toBe(true);
     expect(await listAudit(deps, { from: new Date("2000-01-01"), to: new Date("2000-01-02") })).toEqual([]);
     expect((await listAudit(deps, { entity: "Setting" })).map((e) => e.entityId)).toEqual(["general"]);
   });
