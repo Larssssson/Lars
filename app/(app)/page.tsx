@@ -14,7 +14,7 @@ import { monitoringTile } from "@/lib/domain/monitoring/relevance";
 import { approvalsWaitingFor, myTasksGrouped, openDocumentsByStatus, teamView } from "@/lib/domain/tasks/dashboard";
 import { OPEN_STATUSES } from "@/lib/domain/tasks/rules";
 import { requireUser } from "@/lib/session";
-import { dateKey, formatWaiting } from "@/lib/time";
+import { dateKey, formatWaiting, formatWeekdayDate } from "@/lib/time";
 import { cn } from "@/lib/utils";
 
 export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ ansicht?: string }> }) {
@@ -41,23 +41,49 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   ]);
   const d = t.dashboard;
 
+  const dueToday = mine.groups.DRINGEND.length + mine.groups.HEUTE.length;
+  const firstApproval = approvals[0];
+
   return (
-    <div className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{d.greeting(user.name.split(" ")[0] ?? user.name)}</h1>
-          <p data-testid="client-filter" className="text-sm text-muted-foreground">
+    <div className="mx-auto flex max-w-6xl flex-col gap-7">
+      {/* Datumszeile wie bei einer Zeitung, darunter Dienst heute (BRIEFING 7.1), aufklappbar zur Wochenansicht */}
+      <details className="group border-b border-rule pb-2.5" data-testid="shifts-today">
+        <summary className="flex cursor-pointer list-none flex-wrap items-center gap-x-5 gap-y-1 text-xs tracking-[0.12em] text-muted-foreground uppercase">
+          <span>{formatWeekdayDate(now)}</span>
+          <span className="ml-auto flex flex-wrap gap-x-5 gap-y-1">
+            <span className="font-semibold text-foreground">{d.shiftsToday}</span>
+            {todayShifts.length === 0 ? (
+              <span>{d.shiftsNone}</span>
+            ) : (
+              todayShifts.map((s) => (
+                <span key={s.id}>
+                  {s.shiftType.name} <b className="font-semibold text-foreground">{s.user.name}</b>
+                </span>
+              ))
+            )}
+            <span className="underline underline-offset-4">{d.showWeek}</span>
+          </span>
+        </summary>
+        <div className="mt-4 mb-2 tracking-normal normal-case">
+          <WeekGrid week={week} today={today} editable={false} />
+        </div>
+      </details>
+
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-4xl leading-[1.05] sm:text-[3.4rem]">{d.greeting(user.name.split(" ")[0] ?? user.name)}.</h1>
+          <p data-testid="client-filter" className="mt-2 text-sm text-muted-foreground">
             {clientName ? d.filterActive(clientName) : d.filterAll}
           </p>
         </div>
         {canSeeTeamView(user) && (
-          <nav aria-label={d.teamView} className="flex gap-1 rounded-md border p-1">
+          <nav aria-label={d.teamView} className="flex gap-1 rounded-full border bg-card p-1">
             {[
               { href: "/", label: d.myView, active: !showTeam },
               { href: "/?ansicht=team", label: d.teamView, active: showTeam },
             ].map((v) => (
               <Link key={v.href} href={v.href} aria-current={v.active ? "page" : undefined}
-                className={cn("rounded px-3 py-1 text-sm", v.active ? "bg-primary text-primary-foreground" : "hover:bg-accent")}>
+                className={cn("rounded-full px-4 py-1.5 text-sm", v.active ? "bg-foreground text-background" : "hover:bg-accent")}>
                 {v.label}
               </Link>
             ))}
@@ -65,25 +91,19 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         )}
       </div>
 
-      {/* Dienst heute (BRIEFING 7.1): schmale Leiste, aufklappbar zur Wochenansicht */}
-      <details className="rounded-lg border bg-card px-4 py-2" data-testid="shifts-today">
-        <summary className="flex cursor-pointer flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-          <span className="font-semibold">{d.shiftsToday}</span>
-          {todayShifts.length === 0 ? (
-            <span className="text-muted-foreground">{d.shiftsNone}</span>
-          ) : (
-            todayShifts.map((s) => (
-              <span key={s.id}>
-                <span className="text-muted-foreground">{s.shiftType.name}:</span> {s.user.name}
-              </span>
-            ))
-          )}
-          <span className="ml-auto text-xs text-muted-foreground underline">{d.showWeek}</span>
-        </summary>
-        <div className="mt-3 mb-2">
-          <WeekGrid week={week} today={today} editable={false} />
-        </div>
-      </details>
+      {!team && (
+        <p className="-mt-3 max-w-3xl font-serif text-[1.35rem] leading-relaxed text-foreground/85">
+          {firstApproval ? (
+            <>
+              {approvals.length === 1 ? d.lede.oneApproval : d.lede.manyApprovals(approvals.length)}
+              <Link href={`/aufgaben/${firstApproval.document.task.id}`} className="text-primary underline decoration-1 underline-offset-4">{firstApproval.document.title}</Link>
+              {d.lede.approvalFor(firstApproval.document.task.client.name)}
+            </>
+          ) : mayApprove ? d.lede.noApproval : null}
+          {dueToday === 0 ? d.lede.dueNone : dueToday === 1 ? d.lede.dueOne : d.lede.dueMany(dueToday)}
+          {monitoring.relevant > 0 ? d.lede.review(monitoring.relevant) : d.lede.end}
+        </p>
+      )}
 
       {team ? (
         <div className="grid gap-5 lg:grid-cols-2">
@@ -129,68 +149,79 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           </div>
         </div>
       ) : (
-        <div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-          <div className="flex flex-col gap-5">
+        <div className="grid gap-x-14 gap-y-10 border-t pt-6 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+          <div className="flex flex-col gap-8">
             {mine.total === 0 ? (
-              <Card className="flex flex-col items-start gap-3">
-                <CardTitle>{d.empty.title}</CardTitle>
+              <section className="flex flex-col items-start gap-3">
+                <h2 className="font-serif text-2xl font-medium">{d.empty.title}</h2>
                 <p className="text-sm text-muted-foreground">{d.empty.text}</p>
                 <div className="flex gap-2">
-                  <Button asChild><Link href="/aufgaben/neu">{t.header.newTask}</Link></Button>
-                  <Button asChild variant="outline"><Link href="/profil#push">{d.empty.setupPush}</Link></Button>
+                  <Button asChild className="rounded-full"><Link href="/aufgaben/neu">{t.header.newTask}</Link></Button>
+                  <Button asChild variant="outline" className="rounded-full"><Link href="/profil#push">{d.empty.setupPush}</Link></Button>
                 </div>
-              </Card>
+              </section>
             ) : (
               <MyTasks groups={mine.groups} now={now} />
             )}
+          </div>
+          <div className="flex flex-col gap-9">
             {mayApprove && (
-              <Card>
-                <CardTitle>{d.approvals}</CardTitle>
+              <section aria-labelledby="approvals">
+                <h2 id="approvals" className="kicker">{d.approvals}</h2>
                 {approvals.length === 0 ? (
-                  <p className="mt-2 text-sm text-muted-foreground">{d.approvalsEmpty}</p>
+                  <p className="mt-3 text-sm text-muted-foreground">{d.approvalsEmpty}</p>
                 ) : (
-                  <ul className="mt-2 divide-y">
+                  <ul className="mt-3 flex flex-col gap-5">
                     {approvals.map((a) => (
-                      <li key={a.id}>
-                        <Link href={`/aufgaben/${a.document.task.id}`} className="flex flex-wrap justify-between gap-2 rounded-md px-2 py-2 hover:bg-accent">
-                          <span>
-                            <span className="text-sm text-muted-foreground">{a.document.task.client.name} · </span>
-                            <span className="font-medium">{a.document.title}</span>
-                            <span className="text-sm text-muted-foreground"> · {a.document.documentFormat.name}, {d.requestedBy(a.document.task.owner.name)}</span>
+                      <li key={a.id} className="border-l-[3px] border-primary pl-4">
+                        <Link href={`/aufgaben/${a.document.task.id}`} className="group block">
+                          <span className="block font-serif text-[1.35rem] leading-snug font-medium tracking-tight group-hover:underline group-hover:decoration-1 group-hover:underline-offset-4">{a.document.title}</span>
+                          <span className="mt-0.5 block text-[13px] text-muted-foreground">
+                            {a.document.task.client.name} · {a.document.documentFormat.name} · {d.requestedBy(a.document.task.owner.name)} · {d.waiting(formatWaiting(a.requestedAt, now))}
                           </span>
-                          <span className="text-sm">{d.waiting(formatWaiting(a.requestedAt, now))}</span>
+                          <span className="mt-2 inline-block text-sm font-semibold text-primary">{d.openText} →</span>
                         </Link>
                       </li>
                     ))}
                   </ul>
                 )}
-              </Card>
+              </section>
             )}
-          </div>
-          <div className="flex flex-col gap-5">
+            <section aria-labelledby="monitoring" data-testid="monitoring-tile">
+              <h2 id="monitoring" className="kicker">{t.monitoring.tile.title}</h2>
+              {monitoring.imported === 0 ? (
+                <p className="mt-3 text-sm text-muted-foreground">{t.monitoring.tile.notImported}</p>
+              ) : (
+                <ul className="mt-3 grid grid-cols-3 gap-4">
+                  {[
+                    [monitoring.imported, t.monitoring.tile.importedLabel, ""],
+                    [monitoring.relevant, t.monitoring.tile.relevantLabel, "text-primary"],
+                    [monitoring.selected, t.monitoring.tile.selectedLabel, ""],
+                  ].map(([n, label, color]) => (
+                    <li key={String(label)} className="flex flex-col">
+                      <b className={cn("font-serif text-[2.6rem] leading-none font-medium tabular-nums", String(color))}>{n}</b> <span className="mt-1 text-xs text-muted-foreground">{label}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <p className="mt-3 text-[13px] text-muted-foreground">{monitoring.serviceName ? t.monitoring.tile.service(monitoring.serviceName) : t.monitoring.tile.noService}</p>
+              <Link href="/pressespiegel" className="mt-2 inline-block text-sm font-semibold text-primary">{t.monitoring.tile.open} →</Link>
+            </section>
             {warnings && <Warnings warnings={warnings} />}
-            <Card>
-              <CardTitle>{d.redaktionTile}</CardTitle>
-              <p className="text-sm text-muted-foreground">{d.redaktionTileText}</p>
-              <ul className="mt-3 flex flex-col gap-1 text-sm">
+            <section aria-labelledby="redaktion-tile">
+              <h2 id="redaktion-tile" className="kicker">{d.redaktionTile}</h2>
+              <ul className="mt-2 text-sm">
                 {OPEN_STATUSES.map((s) => (
-                  <li key={s} className="flex justify-between">
-                    <Link href={`/redaktion?status=${s}`} className="hover:underline">{t.tasks.statuses[s]}</Link>
-                    <span className="font-medium">{docCounts[s] ?? 0}</span>
+                  <li key={s}>
+                    <Link href={`/redaktion?status=${s}`} className="flex justify-between border-b py-2 hover:underline hover:decoration-1 hover:underline-offset-4">
+                      <span>{t.tasks.statuses[s]}</span>
+                      <span className="font-medium tabular-nums">{docCounts[s] ?? 0}</span>
+                    </Link>
                   </li>
                 ))}
               </ul>
-              <Button asChild variant="outline" size="sm" className="mt-4"><Link href="/redaktion">{d.toRedaktion}</Link></Button>
-            </Card>
-            <Card data-testid="monitoring-tile">
-              <CardTitle>{t.monitoring.tile.title}</CardTitle>
-              <ul className="mt-2 flex flex-col gap-1 text-sm">
-                <li>{monitoring.imported ? t.monitoring.tile.imported(monitoring.imported) : t.monitoring.tile.notImported}</li>
-                {monitoring.imported > 0 && <li>{t.monitoring.tile.relevant(monitoring.relevant)} · {t.monitoring.tile.selected(monitoring.selected)}</li>}
-                <li className="text-muted-foreground">{monitoring.serviceName ? t.monitoring.tile.service(monitoring.serviceName) : t.monitoring.tile.noService}</li>
-              </ul>
-              <Button asChild variant="outline" size="sm" className="mt-4"><Link href="/pressespiegel">{t.monitoring.tile.open}</Link></Button>
-            </Card>
+              <Link href="/redaktion" className="mt-3 inline-block text-sm font-semibold text-primary">{d.toRedaktion} →</Link>
+            </section>
           </div>
         </div>
       )}

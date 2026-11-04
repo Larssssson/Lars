@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## Gestaltung „Redaktion“ · 2026-11-04
+
+- Neue Gestaltung (D-123): Papierweiß, Tintenschwarz, ein Blau; Überschriften in Newsreader, Bedienung in Inter; Seitenleiste mit Schriftzug, runde Kundenauswahl und Suche.
+- Dashboard: Datumszeile mit Dienst, Begrüßung mit einem Satz zur Lage des Tages, Aufgaben als Liste nach Gruppen, Freigaben mit Linie, Pressespiegel-Zahlen, Warnungen als Notizen.
+- Editor, Pressespiegel und weitere Seiten: Titel und Abschnittsüberschriften in der Serifenschrift.
+
 ## Nach Phase 6 · 2026-10-22 bis 2026-11-03
 
 - Dockerfile: Platzhalter für `DATABASE_URL` in der ganzen Build-Stufe (sonst bricht `npm ci` bei `prisma generate` ab), Schreibrechte für `.next/cache`; `openssl` in Build- und Laufzeit-Stufe, damit Prisma die passende Engine mitbringt und als Nutzer `node` startet.

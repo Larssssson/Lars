@@ -22,7 +22,7 @@ export function Sidebar({ showAdministration, horizontal = false }: { showAdmini
     ? [...items, { href: "/verwaltung", label: t.nav.verwaltung, icon: Settings }]
     : items;
   return (
-    <nav aria-label={t.nav.label} className={cn("flex gap-1 p-3", horizontal ? "flex-row overflow-x-auto p-2" : "flex-col")}>
+    <nav aria-label={t.nav.label} className={cn("flex gap-0.5", horizontal ? "flex-row overflow-x-auto p-2" : "flex-col px-4")}>
       {all.map(({ href, label, icon: Icon }) => {
         const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
         return (
@@ -31,11 +31,13 @@ export function Sidebar({ showAdministration, horizontal = false }: { showAdmini
             href={href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex shrink-0 items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-              active && "bg-accent text-accent-foreground",
+              "relative flex shrink-0 items-center gap-3 rounded-md px-3 py-2 text-[14.5px] font-medium text-muted-foreground transition-colors hover:text-foreground",
+              active && "font-semibold text-foreground",
+              // schmaler Strich links markiert den aktiven Bereich, auf dem Telefon darunter
+              active && (horizontal ? "after:absolute after:inset-x-3 after:-bottom-2 after:h-0.5 after:rounded after:bg-primary" : "before:absolute before:top-2 before:bottom-2 before:-left-4 before:w-[3px] before:rounded-r before:bg-primary"),
             )}
           >
-            <Icon className="size-4" aria-hidden />
+            <Icon className="size-[18px]" strokeWidth={1.6} aria-hidden />
             {label}
           </Link>
         );

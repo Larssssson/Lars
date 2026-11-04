@@ -10,7 +10,7 @@ export default async function NewContactPage() {
   const media = await prisma.media.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } });
   return (
     <div className="flex max-w-3xl flex-col gap-4">
-      <h2 className="text-lg font-semibold">{t.journo.newContact}</h2>
+      <h2 className="font-serif text-2xl font-medium tracking-tight">{t.journo.newContact}</h2>
       <ActionForm action={createContactAction} className="flex flex-col gap-4">
         <ContactFields media={media} details={{ phone: "edit", mail: "edit" }} />
         <div><SubmitButton>{t.journo.create}</SubmitButton></div>

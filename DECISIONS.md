@@ -638,3 +638,8 @@ Frage: Wie testet das Team impress dauerhaft unter einem Link, bevor die Azure-T
 Entscheidung: Ein Demo-Server bei Render (Frankfurt) aus `render.yaml`: ein Dienst mit App und Worker (`scripts/demo-start.sh`: Migrationen, Seed, Worker, `next start`) und eine PostgreSQL. Mit `DEMO_MODE=true` erlaubt impress den Entwickler-Login auch im Betrieb, aber nur mit `DEMO_PASSWORD` (mindestens 10 Zeichen), das die ganze Seite per HTTP Basic Auth schützt (`proxy.ts`, nur `/api/health` bleibt offen); ein Balken weist auf erfundene Beispieldaten hin. Alle externen Dienste laufen über die Ersatz-Adapter. Ausnahme von D-028, nur für Beispieldaten.
 Begründung: Lars wählte den schnellen Weg ohne IT; Passwort und Hinweis verhindern, dass die Demo als echtes System genutzt wird.
 
+
+**D-123** · 2026-11-04
+Frage: Welche Gestaltung bekommt impress, damit es weniger beliebig wirkt und trotzdem ruhig und leicht zu bedienen bleibt?
+Entscheidung: Gestaltung „Redaktion“ (von Lars aus fünf Entwürfen gewählt): warmes Papierweiß mit Tintenschwarz und einem Blau als einziger Akzentfarbe, Hell- und Dunkelmodus nach System; Überschriften, Titel und Zahlen in der Serifenschrift Newsreader, Bedienung in Inter (beide als Pakete eingebunden, kein Abruf von Google); Abschnitte mit Kapitälchen-Zeile („kicker“) und feinen Linien statt Kästen; das Dashboard beginnt mit Datumszeile und Dienst, Begrüßung und einem Satz zur Lage des Tages, Aufgaben als Liste nach Gruppen (leere Gruppen ausgeblendet), daneben Freigaben, Pressespiegel, Warnungen und Redaktion. Die Farben liegen als Tokens in `app/globals.css`, die Bausteine aus shadcn/ui bleiben.
+Begründung: Eine Zeitungsanmutung passt zu einer Presseplattform und gibt Orientierung über Typografie statt über Farbe und Rahmen.

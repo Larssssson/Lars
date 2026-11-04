@@ -21,7 +21,7 @@ export default async function TodayPage() {
       {clients.map((client, i) => (
         <section key={client.id} className="flex flex-col gap-3" aria-labelledby={`today-${client.id}`} data-testid={`today-${client.name}`}>
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 id={`today-${client.id}`} className="text-lg font-semibold">{m.today.perClient(client.name)}</h2>
+            <h2 id={`today-${client.id}`} className="font-serif text-2xl font-medium tracking-tight">{m.today.perClient(client.name)}</h2>
             <ActionForm action={pressReviewAction.bind(null, client.id)} className="flex flex-col items-end">
               <SubmitButton size="sm" variant="outline">{m.review.create}</SubmitButton>
             </ActionForm>

@@ -13,11 +13,11 @@ export default async function MonitoringImportPage() {
   return (
     <div className="flex flex-col gap-8">
       <section className="flex flex-col gap-3" aria-labelledby="import-title">
-        <h2 id="import-title" className="text-lg font-semibold">{m.import.title}</h2>
+        <h2 id="import-title" className="font-serif text-2xl font-medium tracking-tight">{m.import.title}</h2>
         <MonitoringImportWizard />
       </section>
       <section className="flex flex-col gap-3" aria-labelledby="manual-title">
-        <h2 id="manual-title" className="text-lg font-semibold">{m.manual.title}</h2>
+        <h2 id="manual-title" className="font-serif text-2xl font-medium tracking-tight">{m.manual.title}</h2>
         <ActionForm action={manualArticleAction} className="grid max-w-2xl gap-3 sm:grid-cols-2">
           <Field label={f.headline} htmlFor="m-headline"><Input id="m-headline" name="headline" required /></Field>
           <Field label={f.media} htmlFor="m-media"><Input id="m-media" name="media" required /></Field>

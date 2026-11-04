@@ -1,44 +1,47 @@
 @import "tailwindcss";
 
-/* Farbwerte nach shadcn/ui; Akzent = RP_LIGHT_BLUE (Platzhalter #5BB5E5, BRIEFING 7.3).
-   Hell- und Dunkelmodus folgen der Systemeinstellung (BRIEFING 10.6). */
+/* Gestaltung „Redaktion“ (DECISIONS D-123): warmes Papierweiß, Tinte, ein Blau als Akzent; Überschriften in
+   Newsreader, Oberfläche in Inter. Kontraste nach WCAG AA, Hell- und Dunkelmodus nach System (BRIEFING 10.6). */
 :root {
   --rp-light-blue: #5bb5e5;
-  --background: oklch(0.99 0 0);
-  --foreground: oklch(0.2 0.01 250);
-  --muted: oklch(0.96 0.005 250);
-  --muted-foreground: oklch(0.45 0.01 250);
-  --card: oklch(1 0 0);
+  --background: #faf8f4;
+  --foreground: #1c1b19;
+  --muted: #f1ede6;
+  --muted-foreground: #6b6459;
+  --card: #fffdf9;
   --card-foreground: var(--foreground);
-  --border: oklch(0.9 0.005 250);
-  --input: oklch(0.88 0.005 250);
-  --primary: oklch(0.38 0.09 240);
-  --primary-foreground: oklch(0.99 0 0);
-  --accent: oklch(0.94 0.03 230);
-  --accent-foreground: oklch(0.3 0.08 240);
-  --destructive: oklch(0.55 0.2 27);
-  --destructive-foreground: oklch(0.99 0 0);
-  --ring: oklch(0.55 0.13 240);
-  --sidebar: oklch(0.97 0.006 250);
+  --border: #e7e2d8;
+  --input: #d9d2c5;
+  --primary: #2a6fab;
+  --primary-foreground: #ffffff;
+  --accent: #edf3f9;
+  --accent-foreground: #1f5a8c;
+  --destructive: #b3361f;
+  --destructive-foreground: #ffffff;
+  --ring: #2a6fab;
+  --sidebar: #f5f2ec;
+  --rule: #1c1b19;
   --radius: 0.5rem;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: oklch(0.17 0.01 250);
-    --foreground: oklch(0.95 0.005 250);
-    --muted: oklch(0.24 0.01 250);
-    --muted-foreground: oklch(0.72 0.01 250);
-    --card: oklch(0.2 0.01 250);
-    --border: oklch(0.32 0.01 250);
-    --input: oklch(0.36 0.01 250);
-    --primary: oklch(0.75 0.11 230);
-    --primary-foreground: oklch(0.17 0.01 250);
-    --accent: oklch(0.3 0.04 240);
-    --accent-foreground: oklch(0.92 0.03 230);
-    --destructive: oklch(0.65 0.2 27);
-    --ring: oklch(0.75 0.11 230);
-    --sidebar: oklch(0.2 0.01 250);
+    --background: #151412;
+    --foreground: #ece8e1;
+    --muted: #23211d;
+    --muted-foreground: #a8a195;
+    --card: #1b1a17;
+    --border: #2f2c27;
+    --input: #3b3732;
+    --primary: #7cb9e8;
+    --primary-foreground: #0f161d;
+    --accent: #1d2833;
+    --accent-foreground: #cfe4f5;
+    --destructive: #f0846a;
+    --destructive-foreground: #1a0d09;
+    --ring: #7cb9e8;
+    --sidebar: #191815;
+    --rule: #ece8e1;
   }
 }
 
@@ -63,7 +66,9 @@
   --radius-sm: calc(var(--radius) - 2px);
   --radius-md: var(--radius);
   --radius-lg: calc(var(--radius) + 4px);
-  --font-sans: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  --color-rule: var(--rule);
+  --font-sans: "Inter Variable", "Helvetica Neue", Arial, sans-serif;
+  --font-serif: "Newsreader Variable", Georgia, "Times New Roman", serif;
 }
 
 @layer base {
@@ -71,12 +76,22 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background font-sans text-foreground antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
+  /* Seitentitel wie in einer Zeitung */
+  h1 {
+    @apply font-serif font-medium tracking-tight;
   }
   /* sichtbarer Fokus für Tastaturbedienung (BRIEFING 10.6) */
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-ring;
   }
+}
+
+/* Rubrikzeile über Abschnitten: kleine Versalien mit Sperrung */
+.kicker {
+  @apply text-[11px] font-semibold tracking-[0.14em] text-muted-foreground uppercase;
 }
 
 /* Editor (BRIEFING 7.3): Bausteine, Änderungsverfolgung, Kommentaranker */
@@ -99,7 +114,7 @@
 .template-block[data-block="headline"] .template-block-content p,
 .template-block[data-block="titel"] .template-block-content p,
 .template-block[data-block="betreff"] .template-block-content p {
-  @apply text-2xl leading-tight font-bold;
+  @apply font-serif text-3xl leading-tight font-medium tracking-tight;
 }
 .template-block[data-block="lead"] .template-block-content p {
   @apply font-semibold;

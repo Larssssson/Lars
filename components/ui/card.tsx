@@ -6,5 +6,5 @@ export function Card({ className, ...props }: ComponentProps<"section">) {
 }
 
 export function CardTitle({ className, ...props }: ComponentProps<"h2">) {
-  return <h2 className={cn("text-base font-semibold", className)} {...props} />;
+  return <h2 className={cn("font-serif text-xl font-medium tracking-tight", className)} {...props} />;
 }

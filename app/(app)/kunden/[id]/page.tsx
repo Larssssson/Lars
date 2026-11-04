@@ -119,7 +119,7 @@ export default async function ClientPage({ params }: { params: Promise<{ id: str
       </div>
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-lg font-semibold">{c.openTasks}</h2>
+        <h2 className="font-serif text-2xl font-medium tracking-tight">{c.openTasks}</h2>
         <TaskTable tasks={tasks} now={now} />
       </section>
     </div>

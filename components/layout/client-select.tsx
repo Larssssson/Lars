@@ -31,7 +31,7 @@ export function ClientSelect({ clients, selectedId }: { clients: Option[]; selec
           data.set("clientId", next);
           startTransition(() => selectClientAction(data));
         }}
-        className="h-9 rounded-md border border-input bg-background px-3 text-sm font-medium"
+        className="h-9 rounded-full border border-input bg-card pr-8 pl-4 text-sm font-medium"
       >
         <option value="">{t.common.allClients}</option>
         {clients.map((client) => (

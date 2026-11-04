@@ -22,7 +22,7 @@ export function ArticleCard({ article, clients, threshold }: { article: ArticleV
   return (
     <li className="flex flex-col gap-2 rounded-lg border bg-card p-4" data-testid="article">
       <div className="flex flex-col gap-0.5">
-        <h3 className="font-semibold">
+        <h3 className="font-serif text-xl leading-snug font-medium tracking-tight">
           {article.url ? <a href={article.url} target="_blank" rel="noreferrer" className="hover:underline">{article.headline}</a> : article.headline}
         </h3>
         <p className="text-xs text-muted-foreground">
