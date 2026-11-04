@@ -7,7 +7,7 @@ export default function NoAccessPage() {
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center p-6">
       <Card>
-        <h1 className="text-lg font-semibold">{t.auth.noAccessTitle}</h1>
+        <h1 className="font-serif text-2xl font-medium tracking-tight">{t.auth.noAccessTitle}</h1>
         <p className="mt-2 text-sm text-muted-foreground">{t.auth.noAccessText}</p>
         <Link href="/login" className="mt-4 inline-block text-sm text-primary underline">
           {t.auth.backToLogin}

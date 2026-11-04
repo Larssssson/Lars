@@ -3,6 +3,7 @@ import Link from "next/link";
 import { signOutAction } from "@/app/(app)/actions";
 import { Button } from "@/components/ui/button";
 import { t } from "@/i18n";
+import { firstName } from "@/lib/names";
 import { ClientSelect } from "./client-select";
 
 type Props = {
@@ -15,7 +16,7 @@ type Props = {
 /** Feste Kopfzeile (BRIEFING 4): Kundenauswahl, Suche, Neue Aufgabe, Glocke, Profil. */
 export function Header({ user, clients, selectedClientId, unreadCount }: Props) {
   return (
-    <header className="sticky top-0 z-10 flex h-14 items-center gap-3 border-b bg-background/95 px-4 backdrop-blur">
+    <header className="sticky top-0 z-10 flex h-16 items-center gap-3 border-b bg-background/90 px-4 backdrop-blur md:px-10">
       <ClientSelect key={selectedClientId ?? "alle"} clients={clients} selectedId={selectedClientId} />
       <form action="/suche" role="search" className="relative hidden flex-1 md:block md:max-w-md">
         <label htmlFor="global-search" className="sr-only">
@@ -27,11 +28,11 @@ export function Header({ user, clients, selectedClientId, unreadCount }: Props) 
           name="q"
           type="search"
           placeholder={t.header.searchPlaceholder}
-          className="h-9 w-full rounded-md border border-input bg-background pr-3 pl-9 text-sm"
+          className="h-9 w-full rounded-full border border-input bg-card pr-4 pl-9 text-sm placeholder:text-muted-foreground"
         />
       </form>
       <div className="ml-auto flex items-center gap-2">
-        <Button asChild size="sm">
+        <Button asChild size="sm" className="rounded-full px-4">
           <Link href="/aufgaben/neu">
             <Plus aria-hidden />
             <span className="hidden sm:inline">{t.header.newTask}</span>
@@ -51,9 +52,9 @@ export function Header({ user, clients, selectedClientId, unreadCount }: Props) 
           </Link>
         </Button>
         <details className="relative">
-          <summary className="flex h-9 cursor-pointer list-none items-center rounded-md px-3 text-sm font-medium hover:bg-accent">
+          <summary className="flex h-9 cursor-pointer list-none items-center rounded-full px-3 text-sm font-medium hover:bg-accent">
             <span className="sr-only">{t.header.profile}: </span>
-            {user.name}
+            {firstName(user.name)}
           </summary>
           <div className="absolute right-0 mt-1 w-56 rounded-md border bg-card p-1 shadow-md">
             <p className="px-3 py-2 text-xs text-muted-foreground">

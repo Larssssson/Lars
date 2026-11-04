@@ -22,7 +22,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
       ) : (
         <>
           <section className="flex flex-col gap-2">
-            <h2 className="text-lg font-semibold">{s.clients}</h2>
+            <h2 className="font-serif text-2xl font-medium tracking-tight">{s.clients}</h2>
             {result.clients.length === 0 ? <p className="text-sm text-muted-foreground">{s.none}</p> : (
               <ul className="flex flex-wrap gap-2">
                 {result.clients.map((c) => (
@@ -32,7 +32,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
             )}
           </section>
           <section className="flex flex-col gap-2">
-            <h2 className="text-lg font-semibold">{s.contacts}</h2>
+            <h2 className="font-serif text-2xl font-medium tracking-tight">{s.contacts}</h2>
             {result.contacts.length === 0 ? <p className="text-sm text-muted-foreground">{s.none}</p> : (
               <ul className="flex flex-wrap gap-2" data-testid="search-contacts">
                 {result.contacts.map((c) => (
@@ -42,7 +42,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
             )}
           </section>
           <section className="flex flex-col gap-2">
-            <h2 className="text-lg font-semibold">{s.tasks}</h2>
+            <h2 className="font-serif text-2xl font-medium tracking-tight">{s.tasks}</h2>
             <TaskTable tasks={tasks} now={now} />
           </section>
         </>

@@ -23,9 +23,9 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:z-20 focus:m-2 focus:rounded focus:bg-card focus:p-2">
         {t.nav.skipToContent}
       </a>
-      <aside className="hidden w-56 shrink-0 border-r bg-sidebar md:block">
-        <Link href="/" className="block px-6 pt-5 pb-3 text-xl font-bold tracking-tight">
-          {t.common.appName}
+      <aside className="hidden w-60 shrink-0 border-r bg-sidebar md:block">
+        <Link href="/" aria-label={t.common.appName} className="block px-7 pt-7 pb-6 font-serif text-[28px] leading-none font-semibold tracking-tight">
+          im<em className="text-primary">press</em>
         </Link>
         <Sidebar showAdministration={canOpenAdministration(user)} />
       </aside>
@@ -44,7 +44,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         <div className="border-b md:hidden">
           <Sidebar showAdministration={canOpenAdministration(user)} horizontal />
         </div>
-        <main id="main" className="flex-1 p-4 md:p-6">
+        <main id="main" className="flex-1 px-4 py-6 md:px-10 md:py-8">
           {children}
         </main>
       </div>

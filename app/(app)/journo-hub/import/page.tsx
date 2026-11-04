@@ -8,7 +8,7 @@ export default async function ImportPage() {
   const mappings = await prisma.importMapping.findMany({ where: { kind: "KONTAKTE" }, orderBy: { name: "asc" } });
   return (
     <div className="flex flex-col gap-4">
-      <h2 className="text-lg font-semibold">{t.journo.import.title}</h2>
+      <h2 className="font-serif text-2xl font-medium tracking-tight">{t.journo.import.title}</h2>
       <ImportWizard savedMappings={mappings.map((m) => ({ id: m.id, name: m.name, mapping: m.mapping as Record<string, string> }))} />
     </div>
   );

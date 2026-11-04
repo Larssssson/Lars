@@ -117,7 +117,7 @@ test("Redaktionsablauf: schreiben, Freigabe mit Änderungsverfolgung, Kunde, Rü
   await expect(page.getByText("Du prüfst diesen Text.")).toBeVisible();
   await page.getByRole("button", { name: "Freigeben", exact: true }).click();
   await expect(page.getByText("Status: Freigegeben")).toBeVisible();
-  await logout(page, "Lars Scholtyssyk");
+  await logout(page, "Lars");
 
   // 7. Versand an Medien, Ablage im SharePoint-Ersatz
   await loginAs(page, "Laura");

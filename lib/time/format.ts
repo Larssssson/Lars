@@ -22,6 +22,13 @@ export function formatDate(date: Date): string {
 
 const longDateFormatter = new Intl.DateTimeFormat("de-DE", { timeZone: "Europe/Berlin", day: "numeric", month: "long", year: "numeric" });
 
+const weekdayLongFormatter = new Intl.DateTimeFormat("de-DE", { timeZone: "Europe/Berlin", weekday: "long", day: "numeric", month: "long", year: "numeric" });
+
+/** "Dienstag, 20. Oktober 2026" in Berliner Zeit. */
+export function formatWeekdayDate(date: Date): string {
+  return weekdayLongFormatter.format(date);
+}
+
 /** "20. Oktober 2026" in Berliner Zeit. */
 export function formatLongDate(date: Date): string {
   return longDateFormatter.format(date);

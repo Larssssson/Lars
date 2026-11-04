@@ -1,6 +1,20 @@
 export const dashboard = {
   title: "Dashboard",
   greeting: (name: string) => `Guten Tag, ${name}`,
+  /** Zusammenfassung des Tages unter der Begrüßung (Gestaltung „Redaktion“, DECISIONS D-123) */
+  lede: {
+    oneApproval: "Eine Freigabe wartet auf dich: ",
+    manyApprovals: (n: number) => `${n} Freigaben warten auf dich, als Erstes `,
+    approvalFor: (client: string) => ` für ${client}. `,
+    noApproval: "Keine Freigabe wartet auf dich. ",
+    dueNone: "Heute ist nichts mehr fällig",
+    dueOne: "Eine Aufgabe ist heute fällig",
+    dueMany: (n: number) => `${n} Aufgaben sind heute fällig`,
+    review: (n: number) => `, im Pressespiegel sind ${n} Artikel relevant.`,
+    end: ".",
+  },
+  dutyCvd: "CVD vom Dienst",
+  openText: "Text prüfen",
   filterActive: (client: string) => `Gefiltert auf ${client}`,
   filterAll: "Alle Kunden",
   myTasks: "Meine Aufgaben",
