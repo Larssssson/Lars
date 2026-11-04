@@ -39,7 +39,7 @@ test("CVD legt eine Dokument-Aufgabe für eine Redakteurin an, sie sieht sie in 
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("E2E PM Messeauftritt");
   await expect(page.locator(".template-block-label").getByText("Ortsmarke und Datum")).toBeVisible();
 
-  await page.locator("summary", { hasText: "Lars Scholtyssyk" }).click();
+  await page.locator("summary", { hasText: "Lars" }).click();
   await page.getByRole("button", { name: "Abmelden" }).click();
   await loginAs(page, "Mika");
   await expect(page.getByTestId("unread-count")).toHaveText(/[1-9]/);
@@ -111,7 +111,7 @@ test("Dienstplan: CVD trägt ein und kopiert die Woche, Redakteure sehen nur", a
   await page.getByRole("link", { name: "Nächste Woche" }).click();
   await expect(page.getByRole("button", { name: "Hannah austragen" }).first()).toBeVisible();
 
-  await page.locator("summary", { hasText: "Lars Scholtyssyk" }).click();
+  await page.locator("summary", { hasText: "Lars" }).click();
   await page.getByRole("button", { name: "Abmelden" }).click();
   await loginAs(page, "Robin");
   await page.goto("/dienstplan");

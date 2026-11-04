@@ -1,3 +1,4 @@
+import { firstName } from "@/lib/names";
 import Link from "next/link";
 import { MyTasks, TaskLine, Warnings } from "@/components/dashboard/blocks";
 import { WeekGrid } from "@/components/shifts/week-grid";
@@ -57,7 +58,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             ) : (
               todayShifts.map((s) => (
                 <span key={s.id}>
-                  {s.shiftType.name} <b className="font-semibold text-foreground">{s.user.name}</b>
+                  {s.shiftType.name} <b className="font-semibold text-foreground">{firstName(s.user.name)}</b>
                 </span>
               ))
             )}
@@ -71,7 +72,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="text-4xl leading-[1.05] sm:text-[3.4rem]">{d.greeting(user.name.split(" ")[0] ?? user.name)}.</h1>
+          <h1 className="text-4xl leading-[1.05] sm:text-[3.4rem]">{d.greeting(firstName(user.name))}.</h1>
           <p data-testid="client-filter" className="mt-2 text-sm text-muted-foreground">
             {clientName ? d.filterActive(clientName) : d.filterAll}
           </p>
@@ -113,7 +114,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
               {team.byPerson.map((p) => (
                 <li key={p.name}>
                   <details>
-                    <summary className="cursor-pointer text-sm font-medium">{p.name} · {d.team.tasksCount(p.tasks.length)}</summary>
+                    <summary className="cursor-pointer text-sm font-medium">{firstName(p.name)} · {d.team.tasksCount(p.tasks.length)}</summary>
                     <ul className="mt-1 divide-y">{p.tasks.map((task) => <TaskLine key={task.id} task={task} now={now} />)}</ul>
                   </details>
                 </li>
@@ -136,7 +137,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                       <Link href={`/aufgaben/${a.document.task.id}`} className="hover:underline">
                         {a.document.task.client.name}: {a.document.title}
                       </Link>{" "}
-                      <span className="text-muted-foreground">({a.document.task.owner.name}, {formatWaiting(a.requestedAt, now)})</span>
+                      <span className="text-muted-foreground">({firstName(a.document.task.owner.name)}, {formatWaiting(a.requestedAt, now)})</span>
                     </li>
                   ))}
                 </ul>
@@ -177,7 +178,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                         <Link href={`/aufgaben/${a.document.task.id}`} className="group block">
                           <span className="block font-serif text-[1.35rem] leading-snug font-medium tracking-tight group-hover:underline group-hover:decoration-1 group-hover:underline-offset-4">{a.document.title}</span>
                           <span className="mt-0.5 block text-[13px] text-muted-foreground">
-                            {a.document.task.client.name} · {a.document.documentFormat.name} · {d.requestedBy(a.document.task.owner.name)} · {d.waiting(formatWaiting(a.requestedAt, now))}
+                            {a.document.task.client.name} · {a.document.documentFormat.name} · {d.requestedBy(firstName(a.document.task.owner.name))} · {d.waiting(formatWaiting(a.requestedAt, now))}
                           </span>
                           <span className="mt-2 inline-block text-sm font-semibold text-primary">{d.openText} →</span>
                         </Link>
@@ -204,7 +205,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                   ))}
                 </ul>
               )}
-              <p className="mt-3 text-[13px] text-muted-foreground">{monitoring.serviceName ? t.monitoring.tile.service(monitoring.serviceName) : t.monitoring.tile.noService}</p>
+              <p className="mt-3 text-[13px] text-muted-foreground">{monitoring.serviceName ? t.monitoring.tile.service(firstName(monitoring.serviceName)) : t.monitoring.tile.noService}</p>
               <Link href="/pressespiegel" className="mt-2 inline-block text-sm font-semibold text-primary">{t.monitoring.tile.open} →</Link>
             </section>
             {warnings && <Warnings warnings={warnings} />}

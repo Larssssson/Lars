@@ -3,6 +3,7 @@ import Link from "next/link";
 import { signOutAction } from "@/app/(app)/actions";
 import { Button } from "@/components/ui/button";
 import { t } from "@/i18n";
+import { firstName } from "@/lib/names";
 import { ClientSelect } from "./client-select";
 
 type Props = {
@@ -53,7 +54,7 @@ export function Header({ user, clients, selectedClientId, unreadCount }: Props) 
         <details className="relative">
           <summary className="flex h-9 cursor-pointer list-none items-center rounded-full px-3 text-sm font-medium hover:bg-accent">
             <span className="sr-only">{t.header.profile}: </span>
-            {user.name}
+            {firstName(user.name)}
           </summary>
           <div className="absolute right-0 mt-1 w-56 rounded-md border bg-card p-1 shadow-md">
             <p className="px-3 py-2 text-xs text-muted-foreground">
