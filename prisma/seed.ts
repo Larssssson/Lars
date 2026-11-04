@@ -61,7 +61,7 @@ export async function seed(db: PrismaClient, now: Date = new Date(), stores: See
   for (const u of seedUsers) {
     const user = await db.user.upsert({
       where: { email: u.email },
-      update: {},
+      update: { name: u.name },
       create: { name: u.name, email: u.email, role: u.role, isAdmin: u.isAdmin },
     });
     userIds[u.key] = user.id;

@@ -324,7 +324,7 @@ describe("Pflege, Auskunft, Löschen (BRIEFING 7.5, 11)", () => {
     const data = await exportContactData(deps, lars, jana.id);
     expect(data.contactDetails.map((d) => d.value)).toContain("jana.hofmann@example.org");
     expect(data.articles).toHaveLength(3);
-    expect(data.owners.map((o) => o.name).sort()).toEqual(["Lars Scholtyssyk", "Lukas"]);
+    expect(data.owners.map((o) => o.name).sort()).toEqual(["Lars", "Lukas"]);
     const pdf = await exportContactPdf(data);
     expect(new TextDecoder().decode(pdf.slice(0, 4))).toBe("%PDF");
 

@@ -5,7 +5,7 @@
  */
 
 export const seedUsers = [
-  { key: "lars", name: "Lars Scholtyssyk", email: "lars@example.com", role: "CVD", isAdmin: true },
+  { key: "lars", name: "Lars", email: "lars@example.com", role: "CVD", isAdmin: true },
   { key: "lukas", name: "Lukas", email: "lukas@example.com", role: "CVD", isAdmin: true },
   { key: "laura", name: "Laura", email: "laura@example.com", role: "REDAKTEUR", isAdmin: false },
   { key: "robin", name: "Robin", email: "robin@example.com", role: "REDAKTEUR", isAdmin: false },
