@@ -3,6 +3,7 @@ export const nav = {
   dashboard: "Dashboard",
   redaktion: "Redaktion",
   pressespiegel: "Pressespiegel",
+  reporting: "Reporting",
   journoHub: "Journo Hub",
   kunden: "Kunden",
   dienstplan: "Dienstplan",

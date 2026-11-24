@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## Reporting · 2026-11-24
+
+- Neuer Bereich „Reporting“ (D-133): Meltwater-Export hochladen, Zeitraum, eine von drei Vorlagen (Kompakt, Monatsbericht, Management) und Bausteine wählen, Wettbewerber und Tier-Listen (vorbelegt aus dem Kundenprofil), Paid ausschließen, Themenfilter, eigene Einordnung.
+- Kennzahlen: Platzierungen, Reichweite, Share of Voice, Medien nach Tier 1 bis 3, Tonalität, Verlauf, wichtigste Artikel, Positives und Negatives, Medienliste.
+- Ausgabe als Word, PDF und Executive-Version (2 Folien PowerPoint mit bearbeitbaren Diagrammen); Vorschau im Browser; Freigabe nach vier Augen.
+
 ## Live-Test · 2026-11-24
 
 - Anmeldung mit Vorname und Passwort (D-125): Sperre nach 5 Fehlversuchen, Passwort neu erzeugen in der Verwaltung, eigenes Passwort im Profil ändern.

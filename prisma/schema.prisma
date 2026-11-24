@@ -162,6 +162,7 @@ model Client {
   contactGrants      ContactAccessGrant[]
   articleRelevances  ArticleRelevance[]
   articleActions     ArticleAction[]
+  reports Report[]
 }
 
 model ClientMember {
@@ -1138,6 +1139,7 @@ model File {
   logoOf             Client?             @relation("ClientLogo")
   profileSuggestions ProfileSuggestion[]
   monitoringImports  MonitoringImport[]
+  reports Report[]
 }
 
 /// Einträge sind unveränderlich; ein Datenbank-Trigger verhindert UPDATE und DELETE
@@ -1180,4 +1182,51 @@ model StoredBlob {
   mimeType  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+enum ReportTemplate {
+  KOMPAKT
+  MONATSBERICHT
+  MANAGEMENT
+}
+
+enum ReportStatus {
+  ENTWURF
+  FREIGEGEBEN
+}
+
+/// Reporting je Kunde aus einem Meltwater-Export (DECISIONS D-133). Die Kennzahlen werden bei jeder Ausgabe aus der Datei berechnet.
+model Report {
+  id           String         @id @default(uuid()) @db.Uuid
+  clientId     String         @db.Uuid
+  title        String
+  template     ReportTemplate
+  periodStart  DateTime
+  periodEnd    DateTime
+  /// gewählte Bausteine in fester Reihenfolge der Vorlage
+  blocks       String[]
+  /// weitere Schreibweisen des Kunden im Export
+  clientAliases String[]
+  competitors  String[]
+  tier1        String[]
+  tier2        String[]
+  excludePaid  Boolean        @default(true)
+  /// nur Artikel mit einem dieser Begriffe (leer: alle)
+  topicFilter  String[]
+  /// Einordnung, von einem Menschen geschrieben (Grundsatz 1)
+  commentary   String?
+  fileId       String?        @db.Uuid
+  status       ReportStatus   @default(ENTWURF)
+  approvedBy   String?        @db.Uuid
+  approvedAt   DateTime?
+  isSampleData Boolean        @default(false)
+  createdAt    DateTime       @default(now())
+  createdBy    String?        @db.Uuid
+  updatedAt    DateTime       @updatedAt
+  updatedBy    String?        @db.Uuid
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  file   File?  @relation(fields: [fileId], references: [id], onDelete: SetNull)
+
+  @@index([clientId, createdAt])
 }

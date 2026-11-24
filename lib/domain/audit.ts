@@ -59,6 +59,8 @@ export const AuditAction = {
   PASSWORD_SET: "PASSWORD_SET",
   PASSWORD_CHANGED: "PASSWORD_CHANGED",
   CLIENT_DELETED: "CLIENT_DELETED",
+  REPORT_APPROVED: "REPORT_APPROVED",
+  REPORT_REOPENED: "REPORT_REOPENED",
 } as const;
 
 export type AuditActionKey = keyof typeof AuditAction;

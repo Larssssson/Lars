@@ -20,6 +20,7 @@ import { notifications } from "./de/notifications";
 import { profile } from "./de/profile";
 import { projects } from "./de/projects";
 import { redaktion } from "./de/redaktion";
+import { reports } from "./de/reports";
 import { search } from "./de/search";
 import { shifts } from "./de/shifts";
 import { tasks } from "./de/tasks";
@@ -29,7 +30,7 @@ import { warnings } from "./de/warnings";
  * Alle Oberflächentexte, eine Datei pro Bereich (BRIEFING 0.3).
  * Eine englische Fassung kann später als /i18n/en mit derselben Form ergänzt werden.
  */
-export const de = { account, admin, ai, approvals, areas, checks, auth, clients, common, dashboard, dispatch, documents, errors, formats, header, journo, monitoring, nav, notifications, profile, projects, redaktion, search, shifts, tasks, warnings };
+export const de = { account, admin, ai, approvals, areas, checks, auth, clients, common, dashboard, dispatch, documents, errors, formats, header, journo, monitoring, nav, notifications, profile, projects, redaktion, reports, search, shifts, tasks, warnings };
 
 export type Messages = typeof de;
 

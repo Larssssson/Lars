@@ -198,6 +198,8 @@ export const admin = {
       PASSWORD_SET: "Passwort neu vergeben",
       PASSWORD_CHANGED: "Eigenes Passwort geändert",
       CLIENT_DELETED: "Kunde gelöscht",
+      REPORT_APPROVED: "Reporting freigegeben",
+      REPORT_REOPENED: "Freigabe eines Reportings zurückgenommen",
     } as Record<string, string>,
     search: "Suche (Aktion, Person, Betroffen)",
     from: "von",
