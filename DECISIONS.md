@@ -690,3 +690,5 @@ Begründung: Ein Schalter, nichts wird bei späteren Neustarts erneut gelöscht.
 Frage: Next.js 16.4.2 hat bekannte Sicherheitslücken (npm audit: drei hoch).
 Entscheidung: Aktualisierung auf 16.4.6 vor dem Live-Test; `npm audit fix` ohne Versionssprünge. Offen bleiben `uuid` über exceljs (D-117) und `effect` über die Prisma-Kommandozeile, beide ohne Angriffsfläche im laufenden Betrieb.
 Begründung: Echte Daten verlangen den aktuellen Sicherheitsstand.
+
+Nachtrag 2026-11-24: Mit 16.4.6 brach der Build bei Render ohne Meldung beim Sammeln der Seitendaten ab (47 Worker auf einer Maschine mit wenig Speicher). `experimental.cpus` begrenzt die Build-Worker auf 2 (änderbar mit `NEXT_BUILD_CPUS`).
