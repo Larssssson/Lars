@@ -24,6 +24,7 @@ export async function exportContactData(deps: Deps, actor: Actor, journalistId: 
       revealLogs: true,
       articles: { select: { headline: true, mediaName: true, publishedAt: true, url: true } },
       bookmarks: { select: { createdAt: true } },
+      contactEvents: { include: { user: { select: { name: true } }, client: { select: { name: true } } }, orderBy: { at: "desc" } },
     },
   });
   const ids = [...new Set([c.createdBy, c.verifiedBy, c.updatedBy, ...c.revealLogs.map((r) => r.userId), ...c.requests.map((r) => r.requesterId), ...c.accessGrants.map((g) => g.userId)].filter((x): x is string => Boolean(x)))];
@@ -48,6 +49,7 @@ export async function exportContactData(deps: Deps, actor: Actor, journalistId: 
     reveals: c.revealLogs.map((r) => ({ user: user(r.userId), kind: r.kind, at: r.at.toISOString() })),
     articles: c.articles.map((a) => ({ headline: a.headline, media: a.mediaName, publishedAt: a.publishedAt.toISOString(), url: a.url })),
     bookmarks: c.bookmarks.length,
+    contactHistory: c.contactEvents.map((e) => ({ kind: e.kind, at: e.at.toISOString(), user: e.user?.name ?? null, client: e.client?.name ?? null, note: e.note })),
   };
   await writeAudit(deps.db, { actorId: actor.id, action: AuditAction.CONTACT_EXPORTED, entity: "Journalist", entityId: journalistId });
   return data;
@@ -83,6 +85,7 @@ export async function exportContactPdf(data: ExportData): Promise<Uint8Array> {
     <h2>${esc(p.owners)}</h2><table>${rows(data.owners.map((o) => [o.name, date(o.since), o.active ? "" : t.journo.inactiveOwner]))}</table>
     <h2>${esc(p.requests)}</h2><table>${rows(data.requests.map((r) => [r.client, r.requester ?? "", t.journo.request.statuses[r.status] ?? r.status, date(r.createdAt)]))}</table>
     <h2>${esc(p.reveals)}</h2><table>${rows(data.reveals.map((r) => [r.user ?? "", t.journo.kinds[r.kind] ?? r.kind, formatDateTime(new Date(r.at))]))}</table>
+    <h2>${esc(t.journo.contactHistory.title)}</h2><table>${rows(data.contactHistory.map((e) => [date(e.at), t.journo.contactHistory.kinds[e.kind] ?? e.kind, e.user ?? "", e.client ?? "", e.note ?? ""]))}</table>
     <h2>${esc(p.articles)}</h2><table>${rows(data.articles.map((a) => [date(a.publishedAt), a.media, a.headline]))}</table>
     </body></html>`;
   return renderPdf(html);

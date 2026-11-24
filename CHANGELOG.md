@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## Journalisten-Vorschläge · 2026-11-24
+
+- Kontakthistorie auf der Kontaktseite: Telefonat, Mail, Treffen, Hintergrundgespräch eintragen; Versand an Medien wird für vorgemerkte Kontakte automatisch festgehalten (D-134).
+- Vorschläge im Editor nutzen Pressespiegel (zwölf Monate, Artikel zum Kunden, auch über den Autorennamen) und Kontakthistorie; je Vorschlag die Zeilen „Pressespiegel“ und „Letzter Kontakt“.
+- Auskunft zu einem Kontakt enthält die Kontakthistorie.
+
 ## Reporting · 2026-11-24
 
 - Neuer Bereich „Reporting“ (D-133): Meltwater-Export hochladen, Zeitraum, eine von drei Vorlagen (Kompakt, Monatsbericht, Management) und Bausteine wählen, Wettbewerber und Tier-Listen (vorbelegt aus dem Kundenprofil), Paid ausschließen, Themenfilter, eigene Einordnung.

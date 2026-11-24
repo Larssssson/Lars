@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { t } from "@/i18n";
+import { addContactEvent, deleteContactEvent, type MANUAL_KINDS } from "@/lib/domain/journo/history";
 import {
   approvePendingOwner,
   becomeOwner,
@@ -35,7 +36,7 @@ import { DomainError } from "@/lib/domain/errors";
 import { runAction, str, type ActionState } from "@/lib/server/action";
 import { serverDeps } from "@/lib/server/deps";
 import { requireUser } from "@/lib/session";
-import { formatDateTime } from "@/lib/time";
+import { atTime, formatDateTime } from "@/lib/time";
 
 const id = z.uuid();
 const refresh = () => revalidatePath("/journo-hub", "layout");
@@ -277,4 +278,28 @@ export async function importWizardAction(state: ImportStep, form: FormData): Pro
   if (step === "preview") return previewImportAction(state, form);
   if (step === "commit") return commitImportAction(state, form);
   return {};
+}
+
+/** Kontakt in die Kontakthistorie eintragen (DECISIONS D-134). */
+export async function addContactEventAction(journalistId: string, _state: ActionState, form: FormData): Promise<ActionState> {
+  const result = await runAction(async () => {
+    const day = str(form, "at");
+    await addContactEvent(serverDeps(), await requireUser(), journalistId, {
+      kind: (str(form, "kind") ?? "") as (typeof MANUAL_KINDS)[number],
+      at: day && /^\d{4}-\d{2}-\d{2}$/.test(day) ? atTime(day, "12:00") : new Date(Number.NaN),
+      clientId: str(form, "clientId"),
+      note: str(form, "note"),
+    });
+    return t.common.saved;
+  });
+  revalidatePath(`/journo-hub/${journalistId}`);
+  return result;
+}
+
+export async function deleteContactEventAction(journalistId: string, eventId: string, _state: ActionState): Promise<ActionState> {
+  const result = await runAction(async () => {
+    await deleteContactEvent(serverDeps(), await requireUser(), eventId);
+  });
+  revalidatePath(`/journo-hub/${journalistId}`);
+  return result;
 }
