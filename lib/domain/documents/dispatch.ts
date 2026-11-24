@@ -8,6 +8,7 @@ import { loadPermissionContext } from "@/lib/domain/permissions/context";
 import { blockTexts, type JSONNode } from "@/lib/editor/content";
 import type { Prisma, TemplateChoice } from "@/lib/generated/prisma/client";
 import { exportTemplate } from "./export-template";
+import { recordDispatchContacts } from "@/lib/domain/journo/history";
 import { finalFileName, targetFolder } from "./filing";
 import { buildHtml } from "./html-export";
 import { renderPdf } from "./pdf";
@@ -117,6 +118,10 @@ export async function recordDispatch(deps: Deps, actor: NamedActor, taskId: stri
         createdBy: actor.id,
       },
     });
+    // Kontakthistorie: vorgemerkte Journalisten im Empfängerfeld (DECISIONS D-134)
+    if (input.target === "MEDIEN") {
+      await recordDispatchContacts(tx, { documentId: document.id, taskId, clientId: task.clientId, recipients: input.recipients, actorId: actor.id, at: now });
+    }
     await changeDocumentStatus(tx, {
       taskId,
       documentId: document.id,

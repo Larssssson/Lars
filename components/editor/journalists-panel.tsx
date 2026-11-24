@@ -36,6 +36,7 @@ export function JournalistsPanel({ taskId, onBookmarkChange }: { taskId: string;
     <div className="flex flex-col gap-3" data-testid="journalists-panel">
       {result.embargo && <p className="rounded-md border border-amber-300 bg-amber-50 px-2 py-1 text-xs font-medium text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-100">{e.embargo(result.embargo)}</p>}
       <p className="text-xs font-medium text-muted-foreground">{e.title}{result.aiOrdered ? ` · ${e.aiOrdered}` : ""}</p>
+      <p className="text-[11px] text-muted-foreground">{e.sources}</p>
       {result.suggestions.length === 0 ? <p className="text-muted-foreground">{e.none}</p> : (
         <ul className="flex flex-col gap-3" data-testid="journalist-suggestions">
           {result.suggestions.map((s) => (
@@ -46,6 +47,8 @@ export function JournalistsPanel({ taskId, onBookmarkChange }: { taskId: string;
               </span>
               <span className="text-xs text-muted-foreground">{[s.media, s.desk].filter(Boolean).join(" · ")}</span>
               <span className="text-xs">{s.reason}</span>
+              {s.pressLine && <span className="text-xs text-muted-foreground" data-testid="press-line">{s.pressLine}</span>}
+              {s.contactLine && <span className="text-xs text-muted-foreground" data-testid="contact-line">{s.contactLine}</span>}
               <span className="flex flex-wrap gap-1.5">
                 <Button asChild size="sm" variant="outline" className="h-7"><Link href={`/journo-hub/${s.id}?aufgabe=${taskId}`}>{e.open}</Link></Button>
                 <Button asChild size="sm" variant="ghost" className="h-7"><Link href={`/journo-hub/${s.id}?aufgabe=${taskId}#anfragen`}>{e.request}</Link></Button>

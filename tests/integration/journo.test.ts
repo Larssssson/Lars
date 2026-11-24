@@ -20,6 +20,7 @@ import { deleteContact, exportContactData, exportContactPdf } from "@/lib/domain
 import { contactView, listContacts, whoKnows } from "@/lib/domain/journo/queries";
 import { createContactRequest, decideContactRequest, listContactRequests, remindOpenRequests } from "@/lib/domain/journo/requests";
 import { bookmarkedRecipients, suggestJournalists, toggleBookmark } from "@/lib/domain/journo/suggestions";
+import { addContactEvent, deleteContactEvent, recordDispatchContacts } from "@/lib/domain/journo/history";
 import { ForbiddenError } from "@/lib/domain/permissions";
 import { completeOffboarding, offboardingOverview, reassignTask, resolveOwnedContact } from "@/lib/domain/permissions/offboarding";
 import { createPrismaClient } from "@/lib/db";
@@ -369,6 +370,46 @@ describe("Reiter Journalisten im Editor (BRIEFING 7.5)", () => {
     expect(await bookmarkedRecipients(deps, pm.document!.id)).toEqual([{ id: jana.id, label: "Jana Hofmann (Tagesblatt Nord)" }]);
     expect((await suggestJournalists(deps, laura, pm.id)).suggestions.find((s) => s.id === jana.id)!.bookmarked).toBe(true);
     expect(await toggleBookmark(deps, laura, pm.id, jana.id)).toBe(false);
+  });
+});
+
+describe("Vorschläge mit Pressespiegel und Kontakthistorie (D-134)", () => {
+  it("Artikel zum Kunden (auch ohne Verknüpfung über den Autorennamen) und letzter Kontakt fließen ein", async () => {
+    const [laura, robin, lars] = await usersByKey(db, ["laura", "robin", "lars"] as const);
+    const covenant = await clientByName(db, "Covenant");
+    const pm = await db.task.findFirstOrThrow({ where: { title: "PM Standortentscheidung" }, include: { document: true } });
+    await db.client.update({ where: { id: covenant.id }, data: { aiAllowed: false } });
+    const jana = await contact("Jana");
+
+    // Pressespiegel: Artikel von „Jana Hofmann“ ohne Verknüpfung, für Covenant ausgewählt
+    const article = await db.article.create({
+      data: { publishedAt: new Date(FIXED_NOW.getTime() - 5 * 86_400_000), headline: "Werk bei Leipzig: Was die Region erwartet", mediaName: "Tagesblatt Nord", authorName: "Jana Hofmann" },
+    });
+    await db.articleRelevance.create({ data: { articleId: article.id, clientId: covenant.id, selected: true } });
+
+    // Kontakthistorie
+    await expect(addContactEvent(deps, laura, jana.id, { kind: "TELEFONAT", at: new Date(FIXED_NOW.getTime() + 3 * 86_400_000) })).rejects.toThrow(/Zukunft/);
+    await expect(addContactEvent(deps, laura, jana.id, { kind: "MAIL", at: FIXED_NOW, note: "schreib an jana@example.org" })).rejects.toThrow(/Kontaktdaten/);
+    const event = await addContactEvent(deps, laura, jana.id, { kind: "TELEFONAT", at: new Date(FIXED_NOW.getTime() - 2 * 86_400_000), clientId: covenant.id, note: "Interesse an Werksbesuch" });
+
+    const result = await suggestJournalists(deps, laura, pm.id);
+    const s = result.suggestions.find((x) => x.id === jana.id)!;
+    expect(s.pressLine).toMatch(/^Pressespiegel: 1 Artikel zu Covenant/);
+    expect(s.contactLine).toMatch(/^Letzter Kontakt: Laura am \d\d\.\d\d\.\d{4} \(Telefonat, Covenant\) · 1 Kontakt für Covenant$/);
+    expect(result.suggestions[0]!.id).toBe(jana.id);
+
+    // löschen: eigene Einträge, CVD alle; automatische nur CVD
+    await expect(deleteContactEvent(deps, robin, event.id)).rejects.toThrow(ForbiddenError);
+    await recordDispatchContacts(db, { documentId: pm.document!.id, taskId: pm.id, clientId: covenant.id, recipients: "Jana Hofmann (Tagesblatt Nord), Redaktion X", actorId: laura.id, at: FIXED_NOW });
+    expect(await recordDispatchContacts(db, { documentId: pm.document!.id, taskId: pm.id, clientId: covenant.id, recipients: "jemand anderes", actorId: laura.id, at: FIXED_NOW })).toBe(0);
+    await toggleBookmark(deps, laura, pm.id, jana.id);
+    expect(await recordDispatchContacts(db, { documentId: pm.document!.id, taskId: pm.id, clientId: covenant.id, recipients: "Jana Hofmann (Tagesblatt Nord)", actorId: laura.id, at: FIXED_NOW })).toBe(1);
+    const auto = await db.contactEvent.findFirstOrThrow({ where: { journalistId: jana.id, kind: "VERSAND" } });
+    expect(auto.automatic).toBe(true);
+    await expect(deleteContactEvent(deps, laura, auto.id)).rejects.toThrow(ForbiddenError);
+    await deleteContactEvent(deps, lars, auto.id);
+    await deleteContactEvent(deps, laura, event.id);
+    expect(await db.contactEvent.count({ where: { journalistId: jana.id } })).toBe(0);
   });
 });
 

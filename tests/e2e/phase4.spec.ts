@@ -149,3 +149,23 @@ test("CVD: Pflege, Auskunft, Löschen, Offboarding", async ({ page }) => {
   await expect(page.getByTestId("owners")).toContainText("Juliana");
   await expect(page.getByTestId("owners")).toContainText("inaktiv");
 });
+
+test("Kontakthistorie eintragen, erscheint als letzter Kontakt im Reiter Journalisten (D-134)", async ({ page }) => {
+  test.setTimeout(90_000);
+  await loginAs(page, "Hannah");
+  await page.goto("/journo-hub?q=Ole");
+  await page.getByRole("link", { name: /Ole Brandt/ }).first().click();
+  await page.getByText("Kontakt eintragen").click();
+  await page.locator("#ce-kind").selectOption("TREFFEN");
+  await page.locator("#ce-client").selectOption({ label: "Rafael" });
+  await page.locator("#ce-note").fill("Hintergrund zur Luftverteidigung");
+  await page.getByRole("button", { name: "Eintragen" }).click();
+  await expect(page.getByTestId("contact-events")).toContainText("Treffen · Hannah");
+
+  await page.goto("/redaktion?status=ALLE");
+  await page.getByRole("link", { name: "Pitch Luftverteidigung" }).click();
+  await page.getByRole("tab", { name: "Journalisten" }).click();
+  const ole = page.getByTestId("journalist-suggestions").getByRole("listitem").filter({ hasText: "Ole Brandt" });
+  await expect(ole.getByTestId("contact-line")).toContainText("Letzter Kontakt: Hannah");
+  await expect(ole.getByTestId("contact-line")).toContainText("1 Kontakt für Rafael");
+});

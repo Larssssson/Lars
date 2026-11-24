@@ -23,6 +23,8 @@ async function clearSamplesIn(db: Prisma.TransactionClient): Promise<Record<stri
     ["Article", () => db.article.deleteMany({ where })],
     ["MonitoringImport", () => db.monitoringImport.deleteMany({ where })],
     ["ImportMapping", () => db.importMapping.deleteMany({ where })],
+    ["ContactEvent", () => db.contactEvent.deleteMany({ where })],
+    ["Report", () => db.report.deleteMany({ where })],
     ["RevealLog", () => db.revealLog.deleteMany({ where })],
     ["ContactAccessGrant", () => db.contactAccessGrant.deleteMany({ where })],
     ["ContactRequest", () => db.contactRequest.deleteMany({ where })],

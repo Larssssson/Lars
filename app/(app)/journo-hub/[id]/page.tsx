@@ -23,7 +23,9 @@ import { missingForVerification, type RevealContext } from "@/lib/domain/journo/
 import { contactView } from "@/lib/domain/journo/queries";
 import { canRevokeVerificationOrDeleteContact, isCvd } from "@/lib/domain/permissions";
 import { requireUser } from "@/lib/session";
-import { formatDate } from "@/lib/time";
+import { dateKey, formatDate } from "@/lib/time";
+import { listContactEvents } from "@/lib/domain/journo/history";
+import { ContactHistory } from "@/components/journo/contact-history";
 
 /** Kontaktseite (BRIEFING 7.5). ?aufgabe= setzt den Freigabe-Kontext einer Aufgabe (DECISIONS D-012). */
 export default async function ContactPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ aufgabe?: string }> }) {
@@ -36,12 +38,13 @@ export default async function ContactPage({ params, searchParams }: { params: Pr
   const view = await contactView(prisma, user, id, context, now).catch(() => null);
   if (!view) notFound();
   const { contact } = view;
-  const [missing, media, clients, projects, myRequests] = await Promise.all([
+  const [missing, media, clients, projects, myRequests, events] = await Promise.all([
     missingForVerification(prisma, contact.id),
     prisma.media.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
     prisma.client.findMany({ where: { status: { not: "ARCHIVIERT" }, isInternal: false }, orderBy: { name: "asc" }, select: { id: true, name: true } }),
     prisma.project.findMany({ where: { status: { in: ["GEPLANT", "LAUFEND"] } }, orderBy: { title: "asc" }, include: { client: { select: { name: true } } } }),
     prisma.contactRequest.findMany({ where: { journalistId: contact.id, requesterId: user.id }, include: { client: { select: { name: true } } }, orderBy: { createdAt: "desc" } }),
+    listContactEvents(prisma, contact.id),
   ]);
   const j = t.journo;
   const f = j.fields;
@@ -218,6 +221,28 @@ export default async function ContactPage({ params, searchParams }: { params: Pr
                 ))}
               </ul>
             )}
+          </Card>
+
+          <Card id="kontakthistorie" className="flex flex-col gap-2 p-4">
+            <CardTitle>{t.journo.contactHistory.title}</CardTitle>
+            <ContactHistory
+              journalistId={contact.id}
+              clients={clients}
+              defaultClientId={task?.clientId ?? user.selectedClientId}
+              today={dateKey(now)}
+              events={events.map((e) => ({
+                id: e.id,
+                kind: e.kind,
+                at: formatDate(e.at),
+                userName: e.user?.name.split(" ")[0] ?? null,
+                clientName: e.client?.name ?? null,
+                taskId: e.task?.id ?? null,
+                taskTitle: e.task?.title ?? null,
+                note: e.note,
+                automatic: e.automatic,
+                mayDelete: cvd || (e.userId === user.id && !e.automatic),
+              }))}
+            />
           </Card>
 
           <Card className="flex flex-col gap-1 p-4 text-sm" data-testid="contact-history">
