@@ -3,6 +3,8 @@
 import {
   createShiftTypeAction,
   createUserAction,
+  deleteUserAction,
+  resetPasswordAction,
   grantPermissionAction,
   revokePermissionAction,
   setUserActiveAction,
@@ -113,6 +115,22 @@ export function ShiftTypeForm({ id, values }: { id?: string; values?: ShiftTypeV
         <Field label={s.taskDueTime} htmlFor={`st-due-${prefix}`}><Input id={`st-due-${prefix}`} name="taskDueTime" type="time" defaultValue={values?.taskDueTime ?? "09:30"} /></Field>
       </div>
       <div><SubmitButton variant={id ? "outline" : "default"}>{id ? s.save : s.add}</SubmitButton></div>
+    </ActionForm>
+  );
+}
+
+export function ResetPasswordButton({ userId }: { userId: string }) {
+  return (
+    <ActionForm action={resetPasswordAction.bind(null, userId)} confirm={u.newPasswordConfirm}>
+      <SubmitButton size="sm" variant="outline">{u.newPassword}</SubmitButton>
+    </ActionForm>
+  );
+}
+
+export function DeleteUserButton({ userId, name }: { userId: string; name: string }) {
+  return (
+    <ActionForm action={deleteUserAction.bind(null, userId)} confirm={u.deleteConfirm(name)}>
+      <SubmitButton size="sm" variant="destructive">{u.delete}</SubmitButton>
     </ActionForm>
   );
 }

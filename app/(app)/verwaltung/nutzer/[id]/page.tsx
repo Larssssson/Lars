@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ActiveToggle, GrantForm, RevokeGrantButton, RoleForm } from "@/components/admin/admin-forms";
+import { ActiveToggle, DeleteUserButton, GrantForm, ResetPasswordButton, RevokeGrantButton, RoleForm } from "@/components/admin/admin-forms";
 import { MembershipForm, RemoveMembershipButton } from "@/components/clients/client-forms";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardTitle } from "@/components/ui/card";
 import { t } from "@/i18n";
 import { prisma } from "@/lib/db";
-import { canGrantPermission, canManageUsers } from "@/lib/domain/permissions";
+import { canDeleteRecords, canGrantPermission, canManageUsers } from "@/lib/domain/permissions";
+import { env } from "@/lib/env";
 import { requireUser } from "@/lib/session";
 import { formatDate } from "@/lib/time";
 
@@ -74,6 +75,22 @@ export default async function UserPage({ params }: { params: Promise<{ id: strin
             </div>
           )}
         </Card>
+
+        {manage && env().AUTH_PROVIDER === "password" && (
+          <Card>
+            <CardTitle>{t.admin.users.passwordTitle}</CardTitle>
+            <p className="mt-2 mb-3 text-sm text-muted-foreground">{user.passwordHash ? t.admin.users.hasPassword : t.admin.users.noPassword} · {t.admin.users.passwordHint}</p>
+            <ResetPasswordButton userId={user.id} />
+          </Card>
+        )}
+
+        {canDeleteRecords(actor) && !self && (
+          <Card>
+            <CardTitle>{t.admin.users.deleteTitle}</CardTitle>
+            <p className="mt-2 mb-3 text-sm text-muted-foreground">{t.admin.users.deleteHint}</p>
+            <DeleteUserButton userId={user.id} name={user.name} />
+          </Card>
+        )}
 
         <Card className="lg:col-span-2">
           <CardTitle>{t.admin.memberships.title}</CardTitle>

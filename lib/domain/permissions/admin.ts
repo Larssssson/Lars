@@ -4,7 +4,7 @@ import { AuditAction, writeAudit } from "@/lib/domain/audit";
 import type { Deps } from "@/lib/domain/deps";
 import { DomainError, NotFoundError } from "@/lib/domain/errors";
 import type { Permission, Prisma, Role, User } from "@/lib/generated/prisma/client";
-import { assert, canGrantPermission, canManageUsers, type Actor } from "./index";
+import { assert, canDeleteRecords, canGrantPermission, canManageUsers, type Actor } from "./index";
 
 /**
  * Nutzerverwaltung (BRIEFING 3, 7.10): nur CVDs. Jede Rechteänderung wird mit Datum
@@ -160,4 +160,21 @@ export async function listAudit(deps: Pick<Deps, "db">, filter: AuditFilter = {}
     orderBy: { at: "desc" },
     take: filter.limit ?? 200,
   });
+}
+
+/**
+ * Nutzer endgültig löschen (nur Admin, DECISIONS D-126). Geht nur ohne eigene Aufgaben und ohne vergebene
+ * Zusatzrechte; sonst erst Offboarding oder sperren. Protokoll und Verlauf behalten die ID.
+ */
+export async function deleteUser(deps: Deps, actor: Actor, userId: string): Promise<void> {
+  assert(canDeleteRecords(actor));
+  if (userId === actor.id) throw new DomainError(t.admin.errors.notOnSelf);
+  const user = await requireUser(deps, userId);
+  const [tasks, grants] = await Promise.all([
+    deps.db.task.count({ where: { ownerId: userId } }),
+    deps.db.permissionGrant.count({ where: { grantedById: userId } }),
+  ]);
+  if (tasks || grants) throw new DomainError(t.admin.errors.userInUse(tasks, grants));
+  await deps.db.user.delete({ where: { id: userId } });
+  await writeAudit(deps.db, { actorId: actor.id, action: AuditAction.USER_DELETED, entity: "User", entityId: userId, before: { role: user.role, isAdmin: user.isAdmin } });
 }

@@ -1,3 +1,4 @@
+import { LiveNotice } from "@/components/notifications/live-notice";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Header } from "@/components/layout/header";
@@ -35,6 +36,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
             {t.auth.demoBanner}
           </p>
         )}
+        <LiveNotice since={new Date().toISOString()} />
         <Header
           user={user}
           clients={clients}

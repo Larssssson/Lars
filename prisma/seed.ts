@@ -56,7 +56,19 @@ const SEED_LOGOS: Record<string, string> = {
   Rafael: "fixtures/clients/rafael/logo_placeholder.png",
 };
 
-export async function seed(db: PrismaClient, now: Date = new Date(), stores: SeedStores = {}): Promise<void> {
+/**
+ * Mit samples = false (Live-Betrieb, DECISIONS D-131) nur Konfiguration: Diensttypen, Darstellungsformen,
+ * interner Kunde. Nutzer nur, wenn noch keiner existiert; danach pflegt sie die Verwaltung.
+ */
+export async function seed(db: PrismaClient, now: Date = new Date(), stores: SeedStores = {}, options: { samples?: boolean } = {}): Promise<void> {
+  const samples = options.samples ?? true;
+  if (!samples) {
+    if ((await db.user.count()) === 0) {
+      for (const u of seedUsers) await db.user.create({ data: { name: u.name, email: u.email, role: u.role, isAdmin: u.isAdmin } });
+    }
+    await seedConfig(db);
+    return;
+  }
   const userIds = {} as Record<SeedUserKey, string>;
   for (const u of seedUsers) {
     const user = await db.user.upsert({
@@ -93,12 +105,18 @@ export async function seed(db: PrismaClient, now: Date = new Date(), stores: See
     }
   }
 
-  await internalClientId(db);
+  await seedConfig(db);
+  await seedPhase1(db, now, userIds);
+  await seedPhase2(db, userIds, stores);
+}
 
+/** Phase 2: Kundenordner im SharePoint (BRIEFING 9) und Platzhalterlogos (13.7). */
+/** Konfiguration ohne Beispieldaten: interner Kunde, Diensttypen, Darstellungsformen. */
+async function seedConfig(db: PrismaClient): Promise<void> {
+  await internalClientId(db);
   for (const s of seedShiftTypes) {
     await db.shiftType.upsert({ where: { key: s.key }, update: {}, create: s });
   }
-
   for (const [index, f] of seedFormats.entries()) {
     await db.documentFormat.upsert({
       where: { key: f.key },
@@ -106,12 +124,8 @@ export async function seed(db: PrismaClient, now: Date = new Date(), stores: See
       create: { ...f, builtIn: true, sortOrder: index + 1 },
     });
   }
-
-  await seedPhase1(db, now, userIds);
-  await seedPhase2(db, userIds, stores);
 }
 
-/** Phase 2: Kundenordner im SharePoint (BRIEFING 9) und Platzhalterlogos (13.7). */
 async function seedPhase2(db: PrismaClient, userIds: Record<SeedUserKey, string>, stores: SeedStores): Promise<void> {
   for (const client of await db.client.findMany()) {
     if (stores.documents) {
@@ -385,7 +399,8 @@ async function main() {
   const { adapters } = await import("../lib/adapters");
   const db = createPrismaClient();
   try {
-    await seed(db, new Date(), { files: adapters.fileStorage(), documents: adapters.documentStore() });
+    const live = process.argv.includes("--live") || process.env.IMPRESS_LIVE === "true";
+    await seed(db, new Date(), { files: adapters.fileStorage(), documents: adapters.documentStore() }, { samples: !live });
     console.info("Seed abgeschlossen.");
   } finally {
     await db.$disconnect();

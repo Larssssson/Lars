@@ -1,3 +1,4 @@
+import { buildMailDraft } from "@/lib/domain/documents/mail";
 import { readdir } from "node:fs/promises";
 import path from "node:path";
 import { beforeEach, describe, expect, it } from "vitest";
@@ -225,13 +226,32 @@ describe("Kommentare (BRIEFING 7.3)", () => {
     const root = await addComment(deps, lukas, task.id, { body: "Zahl prüfen, @Robin bitte gegenlesen" });
     expect(root.anchor).toEqual({ wholeText: true });
     expect(await db.notification.count({ where: { userId: laura.id, kind: "COMMENT" } })).toBe(1);
-    expect(await db.notification.count({ where: { userId: robin.id, kind: "COMMENT" } })).toBe(1);
+    expect(await db.notification.count({ where: { userId: robin.id, kind: "MENTION" } })).toBe(1);
+    expect(await db.notification.count({ where: { userId: robin.id, kind: "COMMENT" } })).toBe(0);
+    // „@Robinson“ ist keine Erwähnung von Robin, eine Mailadresse auch nicht
+    await addComment(deps, lukas, task.id, { body: "@Robinson und robin@example.com" });
+    expect(await db.notification.count({ where: { userId: robin.id, kind: "MENTION" } })).toBe(1);
     await addComment(deps, laura, task.id, { body: "Erledigt, 450 stimmt", threadId: root.id });
     expect(await db.notification.count({ where: { userId: lukas.id, kind: "COMMENT" } })).toBe(1);
     await resolveThread(deps, laura, task.id, root.id, true);
     expect(await db.comment.count({ where: { threadId: root.id, resolvedAt: { not: null } } })).toBe(2);
     await expect(addComment(deps, laura, task.id, { body: "  " })).rejects.toThrow(DomainError);
   });
+});
+
+describe("Mail-Entwurf mit Anhang (D-129)", () => {
+  it("baut eine .eml mit Betreff, gewähltem Ton und Anhang der gewählten Version", async () => {
+    const laura = (await usersByKey(db, ["laura"]))[0];
+    const task = await newPm(laura);
+    await saveContent(deps, laura, task.id, await contentWith(task.id, { headline: "eins" }));
+    const version = await saveManualVersion(deps, laura, task.id);
+    const mail = await buildMailDraft(deps, laura, task.id, { kind: "docx", template: "RP", versionId: version.id, tone: "nuechtern", length: "lang" });
+    expect(mail.fileName).toMatch(/\.eml$/);
+    expect(mail.eml).toContain("X-Unsent: 1");
+    expect(mail.eml).toMatch(/Content-Disposition: attachment; filename=".*\.docx"/);
+    const bodyPart = mail.eml.split("Content-Transfer-Encoding: base64\r\n\r\n")[1]!.split("\r\n--")[0]!;
+    expect(Buffer.from(bodyPart.replace(/\r\n/g, ""), "base64").toString("utf8")).toMatch(/^Guten Tag,[\s\S]*Mit freundlichen Grüßen\r?\nLaura$/);
+  }, 60_000);
 });
 
 describe("Versionen (BRIEFING 7.3)", () => {

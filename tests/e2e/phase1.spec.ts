@@ -41,6 +41,7 @@ test("CVD legt eine Dokument-Aufgabe für eine Redakteurin an, sie sieht sie in 
 
   await page.locator("summary", { hasText: "Lars" }).click();
   await page.getByRole("button", { name: "Abmelden" }).click();
+  await expect(page).toHaveURL(/\/login$/, { timeout: 30_000 });
   await loginAs(page, "Mika");
   await expect(page.getByTestId("unread-count")).toHaveText(/[1-9]/);
   await page.getByRole("link", { name: /Benachrichtigungen/ }).click();
@@ -90,6 +91,7 @@ test("Dashboard: Blöcke für Redakteure, Team-Ansicht nur für CVDs", async ({ 
 
   await page.locator("summary", { hasText: "Laura" }).click();
   await page.getByRole("button", { name: "Abmelden" }).click();
+  await expect(page).toHaveURL(/\/login$/, { timeout: 30_000 });
   await loginAs(page, "Lukas");
   await expect(page.getByRole("heading", { name: "Wartet auf meine Freigabe" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Warnungen" })).toBeVisible();
@@ -113,6 +115,7 @@ test("Dienstplan: CVD trägt ein und kopiert die Woche, Redakteure sehen nur", a
 
   await page.locator("summary", { hasText: "Lars" }).click();
   await page.getByRole("button", { name: "Abmelden" }).click();
+  await expect(page).toHaveURL(/\/login$/, { timeout: 30_000 });
   await loginAs(page, "Robin");
   await page.goto("/dienstplan");
   await expect(page.getByText("Den Dienstplan pflegen CVDs.")).toBeVisible();

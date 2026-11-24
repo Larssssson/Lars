@@ -26,9 +26,10 @@ import { loadPermissionContext } from "@/lib/domain/permissions/context";
 import { approversForClient } from "@/lib/domain/permissions/queries";
 import { computePriority } from "@/lib/domain/tasks/rules";
 import type { JSONNode } from "@/lib/editor/content";
-import { formatDateTime, formatRelative, formatWaiting, toLocalInput } from "@/lib/time";
+import { formatDate, formatDateTime, formatRelative, formatWaiting, toLocalInput } from "@/lib/time";
 import type { FindingView } from "./check-panel";
 import { DocumentWorkspace, type CommentView } from "./document-workspace";
+import { ExportCard } from "./export-card";
 import { SaveVersionButton } from "./version-button";
 import {
   ClientAgreedButton,
@@ -58,7 +59,7 @@ export async function DocumentTaskPage({ taskId, user }: { taskId: string; user:
     prisma.dispatch.findMany({ where: { documentId: document.id }, orderBy: { sentAt: "desc" } }),
     prisma.comment.findMany({ where: { documentId: document.id }, orderBy: { createdAt: "asc" } }),
     approversForClient(prisma, task.clientId),
-    prisma.user.findMany({ select: { id: true, name: true } }),
+    prisma.user.findMany({ select: { id: true, name: true, active: true } }),
     latestCheck(prisma, document.id),
     prisma.aiInsertion.findMany({ where: { documentId: document.id, status: "ANGENOMMEN" } }),
     prisma.clientProfileSection.findMany({ where: { clientId: task.clientId, key: { in: ["ziele_kernbotschaften", "factsheet", "qa"] } } }),
@@ -135,6 +136,7 @@ export async function DocumentTaskPage({ taskId, user }: { taskId: string; user:
   const lockedApproved = ["FREIGEGEBEN", "BEIM_KUNDEN", "ERLEDIGT", "ARCHIVIERT"].includes(task.status);
   const f = t.tasks.fields;
   const info = t.documents.info;
+  const approvedVersionIds = new Set(approvals.filter((a) => a.decision === "FREIGEGEBEN").map((a) => a.versionId));
 
   return (
     <div className="flex flex-col gap-4">
@@ -231,6 +233,16 @@ export async function DocumentTaskPage({ taskId, user }: { taskId: string; user:
           </Card>
 
           <Card className="p-4">
+            <CardTitle className="mb-3">{t.documents.mail.title}</CardTitle>
+            <ExportCard
+              taskId={task.id}
+              clientHasLogo={Boolean(task.client.logoFileId)}
+              versions={versions.map((v) => ({ id: v.id, approved: approvedVersionIds.has(v.id), label: t.documents.mail.versionOption(v.number, approvedVersionIds.has(v.id), formatDate(v.createdAt)) }))}
+              defaultVersionId={versions.find((v) => approvedVersionIds.has(v.id))?.id ?? versions[0]?.id ?? null}
+            />
+          </Card>
+
+          <Card className="p-4">
             <CardTitle>{info.versions}</CardTitle>
             <ul className="mt-2 flex flex-col gap-1 text-sm" data-testid="versions">
               {versions.map((v, i) => (
@@ -287,6 +299,7 @@ export async function DocumentTaskPage({ taskId, user }: { taskId: string; user:
           mayEdit={mayEdit}
           autoClaim={autoClaim}
           comments={commentViews}
+          mentionable={users.filter((u) => u.active).map(({ id, name }) => ({ id, name }))}
           aiAllowed={task.client.aiAllowed}
           knowledge={knowledge}
           check={checkView}

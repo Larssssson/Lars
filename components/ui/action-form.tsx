@@ -36,7 +36,7 @@ export function ActionForm({
             {state.error}
           </p>
         )}
-        {state?.ok && <p className="mt-2 text-sm text-muted-foreground">{state.ok}</p>}
+        {state?.ok && <p className="mt-2 text-sm font-medium text-foreground">{state.ok}</p>}
       </div>
     </form>
   );

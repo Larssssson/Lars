@@ -5,6 +5,8 @@ import { MockAiProvider } from "./ai/mock";
 import type { AiProvider } from "./ai/types";
 import { DevAuthProvider, type DevUserLookup } from "./auth/dev";
 import { EntraAuthProvider } from "./auth/entra";
+import { DatabaseFileStorage } from "./file-storage/database";
+import { PasswordAuthProvider, type PasswordCheck } from "./auth/password";
 import type { AuthProvider } from "./auth/types";
 import { MockDocumentStore } from "./document-store/mock";
 import { SharePointDocumentStore } from "./document-store/sharepoint";
@@ -24,10 +26,10 @@ export type { AiProvider, AuthProvider, DocumentStore, FileStorage, MonitoringSo
  * Auswahl der Adapter per Umgebungsvariable (BRIEFING 10.2, 10.4).
  * Die create*-Funktionen nehmen die Umgebung als Parameter, damit Tests umschalten können.
  */
-export function createAuthProvider(e: Env, lookup: DevUserLookup): AuthProvider {
-  return e.AUTH_PROVIDER === "entra"
-    ? new EntraAuthProvider({ clientId: e.ENTRA_CLIENT_ID, clientSecret: e.ENTRA_CLIENT_SECRET, tenantId: e.ENTRA_TENANT_ID })
-    : new DevAuthProvider(lookup);
+export function createAuthProvider(e: Env, lookup: DevUserLookup, checkPassword?: PasswordCheck): AuthProvider {
+  if (e.AUTH_PROVIDER === "entra") return new EntraAuthProvider({ clientId: e.ENTRA_CLIENT_ID, clientSecret: e.ENTRA_CLIENT_SECRET, tenantId: e.ENTRA_TENANT_ID });
+  if (e.AUTH_PROVIDER === "password") return new PasswordAuthProvider(checkPassword ?? (async () => null));
+  return new DevAuthProvider(lookup);
 }
 
 export function createDocumentStore(e: Env): DocumentStore {
@@ -44,6 +46,7 @@ export function createDocumentStore(e: Env): DocumentStore {
 }
 
 export function createFileStorage(e: Env): FileStorage {
+  if (e.FILE_STORAGE === "database") return new DatabaseFileStorage(async () => (await import("@/lib/db")).prisma);
   return e.FILE_STORAGE === "azure"
     ? new AzureBlobFileStorage({ connectionString: e.AZURE_STORAGE_CONNECTION_STRING, container: e.AZURE_STORAGE_CONTAINER })
     : new LocalFileStorage(path.join(e.STORAGE_DIR, "files"));
