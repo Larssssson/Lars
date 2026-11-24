@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarDays, FileText, LayoutDashboard, Newspaper, Settings, Users, Building2 } from "lucide-react";
+import { CalendarDays, FileText, LayoutDashboard, Newspaper, Settings, Users, Building2, ChartColumn } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { t } from "@/i18n";
@@ -10,6 +10,7 @@ const items = [
   { href: "/", label: t.nav.dashboard, icon: LayoutDashboard },
   { href: "/redaktion", label: t.nav.redaktion, icon: FileText },
   { href: "/pressespiegel", label: t.nav.pressespiegel, icon: Newspaper },
+  { href: "/reporting", label: t.nav.reporting, icon: ChartColumn },
   { href: "/journo-hub", label: t.nav.journoHub, icon: Users },
   { href: "/kunden", label: t.nav.kunden, icon: Building2 },
   { href: "/dienstplan", label: t.nav.dienstplan, icon: CalendarDays },

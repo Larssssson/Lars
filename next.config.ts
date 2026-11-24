@@ -22,7 +22,7 @@ const nextConfig: NextConfig = {
   // eigener Build-Ordner für Ende-zu-Ende-Tests (playwright.config.ts)
   distDir: process.env.NEXT_DIST_DIR ?? ".next",
   // Prisma-Client und Treiber bleiben serverseitig ungebündelt.
-  serverExternalPackages: ["pg", "pg-boss", "@prisma/client", "@prisma/adapter-pg", "playwright", "mammoth", "web-push", "@azure/storage-blob"],
+  serverExternalPackages: ["pg", "pg-boss", "@prisma/client", "@prisma/adapter-pg", "playwright", "mammoth", "web-push", "@azure/storage-blob", "pptxgenjs", "docx", "exceljs"],
   async headers() {
     return [
       {
@@ -32,6 +32,11 @@ const nextConfig: NextConfig = {
           { key: "X-Frame-Options", value: "DENY" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
         ],
+      },
+      {
+        // Reporting-Vorschau wird im iframe der eigenen Seite gezeigt (spätere Regel überschreibt DENY)
+        source: "/api/reporting/:id/vorschau",
+        headers: [{ key: "X-Frame-Options", value: "SAMEORIGIN" }],
       },
       {
         // Service Worker nie zwischenspeichern, damit Updates sofort greifen (BRIEFING 10.3)
