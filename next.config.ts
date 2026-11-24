@@ -14,7 +14,11 @@ const forwardedHosts = [
 
 const nextConfig: NextConfig = {
   allowedDevOrigins: forwardedHosts,
-  experimental: { serverActions: { allowedOrigins: forwardedHosts } },
+  experimental: {
+    serverActions: { allowedOrigins: forwardedHosts },
+    // Build-Worker begrenzen: bei Render meldet die Maschine viele Kerne, der Speicher reicht aber nicht für so viele Worker
+    cpus: Number(process.env.NEXT_BUILD_CPUS ?? 2),
+  },
   // eigener Build-Ordner für Ende-zu-Ende-Tests (playwright.config.ts)
   distDir: process.env.NEXT_DIST_DIR ?? ".next",
   // Prisma-Client und Treiber bleiben serverseitig ungebündelt.
