@@ -648,3 +648,45 @@ Begründung: Eine Zeitungsanmutung passt zu einer Presseplattform und gibt Orien
 Frage: Lars erscheint als einziger Seed-Nutzer mit vollem Namen, alle anderen nur mit Vornamen.
 Entscheidung: Auf Wunsch von Lars heißt der Seed-Nutzer nur „Lars“ (Abweichung von 3.4 und D-037); der Seed gleicht beim erneuten Einspielen den Namen der Seed-Nutzer an, damit bestehende Datenbanken wie die Demo ihn übernehmen. Der Demo-Hinweis lautet nur noch „Demo mit erfundenen Beispieldaten.“
 Begründung: Einheitliche Anzeige; der volle Name kann vor dem Livegang in der Verwaltung eingetragen werden.
+
+## Live-Test bei Render
+
+**D-125** · 2026-11-24
+Frage: Wie melden sich die Nutzer im ersten Live-Test an, solange es den Microsoft-Login noch nicht gibt?
+Entscheidung: Mit `AUTH_PROVIDER=password` per Vorname (oder vollem Namen) und Passwort. Gespeichert wird nur ein scrypt-Hash; nach 5 Fehlversuchen ist das Konto 15 Minuten gesperrt, die Meldung verrät nicht, ob der Name existiert. CVDs erzeugen in der Verwaltung ein neues Zufallspasswort (8 Zeichen, Groß- und Kleinbuchstaben, Ziffer, Sonderzeichen), das genau einmal angezeigt wird; jede Person kann im Profil ihr Passwort ändern. Vergeben und Ändern stehen im Protokoll. Der Microsoft-Login bleibt für den Betrieb in Azure vorgesehen.
+Begründung: Lars wollte den Live-Test sofort und nur mit Passwort; persönliche Passwörter ersetzen den gemeinsamen Demo-Zugang und machen Freigaben und Protokoll wieder eindeutig.
+
+**D-126** · 2026-11-24
+Frage: Wer darf Nutzer und Kunden endgültig löschen?
+Entscheidung: Nur Admins. Nutzer nur ohne eigene Aufgaben und ohne vergebene Zusatzrechte (sonst erst Offboarding oder sperren); Kunden mit allen Aufgaben, Texten, Versionen, Profil, Zuordnungen und Dateien, nach Eintippen des Kundennamens. „RP intern“ ist nicht löschbar, Dateien im SharePoint bleiben. Die Verwaltung hat einen eigenen Reiter „Kunden“ zum Anlegen und Öffnen.
+Begründung: Löschen ist endgültig; die Schranken verhindern, dass Arbeit oder Rechte ohne Besitzer zurückbleiben.
+
+**D-127** · 2026-11-24
+Frage: Wie funktionieren @-Erwähnungen in Kommentaren?
+Entscheidung: Nach „@“ schlägt das Eingabefeld passende Namen vor (Pfeiltasten, Enter oder Tab, Klick); übernommen wird „@Name“. Im Kommentar sind Erwähnungen farbig, die eigene Erwähnung stärker. Eine Erwähnung zählt nur mit vollem Namen oder Vornamen und danach keinem weiteren Buchstaben (nicht in Mailadressen). Erwähnte bekommen „… hat dich erwähnt“ in der Glocke, Owner und Beteiligte „… hat kommentiert“, ohne Push (Grundsatz 7).
+Begründung: Vorher wurde die Erwähnung nur als Textstelle gesucht, ohne Vorschlag, Markierung und eigene Benachrichtigung; das Team nannte das als Voraussetzung für den Live-Test.
+
+**D-128** · 2026-11-24
+Frage: Wie erfährt man im Tool sofort von einer Erwähnung oder neuen Aufgabe?
+Entscheidung: Oben im Fenster erscheint ein Hinweis mit Link, wenn seit dem Laden der Seite eine Erwähnung oder Zuweisung eingegangen ist; die Seite fragt alle 20 Sekunden nach (nur sichtbare Tabs), der Hinweis verschwindet nach 12 Sekunden, die Glocke zählt mit. Kein Push.
+Begründung: Einfach, ohne Websocket-Dienst, und passt zu „Push nur, wenn es brennt“.
+
+**D-129** · 2026-11-24
+Frage: Wie kommt ein Dokument als Mail mit Anhang zu Outlook, obwohl impress nichts selbst verschickt?
+Entscheidung: Jede Aufgabe mit Dokument hat die Karte „Exportieren und mailen“: Version (freigegebene sind markiert, nicht freigegebene mit Warnhinweis), Vorlage, Word oder PDF, Ton (freundlich, nüchtern) und Länge (kurz, lang). „Als Outlook-Mail öffnen“ lädt einen Entwurf (.eml mit `X-Unsent: 1`) mit Anhang und vorformuliertem Text herunter; Outlook öffnet ihn als neue Mail, Empfänger und Senden bleiben beim Menschen. Die Texte sind feste Vorlagen in `i18n/de/documents.ts`, keine KI.
+Begründung: `mailto:` kann keine Anhänge; der .eml-Entwurf funktioniert mit Outlook ohne Microsoft-Anbindung und hält Grundsatz 4 ein.
+
+**D-130** · 2026-11-24
+Frage: Wo liegen Dateien im Live-Test bei Render, dessen Dateisystem bei jedem Neustart leer ist?
+Entscheidung: Mit `FILE_STORAGE=database` in der Tabelle `StoredBlob` in PostgreSQL. Im Betrieb in Azure gilt weiter Azure Blob. Der SharePoint-Ersatz schreibt weiter ins Dateisystem; abgelegte finale Dateien gehen bei Render deshalb bei einem Neustart verloren, die Texte selbst bleiben in der Datenbank.
+Begründung: Kein zusätzlicher Dienst und keine Platte nötig; Logos und Unterlagen sind klein.
+
+**D-131** · 2026-11-24
+Frage: Wie wird der Render-Server vom Demo- zum Live-Test umgestellt?
+Entscheidung: Mit `IMPRESS_LIVE=true` spielt der Start nur Konfiguration ein (Diensttypen, Darstellungsformen, interner Kunde; Nutzer nur in eine leere Datenbank). `IMPRESS_LIVE_RESET=true` leert beim ersten Start einmal alle Inhalte, auch die im Test angelegten, und merkt sich das (`live.resetAt`); Nutzer, Konfiguration und das unveränderliche Protokoll bleiben. `INITIAL_PASSWORD_HASHES` setzt Startpasswörter nur für Personen ohne Passwort. Demo-Modus und gemeinsames Passwort entfallen. Ausnahme von D-028 und D-122: echte Kundendaten auf Render, von Lars bewusst entschieden; Auftragsverarbeitung und Betrieb in Azure folgen vor dem regulären Betrieb.
+Begründung: Ein Schalter, nichts wird bei späteren Neustarts erneut gelöscht.
+
+**D-132** · 2026-11-24
+Frage: Next.js 16.4.2 hat bekannte Sicherheitslücken (npm audit: drei hoch).
+Entscheidung: Aktualisierung auf 16.4.6 vor dem Live-Test; `npm audit fix` ohne Versionssprünge. Offen bleiben `uuid` über exceljs (D-117) und `effect` über die Prisma-Kommandozeile, beide ohne Angriffsfläche im laufenden Betrieb.
+Begründung: Echte Daten verlangen den aktuellen Sicherheitsstand.

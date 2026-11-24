@@ -35,6 +35,10 @@ model User {
   active           Boolean   @default(true)
   selectedClientId String?   @db.Uuid
   deactivatedAt    DateTime?
+  /// scrypt-Hash, nur bei AUTH_PROVIDER=password (DECISIONS D-125)
+  passwordHash     String?
+  failedLogins     Int       @default(0)
+  lockedUntil      DateTime?
   createdAt        DateTime  @default(now())
   createdBy        String?   @db.Uuid
   updatedAt        DateTime  @updatedAt
@@ -1167,4 +1171,13 @@ model Setting {
   createdBy    String?  @db.Uuid
   updatedAt    DateTime @updatedAt
   updatedBy    String?  @db.Uuid
+}
+
+/// Dateiinhalte bei FILE_STORAGE=database (Live-Test ohne Azure Blob, DECISIONS D-130); Metadaten stehen in File.
+model StoredBlob {
+  key       String   @id
+  data      Bytes
+  mimeType  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

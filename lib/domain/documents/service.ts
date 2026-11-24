@@ -1,6 +1,7 @@
 import { getSchema } from "@tiptap/core";
 import { Node as PMNode } from "@tiptap/pm/model";
 import { t } from "@/i18n";
+import { mentionedUsers } from "@/lib/editor/mentions";
 import type { Deps } from "@/lib/domain/deps";
 import { DomainError, NotFoundError } from "@/lib/domain/errors";
 import { notify } from "@/lib/domain/notifications";
@@ -261,12 +262,11 @@ export async function importWord(deps: Deps, actor: NamedActor, taskId: string, 
 
 // ------------------------------------------------------------- Kommentare (BRIEFING 7.3)
 
-/** Erwähnte Nutzer: "@Vorname" oder "@Vorname Nachname" im Kommentar. */
-async function mentionedUsers(db: PrismaClient, body: string) {
+/** Erwähnte aktive Nutzer: "@Vorname" oder "@Vorname Nachname" im Kommentar (D-127). */
+async function mentionedInComment(db: PrismaClient, body: string) {
   if (!body.includes("@")) return [];
   const users = await db.user.findMany({ where: { active: true }, select: { id: true, name: true } });
-  const lower = body.toLowerCase();
-  return users.filter((u) => lower.includes(`@${u.name.toLowerCase()}`) || lower.includes(`@${u.name.split(" ")[0]!.toLowerCase()}`));
+  return mentionedUsers(body, users);
 }
 
 /**
@@ -304,13 +304,20 @@ export async function addComment(
     },
   });
 
-  const recipients = new Set<string>([task.ownerId, ...(await mentionedUsers(deps.db, body)).map((u) => u.id)]);
+  // Erwähnte bekommen „hat dich erwähnt“, Owner und Beteiligte am Thread „hat kommentiert“ (nur Glocke, Grundsatz 7)
+  const mentioned = new Set((await mentionedInComment(deps.db, body)).map((u) => u.id));
+  const recipients = new Set<string>([task.ownerId]);
   if (threadId) {
     const participants = await deps.db.comment.findMany({ where: { threadId }, select: { createdBy: true } });
     participants.forEach((p) => p.createdBy && recipients.add(p.createdBy));
   }
+  mentioned.delete(actor.id);
   recipients.delete(actor.id);
+  for (const userId of mentioned) {
+    await notify(deps, { userId, kind: "MENTION", title: t.notifications.mention(actor.name, task.title), link: `/aufgaben/${task.id}#kommentare`, push: false });
+  }
   for (const userId of recipients) {
+    if (mentioned.has(userId)) continue;
     await notify(deps, { userId, kind: "COMMENT", title: t.notifications.comment(actor.name, task.title), link: `/aufgaben/${task.id}`, push: false });
   }
   return comment;

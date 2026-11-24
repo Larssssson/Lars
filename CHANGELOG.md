@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## Live-Test · 2026-11-24
+
+- Anmeldung mit Vorname und Passwort (D-125): Sperre nach 5 Fehlversuchen, Passwort neu erzeugen in der Verwaltung, eigenes Passwort im Profil ändern.
+- Verwaltung: Reiter „Kunden“, Nutzer und Kunden endgültig löschen (nur Admin, D-126); beim Anlegen eines Nutzers gleich ein Startpasswort.
+- @-Erwähnungen: Vorschläge beim Tippen, farbig im Kommentar, eigene Benachrichtigung „hat dich erwähnt“ (D-127).
+- Hinweis oben im Fenster bei Erwähnung oder neuer Aufgabe (D-128).
+- Karte „Exportieren und mailen“: Version wählen, Word oder PDF, Outlook-Mail mit Anhang und vorformuliertem Text in zwei Tönen und zwei Längen (D-129).
+- Live-Start bei Render: Dateien in der Datenbank (D-130), einmaliges Leeren aller Inhalte, Startpasswörter (D-131).
+- Next.js 16.4.6 mit Sicherheitskorrekturen (D-132).
+
 ## Gestaltung „Redaktion“ · 2026-11-04
 
 - Neue Gestaltung (D-123): Papierweiß, Tintenschwarz, ein Blau; Überschriften in Newsreader, Bedienung in Inter; Seitenleiste mit Schriftzug, runde Kundenauswahl und Suche.

@@ -1,5 +1,7 @@
 import { signOutAction } from "@/app/(app)/actions";
-import { removeDeviceAction, testPushAction } from "@/app/(app)/profil/actions";
+import { changePasswordAction, removeDeviceAction, testPushAction } from "@/app/(app)/profil/actions";
+import { Field, Input } from "@/components/ui/form";
+import { env } from "@/lib/env";
 import { PushSetup } from "@/components/account/push-setup";
 import { ActionForm, SubmitButton } from "@/components/ui/action-form";
 import { Button } from "@/components/ui/button";
@@ -28,6 +30,16 @@ export default async function AccountPage() {
           <dt className="text-muted-foreground">{a.role}</dt><dd>{t.common.roles[user.role]}{user.isAdmin ? `, ${a.admin}` : ""}</dd>
         </dl>
       </Card>
+      {env().AUTH_PROVIDER === "password" && (
+        <Card>
+          <CardTitle className="mb-3">{t.auth.password.changeTitle}</CardTitle>
+          <ActionForm action={changePasswordAction} className="flex flex-wrap items-end gap-3">
+            <Field label={t.auth.password.current} htmlFor="pw-current"><Input id="pw-current" name="current" type="password" autoComplete="current-password" required /></Field>
+            <Field label={t.auth.password.next} htmlFor="pw-next"><Input id="pw-next" name="next" type="password" autoComplete="new-password" minLength={8} required /></Field>
+            <SubmitButton variant="outline">{t.auth.password.change}</SubmitButton>
+          </ActionForm>
+        </Card>
+      )}
       <section id="push" aria-label={p.title} className="scroll-mt-4">
         <Card>
           <CardTitle className="mb-3">{p.title}</CardTitle>

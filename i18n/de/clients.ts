@@ -36,7 +36,16 @@ export const clients = {
     activate: "Auf Aktiv setzen",
   },
   confirmArchive: "Kunden wirklich archivieren? Er verschwindet aus der Kundenauswahl.",
+  delete: {
+    title: "Kunden löschen",
+    hint: "Endgültig: löscht den Kunden mit allen Aufgaben, Texten, Versionen, Profil, Zuordnungen und Dateien. Abgelegte Dateien im SharePoint bleiben. Zum Bestätigen den Kundennamen eintippen.",
+    nameLabel: "Kundenname zur Bestätigung",
+    submit: "Endgültig löschen",
+    confirm: "Kunden mit allen Inhalten endgültig löschen?",
+  },
   errors: {
+    deleteInternal: "Der interne Kunde „RP intern“ kann nicht gelöscht werden.",
+    deleteConfirmName: "Der eingetippte Name passt nicht zum Kunden.",
     nameRequired: "Bitte einen Namen eingeben.",
     shortNameRequired: "Bitte einen Kurznamen eingeben.",
     shortNameInvalid: "Der Kurzname darf nur Buchstaben, Ziffern, Leerzeichen, Bindestrich und Unterstrich enthalten.",

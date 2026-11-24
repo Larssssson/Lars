@@ -6,6 +6,7 @@ import { t } from "@/i18n";
 import { adapters } from "@/lib/adapters";
 import { DomainError } from "@/lib/domain/errors";
 import { registerDevice, removeDevice, sendTestPush } from "@/lib/domain/notifications/devices";
+import { changeOwnPassword } from "@/lib/domain/permissions/passwords";
 import { runAction, type ActionState } from "@/lib/server/action";
 import { serverDeps } from "@/lib/server/deps";
 import { requireUser } from "@/lib/session";
@@ -58,4 +59,12 @@ export async function testPushAction(_state: ActionState): Promise<ActionState> 
   });
   revalidatePath("/", "layout");
   return result;
+}
+
+/** Eigenes Passwort ändern (Passwort-Login, DECISIONS D-125). */
+export async function changePasswordAction(_state: ActionState, form: FormData): Promise<ActionState> {
+  return runAction(async () => {
+    await changeOwnPassword(serverDeps(), await requireUser(), String(form.get("current") ?? ""), String(form.get("next") ?? ""));
+    return t.auth.password.changed;
+  });
 }

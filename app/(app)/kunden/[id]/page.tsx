@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Warnings } from "@/components/dashboard/blocks";
-import { EditClientForm, LogoForm, MembershipForm, RemoveMembershipButton, StatusActions } from "@/components/clients/client-forms";
+import { DeleteClientForm, EditClientForm, LogoForm, MembershipForm, RemoveMembershipButton, StatusActions } from "@/components/clients/client-forms";
 import { TaskTable } from "@/components/tasks/task-table";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardTitle } from "@/components/ui/card";
@@ -9,7 +9,7 @@ import { t } from "@/i18n";
 import { prisma } from "@/lib/db";
 import { servicesWithProgress } from "@/lib/domain/clients/services";
 import { warningsForClient } from "@/lib/domain/clients/warnings";
-import { canManageClients, canManageUsers, canSeeClientWarnings } from "@/lib/domain/permissions";
+import { canDeleteRecords, canManageClients, canManageUsers, canSeeClientWarnings } from "@/lib/domain/permissions";
 import { loadPermissionContext } from "@/lib/domain/permissions/context";
 import { listTasks } from "@/lib/domain/tasks/queries";
 import { requireUser } from "@/lib/session";
@@ -66,7 +66,15 @@ export default async function ClientPage({ params }: { params: Promise<{ id: str
                 <LogoForm clientId={client.id} />
               </div>
             </Card>
-          ) : (
+          ) : null}
+          {canDeleteRecords(user) && !client.isInternal ? (
+            <Card>
+              <CardTitle>{t.clients.delete.title}</CardTitle>
+              <p className="mt-2 mb-3 text-sm text-muted-foreground">{t.clients.delete.hint}</p>
+              <DeleteClientForm clientId={client.id} />
+            </Card>
+          ) : null}
+          {manage ? null : (
             <Card>
               <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
                 <dt className="text-muted-foreground">{c.fields.shortName}</dt><dd>{client.shortName}</dd>

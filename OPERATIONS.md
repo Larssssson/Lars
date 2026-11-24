@@ -53,13 +53,13 @@ Vorlage mit lokalen Standardwerten: [.env.example](.env.example). Geheimnisse (m
 |---|---|---|
 | `DATABASE_URL` 🔒 | ja | PostgreSQL-Verbindung, mit `sslmode=require` |
 | `AUTH_SECRET` 🔒 | ja | Schlüssel für Sitzungs-Token, mindestens 32 zufällige Zeichen (`openssl rand -base64 32`) |
-| `AUTH_PROVIDER` | ja | `entra` im Betrieb; `dev` (Entwickler-Login) ist bei `NODE_ENV=production` gesperrt |
+| `AUTH_PROVIDER` | ja | `entra` im Betrieb; `password` (Vorname und Passwort, Live-Test bei Render, D-125); `dev` (Entwickler-Login) ist bei `NODE_ENV=production` gesperrt |
 | `ENTRA_CLIENT_ID`, `ENTRA_TENANT_ID` | ja | App-Registrierung in Entra ID (Login und SharePoint) |
 | `ENTRA_CLIENT_SECRET` 🔒 | ja | Geheimnis der App-Registrierung |
 | `DOCUMENT_STORE` | ja | `sharepoint` im Betrieb, `mock` schreibt nach `STORAGE_DIR/sharepoint-mock` |
 | `SHAREPOINT_SITE_ID`, `SHAREPOINT_DRIVE_ID` | bei `sharepoint` | Site und Dokumentbibliothek (IDs aus Graph) |
 | `SHAREPOINT_ROOT_PATH` | nein | Wurzelpfad in der Bibliothek, Standard `impress/Kunden` |
-| `FILE_STORAGE` | ja | `azure` im Betrieb, `local` schreibt nach `STORAGE_DIR/files` |
+| `FILE_STORAGE` | ja | `azure` im Betrieb, `database` legt Dateien in PostgreSQL ab (Live-Test bei Render, D-130), `local` schreibt nach `STORAGE_DIR/files` |
 | `AZURE_STORAGE_CONNECTION_STRING` 🔒 | bei `azure` | Verbindung zum Speicherkonto |
 | `AZURE_STORAGE_CONTAINER` | bei `azure` | privater Container, wird beim ersten Schreiben angelegt |
 | `AI_PROVIDER` | ja | `anthropic` im Betrieb, `mock` liefert Beispielantworten |
@@ -75,6 +75,9 @@ Vorlage mit lokalen Standardwerten: [.env.example](.env.example). Geheimnisse (m
 | `STORAGE_DIR` | nein | nur für die Ersatz-Adapter, im Image `/app/storage` |
 | `PLAYWRIGHT_CHROMIUM_PATH` | nein | anderer Chromium für den PDF-Export; Standard ist der im Image |
 | `PORT` | nein | Port der App, Standard 3000 |
+| `IMPRESS_LIVE` | nein | `true`: Start ohne Beispieldaten (`scripts/live-start.ts`, D-131) |
+| `IMPRESS_LIVE_RESET` | nein | `true`: beim ersten Start einmal alle Inhalte leeren; gemerkt als Einstellung `live.resetAt` |
+| `INITIAL_PASSWORD_HASHES` 🔒 | nein | JSON `{"Vorname": "scrypt$…"}`, Startpasswörter nur für Personen ohne Passwort; danach entfernen |
 | `DEMO_MODE`, `DEMO_PASSWORD` 🔒 | nein, nie im Betrieb | nur Demo-Server mit Beispieldaten (docs/demo-server.md): Entwickler-Login hinter einem gemeinsamen Passwort |
 
 Microsoft Entra ID: Redirect-URI `https://<APP_BASE_URL>/api/auth/callback/microsoft-entra-id`, Scopes `openid profile email`. Für SharePoint braucht dieselbe App-Registrierung die Anwendungsberechtigung `Sites.Selected` (oder `Sites.ReadWrite.All`) mit Schreibrecht auf die impress-Site. Ein Mitarbeiter kann sich nur anmelden, wenn ein CVD ihn vorher mit seiner Mailadresse angelegt hat.

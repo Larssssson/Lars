@@ -2,6 +2,7 @@
 
 import {
   createClientAction,
+  deleteClientAction,
   removeMembershipAction,
   setClientStatusAction,
   setMembershipAction,
@@ -138,6 +139,16 @@ export function RemoveMembershipButton({ clientId, userId }: { clientId: string;
   return (
     <ActionForm action={removeMembershipAction.bind(null, clientId, userId)}>
       <SubmitButton size="sm" variant="ghost">{t.admin.memberships.remove}</SubmitButton>
+    </ActionForm>
+  );
+}
+
+export function DeleteClientForm({ clientId }: { clientId: string }) {
+  const d = t.clients.delete;
+  return (
+    <ActionForm action={deleteClientAction.bind(null, clientId)} confirm={d.confirm} className="flex flex-wrap items-end gap-3">
+      <Field label={d.nameLabel} htmlFor="dc-name"><Input id="dc-name" name="confirmName" required autoComplete="off" /></Field>
+      <SubmitButton variant="destructive">{d.submit}</SubmitButton>
     </ActionForm>
   );
 }

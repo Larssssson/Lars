@@ -6,7 +6,7 @@ import type { HealthStatus } from "../health";
  * die Zuordnung zum angelegten Nutzer erfolgt immer über die Mailadresse.
  */
 export interface AuthProvider {
-  readonly kind: "dev" | "entra";
+  readonly kind: "dev" | "entra" | "password";
   /** Auth.js-Provider-ID, die signIn() übergeben wird */
   readonly providerId: string;
   providers(): Provider[];

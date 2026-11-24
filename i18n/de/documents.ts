@@ -74,6 +74,7 @@ export const documents = {
     newGeneral: "Kommentar zum ganzen Text",
     newOnSelection: "Kommentar zur markierten Stelle",
     selectFirst: "Zum Kommentieren einer Stelle Text markieren. Ohne Markierung gilt der Kommentar für den ganzen Text.",
+    mentionList: "Personen zum Erwähnen",
     placeholder: "Kommentar, @Name erwähnt jemanden",
     add: "Kommentieren",
     reply: "Antworten",
@@ -89,6 +90,35 @@ export const documents = {
   wordFile: "Word-Datei (.docx)",
   importHint: "Ersetzt den Inhalt. Absätze, Fett, Kursiv, Listen, Überschriften und Tabellen werden übernommen.",
   importConfirm: "Der Inhalt wird durch die Word-Datei ersetzt. Fortfahren?",
+  mail: {
+    title: "Exportieren und mailen",
+    version: "Version",
+    versionOption: (n: number, approved: boolean, date: string) => `Version ${n} · ${date}${approved ? " · freigegeben" : ""}`,
+    current: "aktueller Stand",
+    notApproved: "Diese Version ist nicht freigegeben. Nach draußen geht nur eine freigegebene Version.",
+    tone: "Ton",
+    tones: { freundlich: "freundlich", nuechtern: "nüchtern" },
+    length: "Länge",
+    lengths: { kurz: "kurz", lang: "lang" },
+    attachment: "Anhang",
+    open: "Als Outlook-Mail öffnen",
+    hint: "Lädt einen Mail-Entwurf mit Anhang herunter. Öffnen, Outlook zeigt ihn als neue Mail; Empfänger eintragen, prüfen, selbst senden.",
+    subject: (v: { title: string; format: string; client: string }) => `${v.client}: ${v.title}`,
+    bodies: {
+      freundlich: {
+        kurz: (v: { title: string; format: string; client: string; sender: string }) =>
+          `Hallo,\n\nanbei „${v.title}“${v.format ? ` (${v.format})` : ""}. Ich freue mich auf deine Rückmeldung.\n\nViele Grüße\n${v.sender}`,
+        lang: (v: { title: string; format: string; client: string; sender: string }) =>
+          `Hallo,\n\nich hoffe, es geht dir gut. Anbei findest du „${v.title}“${v.format ? ` (${v.format})` : ""} für ${v.client}.\n\nSchau gern in Ruhe drüber. Wenn du Anmerkungen oder Änderungswünsche hast, gib mir einfach Bescheid, dann arbeite ich sie direkt ein. Bei Fragen erreichst du mich jederzeit.\n\nVielen Dank und viele Grüße\n${v.sender}`,
+      },
+      nuechtern: {
+        kurz: (v: { title: string; format: string; client: string; sender: string }) =>
+          `Guten Tag,\n\nanbei „${v.title}“${v.format ? ` (${v.format})` : ""}.\n\nMit freundlichen Grüßen\n${v.sender}`,
+        lang: (v: { title: string; format: string; client: string; sender: string }) =>
+          `Guten Tag,\n\nim Anhang erhalten Sie „${v.title}“${v.format ? ` (${v.format})` : ""} für ${v.client}.\n\nBitte prüfen Sie das Dokument und teilen Sie uns Änderungswünsche oder Ihre Zustimmung mit. Für Rückfragen stehe ich gern zur Verfügung.\n\nMit freundlichen Grüßen\n${v.sender}`,
+      },
+    },
+  },
   export: { word: "Word herunterladen", pdf: "PDF herunterladen", template: "Vorlage", rp: "RP-Vorlage", client: "Kundenvorlage", clientUnavailable: "ohne Kundenlogo nicht wählbar" },
   compareTitle: "Versionen vergleichen",
   compareLeft: "Ältere Version",

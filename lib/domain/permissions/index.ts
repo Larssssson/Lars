@@ -158,6 +158,11 @@ export function canManageUsers(actor: Actor): boolean {
   return isCvd(actor);
 }
 
+/** Nutzer oder Kunden endgültig löschen: nur Admin (Lars, Live-Test, DECISIONS D-126). */
+export function canDeleteRecords(actor: Actor): boolean {
+  return actor.active && actor.isAdmin;
+}
+
 /** Zusatzrecht vergeben: nur CVD; Selbstfreigabe nie an sich selbst (BRIEFING 3.3). */
 export function canGrantPermission(actor: Actor, target: { userId: string; permission: Permission }): boolean {
   if (!canManageUsers(actor)) return false;

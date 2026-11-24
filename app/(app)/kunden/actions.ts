@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { t } from "@/i18n";
-import { createClient, removeMembership, setClientLogo, setClientStatus, setMembership, updateClient } from "@/lib/domain/clients/service";
+import { createClient, deleteClient, removeMembership, setClientLogo, setClientStatus, setMembership, updateClient } from "@/lib/domain/clients/service";
 import { DomainError } from "@/lib/domain/errors";
 import type { ClientStatus } from "@/lib/generated/prisma/enums";
 import { bool, runAction, str, type ActionState } from "@/lib/server/action";
@@ -83,4 +83,13 @@ export async function removeMembershipAction(clientId: string, userId: string, _
   });
   revalidatePath("/", "layout");
   return result;
+}
+
+export async function deleteClientAction(clientId: string, _state: ActionState, form: FormData): Promise<ActionState> {
+  const result = await runAction(async () => {
+    await deleteClient(serverDeps(), await requireUser(), clientId, str(form, "confirmName") ?? "");
+  });
+  if (result?.error) return result;
+  revalidatePath("/", "layout");
+  redirect("/kunden");
 }

@@ -2,7 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { t } from "@/i18n";
-import { createUser, grantPermission, revokePermission, setUserActive, setUserRole } from "@/lib/domain/permissions/admin";
+import { createUser, deleteUser, grantPermission, revokePermission, setUserActive, setUserRole } from "@/lib/domain/permissions/admin";
+import { resetPassword } from "@/lib/domain/permissions/passwords";
+import { env } from "@/lib/env";
+import { redirect } from "next/navigation";
 import { completeOffboarding, reassignTask, resolveOwnedContact, type ContactResolution } from "@/lib/domain/permissions/offboarding";
 import { createFormat, updateFormat } from "@/lib/domain/documents/formats";
 import { createShiftType, updateShiftType } from "@/lib/domain/shifts";
@@ -14,12 +17,15 @@ import { requireUser } from "@/lib/session";
 
 export async function createUserAction(_state: ActionState, form: FormData): Promise<ActionState> {
   const result = await runAction(async () => {
-    await createUser(serverDeps(), await requireUser(), {
+    const actor = await requireUser();
+    const user = await createUser(serverDeps(), actor, {
       name: str(form, "name") ?? "",
       email: str(form, "email") ?? "",
       role: str(form, "role") === "CVD" ? "CVD" : "REDAKTEUR",
       isAdmin: bool(form, "isAdmin"),
     });
+    // Passwort-Login (D-125): gleich ein Startpasswort vergeben und einmal anzeigen
+    if (env().AUTH_PROVIDER === "password") return t.admin.users.created(user.name, await resetPassword(serverDeps(), actor, user.id));
     return t.common.saved;
   });
   revalidatePath("/verwaltung", "layout");
@@ -180,4 +186,22 @@ export async function updateAiModelsAction(_state: ActionState, form: FormData):
   });
   revalidatePath("/verwaltung", "layout");
   return result;
+}
+
+export async function resetPasswordAction(userId: string, _state: ActionState): Promise<ActionState> {
+  return runAction(async () => {
+    const deps = serverDeps();
+    const password = await resetPassword(deps, await requireUser(), userId);
+    const user = await deps.db.user.findUniqueOrThrow({ where: { id: userId }, select: { name: true } });
+    return t.admin.users.passwordShown(user.name, password);
+  });
+}
+
+export async function deleteUserAction(userId: string, _state: ActionState): Promise<ActionState> {
+  const result = await runAction(async () => {
+    await deleteUser(serverDeps(), await requireUser(), userId);
+  });
+  if (result?.error) return result;
+  revalidatePath("/", "layout");
+  redirect("/verwaltung/nutzer");
 }

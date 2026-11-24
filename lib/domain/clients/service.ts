@@ -4,7 +4,7 @@ import { AuditAction, writeAudit } from "@/lib/domain/audit";
 import type { Deps } from "@/lib/domain/deps";
 import { DomainError, NotFoundError } from "@/lib/domain/errors";
 import { notify } from "@/lib/domain/notifications";
-import { assert, canManageClients, canManageUsers, type Actor } from "@/lib/domain/permissions";
+import { assert, canDeleteRecords, canManageClients, canManageUsers, type Actor } from "@/lib/domain/permissions";
 import type { Client, ClientStatus, MemberKind } from "@/lib/generated/prisma/client";
 import { ensureClientFolders } from "@/lib/domain/documents/filing";
 import { missingForActivation, touchSection } from "./profile";
@@ -202,4 +202,24 @@ export async function notifyClientWarnings(deps: Deps): Promise<number> {
     }
   }
   return created;
+}
+
+/**
+ * Kunden endgültig löschen (nur Admin, DECISIONS D-126): mit allen Aufgaben, Texten, Versionen, Profil,
+ * Zuordnungen und Dateien. Der interne Kunde „RP intern“ bleibt. Zur Sicherheit muss der Name eingetippt werden.
+ */
+export async function deleteClient(deps: Deps, actor: Actor, clientId: string, confirmName: string): Promise<void> {
+  assert(canDeleteRecords(actor));
+  const client = await requireClient(deps, clientId);
+  if (client.isInternal) throw new DomainError(t.clients.errors.deleteInternal);
+  if (confirmName.trim().toLowerCase() !== client.name.trim().toLowerCase()) throw new DomainError(t.clients.errors.deleteConfirmName);
+  const files = await deps.db.file.findMany({ where: { OR: [{ clientId }, { task: { clientId } }] }, select: { id: true, storageKey: true } });
+  await deps.db.$transaction(async (tx) => {
+    await tx.user.updateMany({ where: { selectedClientId: clientId }, data: { selectedClientId: null } });
+    await tx.client.update({ where: { id: clientId }, data: { logoFileId: null } });
+    await tx.file.deleteMany({ where: { id: { in: files.map((f) => f.id) } } });
+    await tx.client.delete({ where: { id: clientId } });
+  });
+  for (const file of files) await deps.files.delete(file.storageKey).catch(() => undefined);
+  await writeAudit(deps.db, { actorId: actor.id, action: AuditAction.CLIENT_DELETED, entity: "Client", entityId: clientId, after: { files: files.length } });
 }

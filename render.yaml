@@ -1,5 +1,6 @@
-# Demo-Server von impress bei Render (DECISIONS D-122, Anleitung in docs/demo-server.md).
-# Ein Web-Dienst (App und Worker) in Frankfurt und eine PostgreSQL-Datenbank; nur erfundene Beispieldaten.
+# Server von impress bei Render (DECISIONS D-122, Live-Test D-131, Anleitung in docs/demo-server.md).
+# Ein Web-Dienst (App und Worker) in Frankfurt und eine PostgreSQL-Datenbank.
+# Live-Test: Anmeldung mit Passwort, keine Beispieldaten, Dateien in der Datenbank.
 services:
   - type: web
     name: impress-demo
@@ -18,11 +19,15 @@ services:
       - key: AUTH_SECRET
         generateValue: true
       - key: AUTH_PROVIDER
-        value: dev
-      - key: DEMO_MODE
+        value: password
+      - key: IMPRESS_LIVE
         value: "true"
-      # gemeinsames Passwort für die ganze Seite, wird beim Anlegen im Render-Dashboard abgefragt
-      - key: DEMO_PASSWORD
+      - key: FILE_STORAGE
+        value: database
+      # einmaliges Leeren und Startpasswörter (D-131), im Render-Dashboard gesetzt
+      - key: IMPRESS_LIVE_RESET
+        sync: false
+      - key: INITIAL_PASSWORD_HASHES
         sync: false
       - key: TZ
         value: Europe/Berlin

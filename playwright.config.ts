@@ -10,7 +10,8 @@ export default defineConfig({
   workers: 1,
   reporter: [["list"]],
   use: { baseURL: `http://localhost:${PORT}`, trace: "retain-on-failure", locale: "de-DE", timezoneId: "Europe/Berlin" },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  // PLAYWRIGHT_CHROMIUM_PATH: vorinstalliertes Chromium nutzen, wenn die Paketversion nicht passt (wie beim PDF-Export)
+  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"], launchOptions: { executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH || undefined } } }],
   webServer: {
     command: `npx next dev --port ${PORT}`,
     url: `http://localhost:${PORT}/kein-zugang`, // ohne Datenbank erreichbar; globalSetup legt sie danach an

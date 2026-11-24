@@ -37,3 +37,14 @@ Den Link und das Passwort kannst du ans Team geben.
 - Ein Hinweisbalken oben: „Demo mit erfundenen Beispieldaten“.
 - KI, SharePoint, Dateispeicher und Push laufen mit den Ersatz-Adaptern: feste Beispielantworten der KI, Ablage im Dateisystem des Servers, Push nur in der Glocke.
 - Hintergrundjobs (Priorität, Eskalation, Pressespiegel-Aufgabe) laufen im selben Dienst.
+
+## Live-Test (ab 24.11.2026, DECISIONS D-125 bis D-131)
+
+Der Server läuft seit dem Live-Test ohne Beispieldaten und ohne gemeinsames Passwort:
+
+- Anmeldung mit Vorname und persönlichem Passwort. Neue Personen legt ein CVD in der Verwaltung an; impress zeigt das Startpasswort einmal an. Vergessene Passwörter: Verwaltung → Nutzer → Person → „Neues Passwort erzeugen“.
+- Umgebungsvariablen im Render-Dashboard: `AUTH_PROVIDER=password`, `IMPRESS_LIVE=true`, `FILE_STORAGE=database`; `DEMO_MODE` und `DEMO_PASSWORD` sind entfernt.
+- `IMPRESS_LIVE_RESET=true` hat beim ersten Start einmal alle Inhalte geleert; ein späterer Neustart löscht nichts mehr.
+- `INITIAL_PASSWORD_HASHES` enthält nur Hashes und setzt Passwörter nur für Personen ohne Passwort. Nach dem ersten Start kann die Variable entfernt werden.
+- Dateien (Logos, Unterlagen, Word-Importe) liegen in der Datenbank. Die Ablage im SharePoint-Ersatz geht bei einem Neustart verloren; die Texte selbst nicht.
+- Render ist nicht die endgültige Umgebung: ohne Auftragsverarbeitungsvertrag mit RP und ohne getestete Sicherung. Der reguläre Betrieb folgt in Azure (OPERATIONS.md).

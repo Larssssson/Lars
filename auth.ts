@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import { createAuthProvider, type AuthProvider } from "@/lib/adapters";
 import { prisma } from "@/lib/db";
+import { checkPasswordLogin } from "@/lib/domain/permissions/passwords";
 import { env } from "@/lib/env";
 
 const SESSION_MAX_AGE = 12 * 60 * 60; // BRIEFING 11: Sitzungen laufen nach 12 Stunden ab
@@ -9,8 +10,10 @@ let provider: AuthProvider | undefined;
 
 /** Login-Adapter, erst bei der ersten Anfrage gebaut: der Build läuft ohne Zugangsdaten (BRIEFING 16). */
 export function getAuthProvider(): AuthProvider {
-  provider ??= createAuthProvider(env(), async (userId) =>
-    prisma.user.findFirst({ where: { id: userId, active: true }, select: { id: true, name: true, email: true } }),
+  provider ??= createAuthProvider(
+    env(),
+    async (userId) => prisma.user.findFirst({ where: { id: userId, active: true }, select: { id: true, name: true, email: true } }),
+    (name, password) => checkPasswordLogin(prisma, new Date(), name, password),
   );
   return provider;
 }

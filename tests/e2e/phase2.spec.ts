@@ -77,7 +77,7 @@ test("Redaktionsablauf: schreiben, Freigabe mit Änderungsverfolgung, Kunde, Rü
   await openTask(page, TITLE);
   await expect(page.getByText("Der Text ist freigegeben und gesperrt.")).toBeVisible();
   const downloadPromise = page.waitForEvent("download");
-  await page.getByRole("link", { name: "Word herunterladen" }).click();
+  await page.getByTestId("export-card").getByRole("link", { name: "Word herunterladen" }).click();
   const download = await downloadPromise;
   expect(download.suggestedFilename()).toMatch(/_Covenant_Pressemitteilung_E2E_PM_Werkseroeffnung_v\d+\.docx$/);
   const exported = await readFile((await download.path())!);

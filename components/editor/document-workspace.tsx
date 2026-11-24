@@ -23,9 +23,10 @@ import {
   setTrackChangesAction,
 } from "@/app/(app)/aufgaben/[id]/actions";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/form";
 import { t } from "@/i18n";
 import { structureFindings, type FormatRules, type Strictness } from "@/lib/domain/documents/structure-check";
+import { CommentBody, MentionInput } from "./mention-input";
+import type { MentionUser } from "@/lib/editor/mentions";
 import { blockTexts, charCount, commentThreadIds, lineCount, type JSONNode } from "@/lib/editor/content";
 import { aiRanges, findBlock, findInBlock, insertionTarget, listAiInsertions, type AiBlockView } from "@/lib/editor/positions";
 import { decideAll, decideChange, listChanges, SKIP_TRACKING, type TrackedChange } from "@/lib/editor/track-changes";
@@ -58,6 +59,8 @@ type Props = {
   mayEdit: boolean;
   autoClaim: boolean;
   comments: CommentView[];
+  /** aktive Nutzer für @-Erwähnungen */
+  mentionable: MentionUser[];
   banner?: ReactNode;
   /** Schalter "KI erlaubt" des Kunden (BRIEFING 7.7) */
   aiAllowed: boolean;
@@ -509,6 +512,8 @@ export function DocumentWorkspace(props: Props) {
           {tab === "kommentare" && (
             <Comments
               comments={props.comments}
+              users={props.mentionable}
+              meId={props.me.id}
               anchoredThreads={view?.threads ?? new Set()}
               pendingQuote={pendingAnchor?.quote ?? null}
               canAnchor={editing}
@@ -577,6 +582,8 @@ export function DocumentWorkspace(props: Props) {
 
 function Comments(props: {
   comments: CommentView[];
+  users: MentionUser[];
+  meId: string;
   anchoredThreads: Set<string>;
   pendingQuote: string | null;
   canAnchor: boolean;
@@ -621,7 +628,7 @@ function Comments(props: {
             ? <Button type="button" size="sm" variant="ghost" className="self-start" onClick={props.onAnchorSelection}>{c.newOnSelection}</Button>
             : <p className="text-xs text-muted-foreground">{c.selectFirst}</p>
         )}
-        <Textarea id="new-comment" value={body} onChange={(e) => setBody(e.currentTarget.value)} placeholder={c.placeholder} className="min-h-16" />
+        <MentionInput id="new-comment" multiline value={body} onChange={setBody} users={props.users} placeholder={c.placeholder} className="min-h-16" />
         {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
         <Button type="submit" size="sm" className="self-start" disabled={!body.trim()}>{c.add}</Button>
       </form>
@@ -637,8 +644,10 @@ function Comments(props: {
   );
 }
 
-function Thread({ thread, anchored, onReply, onResolve, onHighlight }: {
+function Thread({ thread, anchored, users, meId, onReply, onResolve, onHighlight }: {
   thread: CommentView[];
+  users: MentionUser[];
+  meId: string;
   anchored: boolean;
   onReply: (threadId: string, body: string) => Promise<string | null>;
   onResolve: (threadId: string, resolved: boolean) => Promise<void>;
@@ -662,7 +671,7 @@ function Thread({ thread, anchored, onReply, onResolve, onHighlight }: {
           <li key={comment.id}>
             <span className="text-xs font-medium">{comment.authorName}</span>{" "}
             <span className="text-xs text-muted-foreground">{dateTimeFmt.format(new Date(comment.createdAt))}</span>
-            <p className="whitespace-pre-wrap">{comment.body}</p>
+            <CommentBody body={comment.body} users={users} meId={meId} />
           </li>
         ))}
       </ul>
@@ -670,7 +679,7 @@ function Thread({ thread, anchored, onReply, onResolve, onHighlight }: {
         {!resolved && (
           <form className="flex gap-1" onSubmit={async (e) => { e.preventDefault(); if (!(await onReply(root.threadId, reply))) setReply(""); }}>
             <label className="sr-only" htmlFor={`reply-${root.id}`}>{c.reply}</label>
-            <input id={`reply-${root.id}`} value={reply} onChange={(e) => setReply(e.currentTarget.value)} placeholder={c.replyPlaceholder} className="h-7 min-w-0 flex-1 rounded border border-input bg-background px-2 text-xs" />
+            <MentionInput id={`reply-${root.id}`} value={reply} onChange={setReply} users={users} placeholder={c.replyPlaceholder} />
             <Button type="submit" size="sm" variant="outline" className="h-7" disabled={!reply.trim()}>{c.reply}</Button>
           </form>
         )}

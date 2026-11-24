@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getAuthProvider } from "@/auth";
+import { PasswordLoginForm } from "@/components/auth/password-login-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { t } from "@/i18n";
@@ -20,10 +21,16 @@ export default async function LoginPage() {
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-6 p-6">
       <div>
-        <p className="text-2xl font-bold tracking-tight">{t.common.appName}</p>
+        <p className="font-serif text-4xl font-semibold tracking-tight">im<em className="text-primary">press</em></p>
         <p className="text-sm text-muted-foreground">{t.common.appClaim}</p>
       </div>
-      {getAuthProvider().kind === "entra" ? (
+      {getAuthProvider().kind === "password" ? (
+        <Card>
+          <h1 className="text-base font-semibold">{t.auth.loginTitle}</h1>
+          <p className="mt-2 mb-4 text-sm text-muted-foreground">{t.auth.password.intro}</p>
+          <PasswordLoginForm />
+        </Card>
+      ) : getAuthProvider().kind === "entra" ? (
         <Card>
           <CardTitle>{t.auth.loginTitle}</CardTitle>
           <p className="mt-2 mb-4 text-sm text-muted-foreground">{t.auth.loginIntro}</p>
